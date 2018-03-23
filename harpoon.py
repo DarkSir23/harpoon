@@ -485,6 +485,7 @@ class QueueR(object):
                         else:
                             #downlocation = os.path.join(snstat['folder'], snstat['files'][0])
                             downlocation = os.path.join(tmpfolder, snstat['files'][0].encode('utf-8'))
+                            downlocation = re.sub(",", "\\,", downlocation)
 
                     labelit = None
                     if self.applylabel is True:
