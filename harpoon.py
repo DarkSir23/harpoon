@@ -29,6 +29,7 @@ import requests
 import datetime
 import hashlib
 import bencode
+import threading
 import shutil
 from StringIO import StringIO
 
@@ -64,6 +65,10 @@ except ConfigParser.NoOptionError:
 # 4 stages = to-do, current, reload, completed.
 CKQUEUE = []
 SNQUEUE = Queue.Queue()
+
+def main():
+    # rename this thread
+    threading.currentThread().name = "MAIN"
 
 class QueueR(object):
 
