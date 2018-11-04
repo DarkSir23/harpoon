@@ -18,24 +18,24 @@ import time
 import shutil
 import requests
 
-from harpoon import logger
+from harpoon import logger, config
 
 class Radarr(object):
 
     def __init__(self, radarr_info):
-       self.radarr_url = radarr_info['radarr_url']
-       self.radarr_label = radarr_info['radarr_label']
-       self.radarr_headers = radarr_info['radarr_headers']
-       self.applylabel = radarr_info['applylabel']
-       self.defaultdir = radarr_info['defaultdir']
-       self.radarr_rootdir = radarr_info['radarr_rootdir']
-       self.torrentfile_dir = radarr_info['torrentfile_dir']
-       self.keep_original_foldernames = radarr_info['keep_original_foldernames']
+       self.radarr_url = config.RADARR['radarr_url']
+       self.radarr_label = config.RADARR['radarr_label']
+       self.radarr_headers = config.RADARR['radarr_headers']
+       self.applylabel = config.GENERAL['applylabel']
+       self.defaultdir = config.GENERAL['defaultdir']
+       self.radarr_rootdir = config.RADARR['radarr_rootdir']
+       self.torrentfile_dir = config.GENERAL['torrentfile_dir']
+       self.keep_original_foldernames = config.RADARR['radarr_keep_original_foldernames']
        self.snstat = radarr_info['snstat']
-       self.dir_hd_movies = radarr_info['dir_hd_movies']
-       self.dir_sd_movies = radarr_info['dir_sd_movies']
-       self.dir_web_movies = radarr_info['dir_web_movies']
-
+       self.dir_hd_movies = config.RADARR['dir_hd_movies']
+       self.dir_sd_movies = config.RADARR['dir_sd_movies']
+       self.dir_web_movies = config.RADARR['dir_web_movies']
+       logger.debug("Directives Set")
        #these 2 will only be not None if keep_original_foldernames is enabled as it will return the movie_id & name after the 1st pass of post-processing
        self.radarr_id = radarr_info['radarr_id']
        self.radarr_movie = radarr_info['radarr_movie']
@@ -107,8 +107,13 @@ class Radarr(object):
         if os.path.isfile(newpath):
             logger.warn('[RADARR] This is an individual movie, but Radarr will only import from a directory. Creating a temporary directory and moving this so it can proceed.')
             newdir = os.path.join(os.path.abspath(os.path.join(newpath, os.pardir)), os.path.splitext(self.snstat['name'])[0])
-            logger.info("[RADARR] Creating directory: %s" % newdir)
-            os.makedirs(newdir)
+            if os.path.exists(newdir):
+                logger.info('[RADARR] Directory already exists.  Clearing it out, and reusing it.')
+                for filename in os.listdir(newdir):
+                    os.remove(os.path.join(newdir, filename))
+            else:
+                logger.info('[RADARR] Creating directory: %s' % newdir)
+                os.makedirs(newdir)
             logger.info('[RADARR] Moving ' + newpath + ' -TO- ' + newdir)
             shutil.move(newpath, newdir)
             newpath = newdir

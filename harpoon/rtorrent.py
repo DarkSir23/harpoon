@@ -25,15 +25,14 @@ import hashlib, StringIO
 import bencode
 from torrent.helpers.variable import link, symlink, is_rarfile
 
-import ConfigParser
 
 import torrent.clients.rtorrent as TorClient
 
 import harpoon
-from harpoon import logger
+from harpoon import logger, config
 
 class RTorrent(object):
-    def __init__(self, hash=None, file=None, add=False, label=None, partial=False, conf=None):
+    def __init__(self, hash=None, file=None, add=False, label=None, partial=False):
 
         if hash is None:
             self.torrent_hash = None
@@ -62,16 +61,7 @@ class RTorrent(object):
         else:
             self.partial = False
 
-        if conf is None:
-            logger.warn('Unable to load config file properly for rtorrent usage. Make sure harpoon.conf is located in the /conf directory')
-            return None
-        else:
-            self.conf_location = conf
-
-        config = ConfigParser.RawConfigParser()
-        config.read(self.conf_location)
-
-        self.multiple_seedboxes = config.getboolean('general', 'multiple_seedboxes')
+        self.multiple_seedboxes = config.get('general', 'multiple_seedboxes',type=bool)
         logger.info('multiple_seedboxes: %s' % self.multiple_seedboxes)
         if self.multiple_seedboxes is True:
             sectionsconfig1 = config.get('general', 'multiple1')
@@ -84,27 +74,27 @@ class RTorrent(object):
             logger.info('sections2: %s' % sections2)
             if sections1:
                 logger.info('SEEDBOX-1 ENABLED!')
-                self.start = config.getboolean('rtorrent', 'startonload')
+                self.start = config.get('rtorrent', 'startonload', type=bool)
                 self.rtorrent_host = config.get('rtorrent', 'rtorr_host') + ':' + config.get('rtorrent', 'rtorr_port')
                 self.rtorrent_user = config.get('rtorrent', 'rtorr_user')
                 self.rtorrent_pass = config.get('rtorrent', 'rtorr_passwd')
                 self.rtorrent_auth = config.get('rtorrent', 'authentication')
                 self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
-                self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
-                self.rtorrent_verify = config.getboolean('rtorrent', 'verify_ssl')
+                self.rtorrent_ssl = config.get('rtorrent', 'ssl', type=bool)
+                self.rtorrent_verify = config.get('rtorrent', 'verify_ssl', type=bool)
                 self.basedir = config.get('post-processing', 'pp_basedir')
                 self.multiple = '1'
 
             elif sections2:
                 logger.info('SEEDBOX-2 ENABLED!')
-                self.start = config.getboolean('rtorrent2', 'startonload')
+                self.start = config.get('rtorrent2', 'startonload', type=bool)
                 self.rtorrent_host = config.get('rtorrent2', 'rtorr_host') + ':' + config.get('rtorrent2', 'rtorr_port')
                 self.rtorrent_user = config.get('rtorrent2', 'rtorr_user')
                 self.rtorrent_pass = config.get('rtorrent2', 'rtorr_passwd')
                 self.rtorrent_auth = config.get('rtorrent2', 'authentication')
                 self.rtorrent_rpc = config.get('rtorrent2', 'rpc_url')
-                self.rtorrent_ssl = config.getboolean('rtorrent2', 'ssl')
-                self.rtorrent_verify = config.getboolean('rtorrent2', 'verify_ssl')
+                self.rtorrent_ssl = config.get('rtorrent2', 'ssl', type=bool)
+                self.rtorrent_verify = config.get('rtorrent2', 'verify_ssl', type=bool)
                 self.basedir = config.get('post-processing2', 'pp_basedir2')
                 self.multiple = '2'
             else:
@@ -112,14 +102,14 @@ class RTorrent(object):
                 return None
         else:
             logger.info('SEEDBOX-1 IS LONE OPTION - ENABLED!')
-            self.start = config.getboolean('rtorrent', 'startonload')
+            self.start = config.get('rtorrent', 'startonload', type=bool)
             self.rtorrent_host = config.get('rtorrent', 'rtorr_host') + ':' + config.get('rtorrent', 'rtorr_port')
             self.rtorrent_user = config.get('rtorrent', 'rtorr_user')
             self.rtorrent_pass = config.get('rtorrent', 'rtorr_passwd')
             self.rtorrent_auth = config.get('rtorrent', 'authentication')
             self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
-            self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
-            self.rtorrent_verify = config.getboolean('rtorrent', 'verify_ssl')
+            self.rtorrent_ssl = config.get('rtorrent', 'ssl', type=bool)
+            self.rtorrent_verify = config.get('rtorrent', 'verify_ssl', type=bool)
             self.basedir = config.get('post-processing', 'pp_basedir')
             self.multiple = None
 

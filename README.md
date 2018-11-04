@@ -85,6 +85,16 @@ This is a python-cli based application that can either be run from the cli direc
 
 ``STARTONLOAD`` [*true/false*] = start the torrent automatically when loading a .torrent file
 
+**[sabnzbd]**
+
+``SAB_ENABLE`` [*true/false*] = Enable or Disable SABnzbd downloading
+
+``SAB_URL`` [*url*] = full address of your SABnzbd interface (including port and basepath)
+
+``SAB_APIKEY`` [*apikey*] = the apikey for SABnzbd
+
+``SAB_CLEANUP`` [*true/false*] = if true, remove completed or failed SABnzbd downloads from history and the remote server.
+
 **[post-processing]**
 
 ``PP_HOST`` [*host*] = the ip/hostname of the seedbox

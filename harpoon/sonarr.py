@@ -17,16 +17,16 @@ import os
 import time
 import requests
 import shutil
-from harpoon import logger
+from harpoon import logger, config
 
 class Sonarr(object):
 
     def __init__(self, sonarr_info):
        logger.info(sonarr_info)
-       self.sonarr_url = sonarr_info['sonarr_url']
-       self.sonarr_headers = sonarr_info['sonarr_headers']
-       self.applylabel = sonarr_info['applylabel']
-       self.defaultdir = sonarr_info['defaultdir']
+       self.sonarr_url = config.SONARR['sonarr_url']
+       self.sonarr_headers = config.SONARR['sonarr_headers']
+       self.applylabel = config.GENERAL['applylabel']
+       self.defaultdir = config.GENERAL['defaultdir']
        self.snstat = sonarr_info['snstat']
 
     def post_process(self):
@@ -45,8 +45,13 @@ class Sonarr(object):
         if os.path.isfile(newpath):
             logger.warn('[SONARR] This is an individual movie, but Sonarr will only import from a directory. Creating a temporary directory and moving this so it can proceed.')
             newdir = os.path.join(os.path.abspath(os.path.join(newpath, os.pardir)), os.path.splitext(self.snstat['name'])[0])
-            logger.info('[SONARR] Creating directory: %s' % newdir)
-            os.makedirs(newdir)
+            if os.path.exists(newdir):
+                logger.info('[SONARR] Directory already exists.  Clearing it out, and reusing it.')
+                for filename in os.listdir(newdir):
+                    os.remove(os.path.join(newdir,filename))
+            else:
+                logger.info('[SONARR] Creating directory: %s' % newdir)
+                os.makedirs(newdir)
             logger.info('[SONARR] Moving %s -TO- %s' % (newpath, newdir))
             shutil.move(newpath, newdir)
             newpath = newdir
