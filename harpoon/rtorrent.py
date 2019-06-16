@@ -20,6 +20,7 @@ import time
 import shutil
 import traceback
 from base64 import b16encode, b32decode
+import ConfigParser
 
 import hashlib, StringIO
 import bencode
