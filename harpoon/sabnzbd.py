@@ -95,6 +95,7 @@ class SABnzbd(object):
             hist_params = {'mode':      'history',
                            'failed':    0,
                            'output':    'json',
+                           'limit':     500,
                            'apikey':    self.sab_apikey}
             hist = requests.get(self.sab_url, params=hist_params, verify=False)
             historyresponse = hist.json()
@@ -122,7 +123,7 @@ class SABnzbd(object):
                     elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':
                         # get the stage / error message and see what we can do
                         stage = hq['stage_log']
-                        for x in stage[0]:
+                        for x in stage:
                             if 'Failed' in x['actions'] and any([x['name'] == 'Unpack', x['name'] == 'Repair']):
                                 if 'moving' in x['actions']:
                                     logger.warn(
@@ -132,7 +133,13 @@ class SABnzbd(object):
                                     logger.warn(
                                         '[SABNZBD] Failure occured during the Unpack/Repair phase of SABnzbd. This is probably a bad file: %s' %
                                         x['actions'])
-                                break
+                                    found = {'completed': True,
+                                             'failed': True}
+                            if any([x['name'] == 'Download', x['name'] == 'Fail']):
+                                logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
+                                found = {'completed': True,
+                                         'failed': True}
+                    found = {'completed': True, 'failed': True}
             except Exception as e:
                 logger.warn('error %s' % e)
 

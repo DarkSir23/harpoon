@@ -17,20 +17,20 @@ import os
 import time
 import json
 import requests
-from harpoon import logger
+from harpoon import logger, config
 
 class Mylar(object):
 
     def __init__(self, mylar_info):
-       self.mylar_url = mylar_info['mylar_url']
-       self.mylar_apikey = mylar_info['mylar_apikey']
-       self.mylar_label = mylar_info['mylar_label']
-       self.mylar_headers = mylar_info['mylar_headers']
-       self.applylabel = mylar_info['applylabel']
-       self.torrentfile_dir = mylar_info['torrentfile_dir']
-       self.defaultdir = mylar_info['defaultdir']
-       self.issueid = mylar_info['issueid']
-       self.snstat = mylar_info['snstat']
+        self.mylar_url = config.MYLAR['mylar_url']
+        self.mylar_apikey = config.MYLAR['mylar_apikey']
+        self.mylar_label = config.MYLAR['mylar_label']
+        self.mylar_headers = config.MYLAR['mylar_headers']
+        self.applylabel = config.GENERAL['applylabel']
+        self.torrentfile_dir = config.GENERAL['torrentfile_dir']
+        self.defaultdir = config.GENERAL['defaultdir']
+        self.issueid = mylar_info['issueid']
+        self.snstat = mylar_info['snstat']
 
     def post_process(self):
        logger.info('snstat: %s' % self.snstat)
@@ -76,10 +76,27 @@ class Mylar(object):
                issueid = self.issueid
                comicid = None
 
-       if self.issueid is not None and nzb_name == 'Manual Run':
-           issueid = self.issueid
-           comicid = None
-           nzb_name = self.snstat['name']
+        url = self.mylar_url + '/api'
+        if all([self.applylabel is True, self.snstat['label'] != 'None']):
+            logger.info('1')
+            if nzb is True:
+                logger.info('1-1')
+                newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['extendedname'])
+            else:
+                logger.info('1-2')
+                if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])):
+                    newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])
+                else:
+                    if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'])):
+                        newpath = os.path.join(self.defaultdir, self.snstat['label'])
+        else:
+            logger.info('2')
+            if nzb is True:
+                logger.info('2-1')
+                newpath = os.path.join(self.defaultdir, self.snstat['extendedname'])
+            else:
+                logger.info('2-2')
+                newpath = os.path.join(self.defaultdir, self.snstat['name'])
 
        url = self.mylar_url + '/api'
        if all([self.applylabel is True, self.snstat['label'] != 'None']):
@@ -104,8 +121,9 @@ class Mylar(object):
                   'comicid':     comicid,
                   'nzb_folder':  newpath}
 
-       logger.info('[MYLAR] Posting url: %s' % url)
-       logger.info('[MYLAR] Posting to completed download handling now: %s' % payload)
+        r = requests.post(url, params=payload, headers=self.mylar_headers)
+        #response = r.json()
+        logger.debug('content: %s' % r.content)
 
        try:
            r = requests.post(url, params=payload, headers=self.mylar_headers, timeout=0.001)
@@ -119,7 +137,4 @@ class Mylar(object):
        #response = r.json()
        logger.debug('content: %s' % r.content)
 
-       logger.debug('[MYLAR] status_code: %s' % r.status_code)
-       logger.info('[MYLAR] Successfully post-processed : ' + self.snstat['name'])
-
-       return True
+        return True

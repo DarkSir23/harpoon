@@ -58,6 +58,7 @@ logger.addHandler(file_handler)
 filecontent = None
 
 try:
+    logger.info('Args: %s' % sys.argv)
     mode = sys.argv[1]
     args = sys.argv[1:]
 except IndexError:
@@ -114,15 +115,18 @@ else:
                 n -= 2
             except IndexError:
                 break
+        logger.debug('Dict: %s' % mydict)
         if 'DownloadID' in mydict.keys(): # LazyLibrarian book or audiobook
-            mode = 'lazylibrarian'
+            # mode = 'lazylibrarian'
+            mode = ''
             inputfile = mydict['DownloadID']
             if len(inputfile) > 20:
                 inputfile = inputfile.upper()
             label = lazylibrarian_label
-            filetype = '.hash'
+            filetype = 'hash'
             filecontent = mydict
         else:
+            logger.debug('Not enough Arguments: %s' % args)
             logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
             sys.exit(1)
 

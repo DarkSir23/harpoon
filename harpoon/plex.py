@@ -20,22 +20,19 @@ import base64
 import xml.etree.cElementTree as ET
 
 import harpoon
-from harpoon import logger
+from harpoon import logger, config
 
 class Plex(object):
 
     def __init__(self, plexinfo):
-        self.plex_update = plexinfo['plex_update']
+        self.plex_update = config.PLEX['plex_update']
 
-        if plexinfo['plex_host_port'] is None:
-            plex_port = '32400'
-        else:
-            plex_port = str(plexinfo['plex_host_port'])
+        plex_port = str(config.PLEX['plex_host_port'])
 
-        self.plex_host = plexinfo['plex_host_ip'] + ':' + plex_port
-        self.plex_login = plexinfo['plex_login']
-        self.plex_password = plexinfo['plex_password']
-        self.plex_token = plexinfo['plex_token']
+        self.plex_host = config.PLEX['plex_host_ip'] + ':' + plex_port
+        self.plex_login = config.PLEX['plex_login']
+        self.plex_password = config.PLEX['plex_password']
+        self.plex_token = config.PLEX['plex_token']
         self.plex_label = plexinfo['plex_label']   #the label of the download.
         self.root_path = plexinfo['root_path']
         #self.manual_plex = plexinfo['manual_plex']
