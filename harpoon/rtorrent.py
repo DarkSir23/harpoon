@@ -61,7 +61,17 @@ class RTorrent(object):
         else:
             self.partial = False
 
-        self.multiple_seedboxes = config.get('general', 'multiple_seedboxes',type=bool)
+        if conf is None:
+            logger.warn('Unable to load config file properly for rtorrent usage. Make sure harpoon.conf is located in the /conf directory')
+            return None
+        else:
+            self.conf_location = conf
+
+        config = ConfigParser.RawConfigParser()
+        config.read(self.conf_location)
+
+        self.applylabel = config.getboolean('general', 'applylabel')
+        self.multiple_seedboxes = config.getboolean('general', 'multiple_seedboxes')
         logger.info('multiple_seedboxes: %s' % self.multiple_seedboxes)
         if self.multiple_seedboxes is True:
             sectionsconfig1 = config.get('general', 'multiple1')
@@ -158,7 +168,7 @@ class RTorrent(object):
         if self.add is True:
             logger.info("Attempting to load torrent. Filepath is : %s" % self.filepath)
             logger.info("label is : %s" % self.label)
-            loadit = self.client.load_torrent(self.filepath, self.label, self.start)
+            loadit = self.client.load_torrent(self.filepath, self.label, self.start, self.applylabel, self.basedir)
             if loadit:
                 logger.info('Successfully loaded torrent.')
                 torrent_hash = self.get_the_hash()
