@@ -287,27 +287,7 @@ class QueueR(object):
             logger.info(snstat)
             logger.info('---')
 
-            if snstat and 'failed' in snstat.keys() and snstat['failed']:
-                logger.info('Torrent or NZB returned status of "failed".  Removing queue item.')
-                if item['client'] == 'sabnzbd' and config.SAB['sab_cleanup']:
-                    sa_params = {}
-                    sa_params['nzo_id'] = item['item']
-                    sa_params['apikey'] = config.SAB['sab_apikey']
-                    try:
-                        sab = sabnzbd.SABnzbd(params=sa_params, saburl=config.SAB['sab_url'])
-                        snstat = sab.cleanup()
-                    except Exception as e:
-                        logger.info('ERROR - %s' % e)
-                        snstat = None
-                try:
-                    os.remove(os.path.join(config.GENERAL['torrentfile_dir'], item['label'],
-                                           item['item'] + '.' + item['mode']))
-                    logger.info('[HARPOON] File removed')
-                except:
-                    logger.warn('[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item[
-                        'mode'] + ']. You should delete it manually to avoid re-downloading')
-                queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed'})
-            elif (snstat is None or not snstat['completed']) and self.partial is False:
+            if (snstat is None or not snstat['completed']) and self.partial is False:
                 if snstat is None:
                     ckqueue_entry = queue.ckqueue()[item['item']]
                     if 'retry_count' in ckqueue_entry.keys():
@@ -343,6 +323,27 @@ class QueueR(object):
                                'label': item['label'],
                                'client': item['client']})
                     queue.ckupdate(item['item'],{'stage': 'to-do', 'status': 'Still downloading in client'})
+            elif snstat and 'failed' in snstat.keys() and snstat['failed']:
+                logger.info('Torrent or NZB returned status of "failed".  Removing queue item.')
+                if item['client'] == 'sabnzbd' and config.SAB['sab_cleanup']:
+                    sa_params = {}
+                    sa_params['nzo_id'] = item['item']
+                    sa_params['apikey'] = config.SAB['sab_apikey']
+                    try:
+                        sab = sabnzbd.SABnzbd(params=sa_params, saburl=config.SAB['sab_url'])
+                        snstat = sab.cleanup()
+                    except Exception as e:
+                        logger.info('ERROR - %s' % e)
+                        snstat = None
+                try:
+                    os.remove(os.path.join(config.GENERAL['torrentfile_dir'], item['label'],
+                                           item['item'] + '.' + item['mode']))
+                    logger.info('[HARPOON] File removed')
+                except:
+                    logger.warn(
+                        '[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item[
+                            'mode'] + ']. You should delete it manually to avoid re-downloading')
+                queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed'})
             else:
                 if self.exists is False:
                     import shlex, subprocess
