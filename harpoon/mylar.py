@@ -125,16 +125,16 @@ class Mylar(object):
         #response = r.json()
         logger.debug('content: %s' % r.content)
 
-       try:
+        try:
            r = requests.post(url, params=payload, headers=self.mylar_headers, timeout=0.001)
-       except Exception as e:
+        except Exception as e:
            if any(['Connection refused' in e, 'Timeout' in e]):
                logger.warn('Unable to connect to Mylar server. Please check that it is online [%s].' % e)
            else:
                logger.warn('%s' % e)
            return False
 
-       #response = r.json()
-       logger.debug('content: %s' % r.content)
+        #response = r.json()
+        logger.debug('content: %s' % r.content)
 
         return True
