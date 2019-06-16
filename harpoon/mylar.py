@@ -33,20 +33,20 @@ class Mylar(object):
         self.snstat = mylar_info['snstat']
 
     def post_process(self):
-       logger.info('snstat: %s' % self.snstat)
-       issueid = None
-       comicid = None
-       nzb_name = None
-       nzb = False
-       try:
+        logger.info('snstat: %s' % self.snstat)
+        issueid = None
+        comicid = None
+        nzb_name = None
+        nzb = False
+        try:
            logger.debug('Attempting to open: %s' % os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.mylar.hash'))
            with open(os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.mylar.hash')) as dfile:
                data = json.load(dfile)
-       except Exception as e:
+        except Exception as e:
            logger.error('[%s] not able to load .mylar.hash file.' % e)
            #for those that were done outside of Mylar or using the -s switch on the cli directly by hash
            nzb_name = 'Manual Run'
-       else:
+        else:
            logger.debug('loaded .mylar.hash successfully - extracting info.')
            try:
                nzb_name = data['mylar_release_name']
@@ -98,8 +98,8 @@ class Mylar(object):
                 logger.info('2-2')
                 newpath = os.path.join(self.defaultdir, self.snstat['name'])
 
-       url = self.mylar_url + '/api'
-       if all([self.applylabel is True, self.snstat['label'] != 'None']):
+        url = self.mylar_url + '/api'
+        if all([self.applylabel is True, self.snstat['label'] != 'None']):
            if nzb is True:
                newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['extendedname'])
            else:
@@ -108,13 +108,13 @@ class Mylar(object):
                else:
                    if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'])):
                        newpath = os.path.join(self.defaultdir, self.snstat['label'])
-       else:
+        else:
            if nzb is True:
                newpath = os.path.join(self.defaultdir, self.snstat['extendedname'])
            else:
                newpath = os.path.join(self.defaultdir, self.snstat['name'])
 
-       payload = {'cmd':         'forceProcess',
+        payload = {'cmd':         'forceProcess',
                   'apikey':      self.mylar_apikey,
                   'nzb_name':    nzb_name,
                   'issueid':     issueid,
