@@ -29,7 +29,7 @@ from torrent.helpers.variable import link, symlink, is_rarfile
 import torrent.clients.rtorrent as TorClient
 
 import harpoon
-from harpoon import logger, config
+from harpoon import logger, config as conf
 
 class RTorrent(object):
     def __init__(self, hash=None, file=None, add=False, label=None, partial=False):
