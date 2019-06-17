@@ -491,7 +491,7 @@ class QueueR(object):
                     if sonarr_process is True:
                         logger.info('[SONARR] Successfully post-processed : ' + snstat['name'])
                         if config.SAB['sab_enable'] is True:
-                            self.cleanup_check(item, script_cmd, downlocation)
+                            self.cleanup_check(item, script_cmd, downlocation, snstat)
                     else:
                         logger.info('[SONARR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the episode.')
                         logger.info('[SONARR] HASH: %s / label: %s' % (snstat['hash'], snstat['label']))
@@ -543,7 +543,7 @@ class QueueR(object):
 
                     if sickrage_process is True:
                         logger.info('[SICKRAGE] Successfully post-processed : ' + snstat['name'])
-                        self.cleanup_check(item, script_cmd, downlocation)
+                        self.cleanup_check(item, script_cmd, downlocation, snstat)
 
                     else:
                         logger.info('[SICKRAGE] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the episode.')
@@ -604,7 +604,7 @@ class QueueR(object):
 
                     if radarr_process['status'] is True:
                         logger.info('[RADARR] Successfully post-processed : ' + snstat['name'])
-                        self.cleanup_check(item, script_cmd, downlocation)
+                        self.cleanup_check(item, script_cmd, downlocation, snstat)
                     else:
                         logger.info('[RADARR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the movie.')
                         logger.info('[RADARR] HASH: %s / label: %s' % (snstat['hash'], snstat['label']))
@@ -655,7 +655,7 @@ class QueueR(object):
 
                     if lidarr_process is True:
                         logger.info('[LIDARR] Successfully post-processed : ' + snstat['name'])
-                        self.cleanup_check(item, script_cmd, downlocation)
+                        self.cleanup_check(item, script_cmd, downlocation, snstat)
                     else:
                         logger.info('[LIDARR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the movie.')
                         logger.info('[LIDARR] HASH: %s / label: %s' % (snstat['hash'], snstat['label']))
@@ -710,7 +710,7 @@ class QueueR(object):
 
                     if lazylibrarian_process is True:
                         logger.info('[LAZYLIBRARIAN] Successfully post-processed : ' + snstat['name'])
-                        self.cleanup_check(item, script_cmd, downlocation)
+                        self.cleanup_check(item, script_cmd, downlocation, snstat)
 
                     else:
                         logger.info('[LAZYLIBRARIAN] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the episode.')
@@ -736,7 +736,7 @@ class QueueR(object):
                 elif snstat['label'] == 'music':
                     logger.debug('[HARPOON] - Music Detected')
                     logger.info('[MUSIC] Successfully auto-snatched!')
-                    self.cleanup_check(item, script_cmd, downlocation)
+                    self.cleanup_check(item, script_cmd, downlocation, snstat)
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                         logger.info('[MUSIC] Removing completed file from queue directory.')
                         try:
@@ -759,7 +759,7 @@ class QueueR(object):
                 elif snstat['label'] == 'xxx':
                     logger.debug('[HARPOON] - XXX Detected')
                     logger.info('[XXX] Successfully auto-snatched!')
-                    self.cleanup_check(item, script_cmd, downlocation)
+                    self.cleanup_check(item, script_cmd, downlocation, snstat)
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                         logger.info('[XXX] Removing completed file from queue directory.')
                         try:
@@ -790,7 +790,7 @@ class QueueR(object):
                     mylar_process = my.post_process()
 
                     logger.info('[MYLAR] Successfully auto-snatched!')
-                    self.cleanup_check(item, script_cmd, downlocation)
+                    self.cleanup_check(item, script_cmd, downlocation, snstat)
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                         logger.info('[MYLAR] Removing completed file from queue directory.')
                         try:
@@ -808,7 +808,7 @@ class QueueR(object):
 
                     if mylar_process is True:
                         logger.info('[MYLAR] Successfully post-processed : ' + snstat['name'])
-                        self.cleanup_check(item, script_cmd, downlocation)
+                        self.cleanup_check(item, script_cmd, downlocation, snstat)
 
                     else:
                         logger.info('[MYLAR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the issue.')
@@ -822,7 +822,7 @@ class QueueR(object):
                 else:
                     logger.debug('[HARPOON] - Other Detected')
                     logger.info('Successfully auto-snatched!')
-                    self.cleanup_check(item, script_cmd, downlocation)
+                    self.cleanup_check(item, script_cmd, downlocation, snstat)
 
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                         logger.info('Removing completed file from queue directory.')
@@ -847,7 +847,7 @@ class QueueR(object):
                     queue.put({'mode': 'exit',
                                'item': 'None'})
 
-    def cleanup_check(self, item, script_cmd, downlocation):
+    def cleanup_check(self, item, script_cmd, downlocation, snstat):
         logger.info('[CLEANUP-CHECK] item: %s' % item)
         if 'client' in item.keys() and config.SAB['sab_cleanup'] and item['client'] == 'sabnzbd':
             import subprocess
