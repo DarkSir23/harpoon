@@ -62,7 +62,7 @@ class RTorrent(object):
         else:
             self.partial = False
 
-        if conf is None:
+        if config is None:
             logger.warn('Unable to find config.')
             return None
         self.applylabel = config.getboolean('general', 'applylabel')
