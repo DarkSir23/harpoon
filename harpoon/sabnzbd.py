@@ -100,7 +100,7 @@ class SABnzbd(object):
             hist = requests.get(self.sab_url, params=hist_params, verify=False)
             historyresponse = hist.json()
             histqueue = historyresponse['history']
-            found = {'completed': False, 'failed': True}
+            found = {'completed': True, 'failed': True}
             try:
                 for hq in histqueue['slots']:
                     # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
