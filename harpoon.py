@@ -490,7 +490,7 @@ class QueueR(object):
 
                     if sonarr_process is True:
                         logger.info('[SONARR] Successfully post-processed : ' + snstat['name'])
-                        if self.sab_enable is True:
+                        if config['SAB']['sab_enable'] is True:
                             self.cleanup_check(item, script_cmd, downlocation)
                     else:
                         logger.info('[SONARR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the episode.')
@@ -851,6 +851,7 @@ class QueueR(object):
         logger.info('[CLEANUP-CHECK] item: %s' % item)
         if 'client' in item.keys() and config.SAB['sab_cleanup'] and item['client'] == 'sabnzbd':
             import subprocess
+            logger.info('[HARPOON] Triggering cleanup')
             sa_params = {}
             sa_params['nzo_id'] = item['item']
             sa_params['apikey'] = config.SAB['sab_apikey']
@@ -869,6 +870,7 @@ class QueueR(object):
             harpoon_env['harpoon_applylabel'] = str(config.GENERAL['applylabel']).lower()
             harpoon_env['harpoon_defaultdir'] = config.GENERAL['defaultdir']
             harpoon_env['harpoon_lcmd'] = 'rm -r \"%s\"' % downlocation
+            logger.debug('Params: %s' % harpoon_env)
             try:
                 p = subprocess.Popen(script_cmd, env=dict(harpoon_env), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 output, error = p.communicate()
