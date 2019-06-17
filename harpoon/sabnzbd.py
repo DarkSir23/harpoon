@@ -84,7 +84,7 @@ class SABnzbd(object):
                 logger.info('queue: %s' % queueresponse)
                 logger.info('Queue status : %s' % queueinfo['status'])
                 logger.info('Queue mbleft : %s' % queueinfo['mbleft'])
-                if any([str(queueinfo['status']) == 'Downloading', str(queueinfo['status']) == 'Idle']):
+                if any([str(queueinfo['status']) == 'Downloading'):
                     logger.info('[SABNZBD] Dowwnload is not yet finished')
                     return {'completed': False}
             except Exception as e:
@@ -100,7 +100,7 @@ class SABnzbd(object):
             hist = requests.get(self.sab_url, params=hist_params, verify=False)
             historyresponse = hist.json()
             histqueue = historyresponse['history']
-            found = None
+            found = {'completed': False, 'failed': False}
             try:
                 for hq in histqueue['slots']:
                     # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
@@ -139,7 +139,6 @@ class SABnzbd(object):
                                 logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
                                 found = {'completed': True,
                                          'failed': True}
-                    found = {'completed': True, 'failed': True}
             except Exception as e:
                 logger.warn('error %s' % e)
 
