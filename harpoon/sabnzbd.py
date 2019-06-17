@@ -84,7 +84,7 @@ class SABnzbd(object):
                 logger.info('queue: %s' % queueresponse)
                 logger.info('Queue status : %s' % queueinfo['status'])
                 logger.info('Queue mbleft : %s' % queueinfo['mbleft'])
-                if any([str(queueinfo['status']) == 'Downloading', str(queueinfo['status']) == 'Idle']) and float(queueinfo['mbleft']) > 0:
+                if any([str(queueinfo['status']) == 'Downloading', str(queueinfo['status']) == 'Idle']):
                     logger.info('[SABNZBD] Dowwnload is not yet finished')
                     return {'completed': False}
             except Exception as e:
