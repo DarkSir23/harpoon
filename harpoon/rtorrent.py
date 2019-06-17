@@ -62,7 +62,7 @@ class RTorrent(object):
         else:
             self.partial = False
 
-        if CONF_LOCAITON is None:
+        if CONF_LOCATION is None:
             logger.warn('Unable to find config.')
             return None
         config = ConfigParser.RawConfigParser()
