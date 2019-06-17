@@ -860,9 +860,17 @@ class QueueR(object):
             except Exception as e:
                 logger.info('ERROR - %s' % e)
                 cleanup = None
-            harpoon_lcmd = 'rm -r \"%s\"' % downlocation
+            harpoon_env = os.environ.copy()
+
+            harpoon_env['conf_location'] = harpoon.CONF_LOCATION
+            harpoon_env['harpoon_location'] = re.sub("'", "\\'", downlocation)
+            harpoon_env['harpoon_location'] = re.sub("!", "\\!", downlocation)
+            harpoon_env['harpoon_label'] = labelit
+            harpoon_env['harpoon_applylabel'] = str(config.GENERAL['applylabel']).lower()
+            harpoon_env['harpoon_defaultdir'] = config.GENERAL['defaultdir']
+            harpoon_env['harpoon_lcmd'] = 'rm -r \"%s\"' % downlocation
             try:
-                p = subprocess.Popen(script_cmd, env=dict(os.environ, harpoon_lcmd=harpoon_lcmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                p = subprocess.Popen(script_cmd, env=dict(harpoon_env), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 output, error = p.communicate()
                 if error:
                     logger.warn('[ERROR] %s' % error)
