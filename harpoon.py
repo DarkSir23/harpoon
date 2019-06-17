@@ -490,7 +490,7 @@ class QueueR(object):
 
                     if sonarr_process is True:
                         logger.info('[SONARR] Successfully post-processed : ' + snstat['name'])
-                        if config['SAB']['sab_enable'] is True:
+                        if config.SAB['sab_enable'] is True:
                             self.cleanup_check(item, script_cmd, downlocation)
                     else:
                         logger.info('[SONARR] Unable to confirm successful post-processing - this could be due to running out of hdd-space, an error, or something else occuring to halt post-processing of the episode.')
