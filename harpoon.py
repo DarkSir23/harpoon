@@ -867,6 +867,10 @@ class QueueR(object):
                 if any([snstat['label'] != 'None', snstat['label'] is not None]):
                     labelit = snstat['label']
 
+            if snstat['multiple'] is None:
+                multiplebox = '0'
+            else:
+                multiplebox = snstat['multiple']
             harpoon_env = os.environ.copy()
 
             harpoon_env['conf_location'] = harpoon.CONF_LOCATION
@@ -876,6 +880,32 @@ class QueueR(object):
             harpoon_env['harpoon_applylabel'] = str(config.GENERAL['applylabel']).lower()
             harpoon_env['harpoon_defaultdir'] = config.GENERAL['defaultdir']
             harpoon_env['harpoon_lcmd'] = 'rm -r \"%s\"' % downlocation
+
+            if any([multiplebox == '1', multiplebox == '0']):
+                harpoon_env['harpoon_pp_host'] = config.PP['pp_host']
+                harpoon_env['harpoon_pp_sshport'] = str(config.PP['pp_sshport'])
+                harpoon_env['harpoon_pp_user'] = config.PP['pp_user']
+                if config.PP['pp_keyfile'] is not None:
+                    harpoon_env['harpoon_pp_keyfile'] = config.PP['pp_keyfile']
+                else:
+                    harpoon_env['harpoon_pp_keyfile'] = ''
+                if config.PP['pp_passwd'] is not None:
+                    harpoon_env['harpoon_pp_passwd'] = config.PP['pp_passwd']
+                else:
+                    harpoon_env['harpoon_pp_passwd'] = ''
+            else:
+                harpoon_env['harpoon_pp_host'] = config.PP['pp_host2']
+                harpoon_env['harpoon_pp_sshport'] = config.PP['pp_sshport2']
+                harpoon_env['harpoon_pp_user'] = config.PP['pp_user2']
+                if config.PP['pp_keyfile2'] is not None:
+                    harpoon_env['harpoon_pp_keyfile'] = config.PP['pp_keyfile2']
+                else:
+                    harpoon_env['harpoon_pp_keyfile'] = ''
+                if config.PP['pp_passwd2'] is not None:
+                    harpoon_env['harpoon_pp_passwd'] = config.PP['pp_passwd2']
+                else:
+                    harpoon_env['harpoon_pp_passwd'] = ''
+
             logger.debug('Params: %s' % harpoon_env)
             try:
                 p = subprocess.Popen(script_cmd, env=dict(harpoon_env), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
