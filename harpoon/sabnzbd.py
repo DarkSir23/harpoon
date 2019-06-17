@@ -100,7 +100,7 @@ class SABnzbd(object):
             hist = requests.get(self.sab_url, params=hist_params, verify=False)
             historyresponse = hist.json()
             histqueue = historyresponse['history']
-            found = {'completed': False, 'failed': False}
+            found = {'completed': False, 'failed': True}
             try:
                 for hq in histqueue['slots']:
                     # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
@@ -139,6 +139,9 @@ class SABnzbd(object):
                                 logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
                                 found = {'completed': True,
                                          'failed': True}
+                    elif hq['nzo_id'] == sendresponse:
+                        logger.warn('[SABNZBD] Unexpected response: %s' % hq)
+                        found = {'completed': False}
             except Exception as e:
                 logger.warn('error %s' % e)
 
