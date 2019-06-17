@@ -30,7 +30,7 @@ from torrent.helpers.variable import link, symlink, is_rarfile
 import torrent.clients.rtorrent as TorClient
 
 import harpoon
-from harpoon import logger, config as conf
+from harpoon import logger, config
 
 class RTorrent(object):
     def __init__(self, hash=None, file=None, add=False, label=None, partial=False):
@@ -63,13 +63,8 @@ class RTorrent(object):
             self.partial = False
 
         if conf is None:
-            logger.warn('Unable to load config file properly for rtorrent usage. Make sure harpoon.conf is located in the /conf directory')
+            logger.warn('Unable to find config.')
             return None
-        else:
-            self.conf_location = conf
-            logger.info('Config Location: %s' % self.conf_location)
-        config = ConfigParser.RawConfigParser()
-        config.read(self.conf_location)
         self.applylabel = config.getboolean('general', 'applylabel')
         logger.info('Config: %s' % self.applylabel)
         self.multiple_seedboxes = config.getboolean('general', 'multiple_seedboxes')
