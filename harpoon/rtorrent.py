@@ -70,8 +70,8 @@ class RTorrent(object):
             logger.info('Config Location: %s' % self.conf_location)
         config = ConfigParser.RawConfigParser()
         config.read(self.conf_location)
-        logger.info('Config: %s' % config)
         self.applylabel = config.getboolean('general', 'applylabel')
+        logger.info('Config: %s' % self.applylabel)
         self.multiple_seedboxes = config.getboolean('general', 'multiple_seedboxes')
         logger.info('multiple_seedboxes: %s' % self.multiple_seedboxes)
         if self.multiple_seedboxes is True:
