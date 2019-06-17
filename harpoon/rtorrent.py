@@ -82,27 +82,27 @@ class RTorrent(object):
             logger.info('sections2: %s' % sections2)
             if sections1:
                 logger.info('SEEDBOX-1 ENABLED!')
-                self.start = config.get('rtorrent', 'startonload', type=bool)
+                self.start = config.getboolean('rtorrent', 'startonload')
                 self.rtorrent_host = config.get('rtorrent', 'rtorr_host') + ':' + config.get('rtorrent', 'rtorr_port')
                 self.rtorrent_user = config.get('rtorrent', 'rtorr_user')
                 self.rtorrent_pass = config.get('rtorrent', 'rtorr_passwd')
                 self.rtorrent_auth = config.get('rtorrent', 'authentication')
                 self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
-                self.rtorrent_ssl = config.get('rtorrent', 'ssl', type=bool)
-                self.rtorrent_verify = config.get('rtorrent', 'verify_ssl', type=bool)
+                self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
+                self.rtorrent_verify = config.getboolean('rtorrent', 'verify_ssl')
                 self.basedir = config.get('post-processing', 'pp_basedir')
                 self.multiple = '1'
 
             elif sections2:
                 logger.info('SEEDBOX-2 ENABLED!')
-                self.start = config.get('rtorrent2', 'startonload', type=bool)
+                self.start = config.getboolean('rtorrent2', 'startonload')
                 self.rtorrent_host = config.get('rtorrent2', 'rtorr_host') + ':' + config.get('rtorrent2', 'rtorr_port')
                 self.rtorrent_user = config.get('rtorrent2', 'rtorr_user')
                 self.rtorrent_pass = config.get('rtorrent2', 'rtorr_passwd')
                 self.rtorrent_auth = config.get('rtorrent2', 'authentication')
                 self.rtorrent_rpc = config.get('rtorrent2', 'rpc_url')
-                self.rtorrent_ssl = config.get('rtorrent2', 'ssl', type=bool)
-                self.rtorrent_verify = config.get('rtorrent2', 'verify_ssl', type=bool)
+                self.rtorrent_ssl = config.getboolean('rtorrent2', 'ssl')
+                self.rtorrent_verify = config.getboolean('rtorrent2', 'verify_ssl')
                 self.basedir = config.get('post-processing2', 'pp_basedir2')
                 self.multiple = '2'
             else:
@@ -110,14 +110,14 @@ class RTorrent(object):
                 return None
         else:
             logger.info('SEEDBOX-1 IS LONE OPTION - ENABLED!')
-            self.start = config.get('rtorrent', 'startonload', type=bool)
+            self.start = config.getboolean('rtorrent', 'startonload')
             self.rtorrent_host = config.get('rtorrent', 'rtorr_host') + ':' + config.get('rtorrent', 'rtorr_port')
             self.rtorrent_user = config.get('rtorrent', 'rtorr_user')
             self.rtorrent_pass = config.get('rtorrent', 'rtorr_passwd')
             self.rtorrent_auth = config.get('rtorrent', 'authentication')
             self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
-            self.rtorrent_ssl = config.get('rtorrent', 'ssl', type=bool)
-            self.rtorrent_verify = config.get('rtorrent', 'verify_ssl', type=bool)
+            self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
+            self.rtorrent_verify = config.get('rtorrent', 'verify_ssl')
             self.basedir = config.get('post-processing', 'pp_basedir')
             self.multiple = None
 
