@@ -270,6 +270,7 @@ class QueueR(object):
                         logger.info('sending to rtorrent as file...')
                         rt = rtorrent.RTorrent(file=item['item'], label=item['label'], partial=self.partial)
                     else:
+                        logger.info('checking rtorrent...')
                         rt = rtorrent.RTorrent(hash=item['item'], label=item['label'])
                     snstat = rt.main()
                 except Exception as e:
