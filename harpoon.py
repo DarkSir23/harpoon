@@ -861,6 +861,12 @@ class QueueR(object):
             except Exception as e:
                 logger.info('ERROR - %s' % e)
                 cleanup = None
+
+            labelit = None
+            if config.GENERAL['applylabel'] is True:
+                if any([snstat['label'] != 'None', snstat['label'] is not None]):
+                    labelit = snstat['label']
+
             harpoon_env = os.environ.copy()
 
             harpoon_env['conf_location'] = harpoon.CONF_LOCATION
