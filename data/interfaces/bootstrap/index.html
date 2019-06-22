@@ -73,7 +73,7 @@
                 % if item['stage'] == 'current' or item['stage'] == 'to-do':
                     <a href="hashfile?hash=${item['hash']}">${item['hash'][-6:]}</a>
                 % else:
-                    ${item['hash']}
+                    ${item['hash'][-6:]}
                 % endif
             </td>
             <td>${item['timestamp']}</td>
