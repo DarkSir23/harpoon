@@ -67,11 +67,11 @@
                 rowclass = 'info'
         %>
         <tr class="${rowclass}">
-            <td>${item['name']}</td>
+            <td>${item['name'].replace('.',' ')}</td>
             <td>${item['status']}</td>
             <td>
                 % if item['stage'] == 'current' or item['stage'] == 'to-do':
-                    <a href="hashfile?hash=${item['hash']}">${item['hash']}</a>
+                    <a href="hashfile?hash=${item['hash']}">${item['hash'][-6:]}</a>
                 % else:
                     ${item['hash']}
                 % endif
