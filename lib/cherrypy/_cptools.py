@@ -253,8 +253,8 @@ class ErrorTool(Tool):
 
 #                              Builtin tools                              #
 
-from cherrypy.lib import cptools, encoding, auth, static, jsontools, xmlrpcutil as _xmlrpc
-from cherrypy.lib import sessions as _sessions
+from cherrypy.lib import cptools, encoding, auth, static, jsontools
+from cherrypy.lib import sessions as _sessions, xmlrpcutil as _xmlrpc
 from cherrypy.lib import caching as _caching
 from cherrypy.lib import auth_basic, auth_digest
 
