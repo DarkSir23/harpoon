@@ -95,10 +95,15 @@ def initialize(options=None, basepath=None):
     logger.debug('config: %s' % conf)
     # Prevent time-outs
     try:
+        logger.debug("Stage A")
         cherrypy.engine.timeout_monitor.unsubscribe()
+        logger.debug("Stage B")
         cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
+        logger.debug("Stage C")
         cherrypy.engine.autoreload.subscribe()
+        logger.debug("Stage D")
         cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
+        logger.debug("Stage E")
         cherrypy.server.start()
     except IOError:
         print 'Failed to start on port: %i. is something else running?' % (options['http_port'])
