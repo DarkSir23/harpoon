@@ -7,7 +7,8 @@ import win32event
 import win32service
 import win32serviceutil
 
-from cherrypy.process import wspbus, plugins
+from cherrypy.process import plugins
+from lib.cherrypy.process import wspbus
 
 
 class ConsoleCtrlHandler(plugins.SimplePlugin):

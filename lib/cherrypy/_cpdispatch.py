@@ -611,7 +611,7 @@ class RoutesDispatcher(object):
 
 
 def XMLRPCDispatcher(next_dispatcher=Dispatcher()):
-    from cherrypy.lib import xmlrpcutil
+    from lib.cherrypy.lib import xmlrpcutil
 
     def xmlrpc_dispatch(path_info):
         path_info = xmlrpcutil.patched_path(path_info)
