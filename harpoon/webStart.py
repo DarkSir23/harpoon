@@ -94,16 +94,18 @@ def initialize(options=None, basepath=None):
         conf['/api'] = {'tools.auth_basic.on': False}
     logger.debug('config: %s' % conf)
     # Prevent time-outs
-    cherrypy.engine.timeout_monitor.unsubscribe()
-    cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
-    cherrypy.engine.autoreload.subscribe()
     try:
+        cherrypy.engine.timeout_monitor.unsubscribe()
+        cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
+        cherrypy.engine.autoreload.subscribe()
         cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
     except IOError:
         print 'Failed to start on port: %i. is something else running?' % (options['http_port'])
         sys.exit(1)
-
+    except Exception as e:
+        print 'Error: %s' % e
+        sys.exit(1)
     cherrypy.server.wait()
 
 
