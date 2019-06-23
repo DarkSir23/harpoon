@@ -10,4 +10,4 @@ use with the bus. Some use tool-specific channels; see the documentation
 for each class.
 """
 
-from lib.cherrypy.process.wspbus import bus
+from cherrypy.process.wspbus import bus
