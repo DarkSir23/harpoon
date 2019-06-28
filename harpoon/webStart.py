@@ -38,6 +38,7 @@ def initialize(options=None, basepath=None):
         protocol = "https"
     else:
         protocol = "http"
+    logger.debug("Options: %s" % options_dict)
     logger.info("Starting harpoon web server on %s://%s:%d/" % (protocol, options['http_host'], options['http_port']))
     cherrypy.config.update(options_dict)
     cherrypy.log.access_log.propagate = False
