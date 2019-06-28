@@ -37,7 +37,8 @@ class WebInterface(object):
     @cherrypy.expose
     def index(self):
         logger.debug("Serving index")
-        raise cherrypy.HTTPRedirect("home")
+        # raise cherrypy.HTTPRedirect("home")
+        return self.home()
 
     @cherrypy.expose
     def home(self, msg=None):
