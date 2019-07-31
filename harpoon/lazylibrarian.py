@@ -17,22 +17,24 @@ import os
 import time
 import shutil
 import requests
-from harpoon import logger
+from harpoon import logger, config, common
 
 class LazyLibrarian(object):
 
     def __init__(self, ll_info):
         logger.info(ll_info)
-        self.lazylibrarian_url = ll_info['lazylibrarian_url']
-        self.lazylibrarian_label = ll_info['lazylibrarian_label']
-        self.lazylibrarian_headers = ll_info['lazylibrarian_headers']
-        self.lazylibrarian_apikey = ll_info['lazylibrarian_apikey']
-        self.lazylibrarian_filedata = ll_info['lazylibrarian_filedata']
-        self.applylabel = ll_info['applylabel']
-        self.defaultdir = ll_info['defaultdir']
+        self.lazylibrarian_url = config.LAZYLIBRARIAN['lazylibrarian_url']
+        self.lazylibrarian_label = config.LAZYLIBRARIAN['lazylibrarian_label']
+        self.lazylibrarian_headers = config.LAZYLIBRARIAN['lazylibrarian_headers']
+        self.lazylibrarian_apikey = config.LAZYLIBRARIAN['lazylibrarian_apikey']
+        self.lazylibrarian_filedata = ll_info['filedata']
+        self.applylabel = config.GENERAL['applylabel']
+        self.defaultdir = config.GENERAL['defaultdir']
         self.snstat = ll_info['snstat']
+        logger.debug("---")
 
     def post_process(self):
+
         url = self.lazylibrarian_url + '/api'
         if 'extendedname' in self.snstat.keys():
             nzbname = self.snstat['extendedname']
@@ -55,23 +57,26 @@ class LazyLibrarian(object):
             process_suffix = ' LL.(%s)' % self.lazylibrarian_filedata['BookID']
         else:
             process_suffix = ' PROCESS'
-        logger.debug('[LAZYLIBRARIAN] Process Suffix: %s' % process_suffix)
+        logger.info('[LAZYLIBRARIAN] Process Suffix: %s' % process_suffix)
         if midbase == defaultbase or midbase == self.snstat['label']:
             # name is 1 deep - if file, move it.  if folder, check for LL
             if os.path.isfile(filepath):
-                logger.debug('[LAZYLIBRARIAN] Prepping file to move')
+                logger.info('[LAZYLIBRARIAN] Prepping file to move')
                 process_path = filepath + process_suffix
                 movefile = True
             elif os.path.isdir(filepath):
-                logger.debug('[LAZYLIBRARIAN] Path is a folder')
+                logger.info('[LAZYLIBRARIAN] Path is a folder')
                 if filepath.endswith(process_suffix):
-                    logger.debug('[LAZYLIBRARIAN] Folder is already properly named')
+                    logger.info('[LAZYLIBRARIAN] Folder is already properly named')
                     movefile = False
                     process_path = filepath
                 else:
-                    logger.debug('[LAZYLIBRARIAN] Renaming folder')
+                    logger.info('[LAZYLIBRARIAN] Renaming folder')
                     movefile = False
                     process_path = filepath + process_suffix
+                    if os.path.exists(process_path):
+                        logger.info('[LAZYLIBRARIAN] Path Exists.  Renaming.')
+                        os.rename(process_path, process_path + ' - %s' % common.currentTime())
                     os.rename(filepath, process_path)
             else:
                 logger.debug('[LAZYLIBRARIAN] File not found')

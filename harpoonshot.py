@@ -37,6 +37,10 @@ radarr_label = config.get('radarr', 'radarr_label')
 mylar_label = config.get('mylar', 'mylar_label')
 lidarr_label = config.get('lidarr', 'lidarr_label')
 lazylibrarian_label = config.get('lazylibrarian', 'lazylibrarian_label')
+try:
+    sabnzbd_enable = config.getboolean('sabnzbd', 'sab_enable')
+except ValueError:
+    sabnzbd_enable = False
 torrentfile_dir = config.get('general', 'torrentfile_dir')
 
 # Setup file logger
@@ -54,6 +58,7 @@ logger.addHandler(file_handler)
 filecontent = None
 
 try:
+    logger.info('Args: %s' % sys.argv)
     mode = sys.argv[1]
     args = sys.argv[1:]
 except IndexError:
@@ -65,7 +70,7 @@ except IndexError:
                 label = mylar_label
                 filetype = '.hash'
                 mode = 'mylar'
-            elif method == 'nzb':
+            elif all([method == 'nzb', sabnzbd_enable is True]):
                 inputfile = os.environ.get('mylar_client_id')
                 label = mylar_label
                 filetype = '.hash'
@@ -73,6 +78,11 @@ except IndexError:
             else:
                 logger.info('mylar_method is not set to torrent or nzb, so I\'m not sure what to do.')
                 sys.exit(1)
+        elif 'sonarr_release_title' in os.environ:
+            mode = 'sonarr'
+            inputfile = os.environ.get('sonarr_release_title')
+            label = sonarr_label
+            filetype = '.file'
         else:
             logger.info('mylar_method not in os.environ, but it was called from mylar...')
             #ignore non-torrent snatches...
@@ -110,15 +120,18 @@ else:
                 n -= 2
             except IndexError:
                 break
+        logger.debug('Dict: %s' % mydict)
         if 'DownloadID' in mydict.keys(): # LazyLibrarian book or audiobook
-            mode = 'lazylibrarian'
+            # mode = 'lazylibrarian'
+            mode = ''
             inputfile = mydict['DownloadID']
             if len(inputfile) > 20:
                 inputfile = inputfile.upper()
             label = lazylibrarian_label
-            filetype = '.hash'
+            filetype = 'hash'
             filecontent = mydict
         else:
+            logger.debug('Not enough Arguments: %s' % args)
             logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
             sys.exit(1)
 
@@ -126,7 +139,7 @@ else:
         logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
         sys.exit(1)
 
-logger.info("Torrent name to use: %s" % inputfile)
+logger.info("Name to use: %s" % inputfile)
 
 path = os.path.join(torrentfile_dir, label)
 

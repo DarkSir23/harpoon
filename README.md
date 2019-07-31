@@ -85,6 +85,16 @@ This is a python-cli based application that can either be run from the cli direc
 
 ``STARTONLOAD`` [*true/false*] = start the torrent automatically when loading a .torrent file
 
+**[sabnzbd]**
+
+``SAB_ENABLE`` [*true/false*] = Enable or Disable SABnzbd downloading
+
+``SAB_URL`` [*url*] = full address of your SABnzbd interface (including port and basepath)
+
+``SAB_APIKEY`` [*apikey*] = the apikey for SABnzbd
+
+``SAB_CLEANUP`` [*true/false*] = if true, remove completed or failed SABnzbd downloads from history and the remote server.
+
 **[post-processing]**
 
 ``PP_HOST`` [*host*] = the ip/hostname of the seedbox
@@ -210,6 +220,8 @@ For organizational/operational usage it is best to create a folder for .torrent 
 
 **For Sonarr/Radarr/Lidarr**
 ----------
+
+**NOTE FOR SONARR > V2.0.0.5301** Remote Mapping MUST be enabled - your remote mapping folder is the location where sonarr puts your tv-related torrents on your seedobox, local is where harpoon drops them prior to post-processing
 
 In any of the above applications, go to Settings / Connections and create a custom script. Give the name something obvious 'HARPOON', and set the On Grab option to Yes, and the On Download option to No.  Set the Path option to the location of your python executable (ie. /usr/bin/python), and then in the arguments set it to the complete path to the harpoonshot.py file which is currently located in the root of the harpoon folder with the application name at the end of the argument line (ie. /opt/harpoon/harpoonshot.py radarr OR /opt/harpoon/harpoonshot.py sonarr).
 

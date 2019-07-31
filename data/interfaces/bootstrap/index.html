@@ -1,0 +1,95 @@
+<%inherit file="base.html"/>
+<%!
+    import harpoon
+    import threading
+    from collections import OrderedDict
+%>
+<%def name="headerIncludes()">
+    <div id="subhead_container" class="row">
+      <form action="search" method="get">
+        <div id="subhead_menu"  class="col-xs-12 col-md-8">
+            <a href="confirm?action=clearFailed" class="btn btn-sm btn-primary" id="clearfailed"><i class="fa fa-remove"></i> Clear Failed</a>
+            <a href="confirm?action=clearCompleted" class="btn btn-sm btn-primary" id="clearcompleted"><i class="fa fa-remove"></i> Clear Finished</a>
+            <a gref="confirm?action=restart" class="btn btn-sm btn-warning" id="restart"><i class="fa fa-refresh"></i> Restart Harpoon</a>
+        </div>
+        <div class="clearfix visible-xs"><hr/></div>
+        <div class="col-xs-12 col-md-4">
+            Status: ${harpoon.MAINTHREAD.isAlive()}
+<!--    <div class="form-group">
+          <label class="sr-only">Search</label>
+          <div class="input-group">
+            <input type="text"  id="name" name="name" placeholder="Player / Event / Opponent" name="title" class="form-control input-sm col-xs-12">
+            <span class="input-group-btn">
+              <button type="submit" value="Book" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Search"><i class="fa fa-search"></i></button>
+            </span>
+          </div>
+        </div>
+ -->
+        </div>
+      </form>
+    </div>
+</%def>
+<%def name="body()">
+% if msg:
+    <div class="alert alert-info" style="text-align: center; padding: 8px;">
+        ${msg}
+    </div>
+% endif
+<h1>${title}</h1>
+<div>
+        <%
+        items = OrderedDict(sorted(harpoon.HQUEUE.ckqueue().iteritems(), key=lambda x: x[1]['timestamp'], reverse=True))
+        %>
+</div>
+<div class="table-responsive">
+    <table class="display table table-striped table-hover table-bordered table-condensed" id="queue-table">
+        <thead>
+            <tr>
+                <th class="name col-xs-4">Name</th>
+                <th class="status col-xs-2 text-center">Status</th>
+                <th class="hash col-xs-1">Hash</th>
+                <th class="timestamp col-xs-2">Time</th>
+                <th class="actions col-xs-3">Actions</th>
+
+            </tr>
+        </thead>
+
+        % for key in items.keys():
+        <% item = items[key] %>
+        <%
+            if item['stage'] == 'current':
+                rowclass = 'active'
+            elif item['stage'] == 'completed':
+                rowclass = 'success'
+            elif item['stage'] == 'failed':
+                rowclass = 'danger'
+            else:
+                rowclass = 'info'
+        %>
+        <tr class="${rowclass}">
+            <td>${item['name'].replace('.',' ')}</td>
+            <td>${item['status']}</td>
+            <td>
+                % if item['stage'] == 'current' or item['stage'] == 'to-do':
+                    <a href="hashfile?hash=${item['hash']}">${item['hash'][-6:]}</a>
+                % else:
+                    ${item['hash'][-6:]}
+                % endif
+            </td>
+            <td>${item['timestamp']}</td>
+            <td>
+                % if item['stage'] == 'current' or item['stage'] == 'to-do':
+                    <a href="confirm?action=removeItem&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
+                    <a href="confirm?action=removeItemAndHash&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
+                % else:
+                    <a href="confirm?action=removeItem&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
+                %endif
+            </td>
+        </tr>
+        % endfor
+    </table>
+</div>
+
+</%def>
+<%def name="javascriptIncludes()">
+</%def>

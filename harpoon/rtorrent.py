@@ -20,20 +20,20 @@ import time
 import shutil
 import traceback
 from base64 import b16encode, b32decode
+import ConfigParser
 
 import hashlib, StringIO
 import bencode
 from torrent.helpers.variable import link, symlink, is_rarfile
 
-import ConfigParser
 
 import torrent.clients.rtorrent as TorClient
 
 import harpoon
-from harpoon import logger
+from harpoon import logger, CONF_LOCATION
 
 class RTorrent(object):
-    def __init__(self, hash=None, file=None, add=False, label=None, partial=False, conf=None):
+    def __init__(self, hash=None, file=None, add=False, label=None, partial=False):
 
         if hash is None:
             self.torrent_hash = None
@@ -62,21 +62,25 @@ class RTorrent(object):
         else:
             self.partial = False
 
-        if conf is None:
-            logger.warn('Unable to load config file properly for rtorrent usage. Make sure harpoon.conf is located in the /conf directory')
+        if CONF_LOCATION is None:
+            logger.warn('Unable to find config.')
             return None
-        else:
-            self.conf_location = conf
-
         config = ConfigParser.RawConfigParser()
-        config.read(self.conf_location)
-
+        config.read(CONF_LOCATION)
+        self.applylabel = config.getboolean('general', 'applylabel')
+        logger.info('Config: %s' % self.applylabel)
         self.multiple_seedboxes = config.getboolean('general', 'multiple_seedboxes')
         logger.info('multiple_seedboxes: %s' % self.multiple_seedboxes)
         if self.multiple_seedboxes is True:
-            sections = config.get('general', 'multiple1')
-            logger.info('sections: %s' % sections)
-            if label in sections:
+            sectionsconfig1 = config.get('general', 'multiple1')
+            sectionsconfig2 = config.get('general', 'multiple2')
+            sectionlist1 = sectionsconfig1.split(',')
+            sections1 = [x for x in sectionlist1 if x.lower() == label.lower()]
+            sectionlist2 = sectionsconfig2.split(',')
+            sections2 = [x for x in sectionlist2 if x.lower() == label.lower()]
+            logger.info('sections1: %s' % sections1)
+            logger.info('sections2: %s' % sections2)
+            if sections1:
                 logger.info('SEEDBOX-1 ENABLED!')
                 self.start = config.getboolean('rtorrent', 'startonload')
                 self.rtorrent_host = config.get('rtorrent', 'rtorr_host') + ':' + config.get('rtorrent', 'rtorr_port')
@@ -89,7 +93,7 @@ class RTorrent(object):
                 self.basedir = config.get('post-processing', 'pp_basedir')
                 self.multiple = '1'
 
-            elif label in config.get('general', 'multiple2'):
+            elif sections2:
                 logger.info('SEEDBOX-2 ENABLED!')
                 self.start = config.getboolean('rtorrent2', 'startonload')
                 self.rtorrent_host = config.get('rtorrent2', 'rtorr_host') + ':' + config.get('rtorrent2', 'rtorr_port')
@@ -113,7 +117,7 @@ class RTorrent(object):
             self.rtorrent_auth = config.get('rtorrent', 'authentication')
             self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
             self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
-            self.rtorrent_verify = config.getboolean('rtorrent', 'verify_ssl')
+            self.rtorrent_verify = config.get('rtorrent', 'verify_ssl')
             self.basedir = config.get('post-processing', 'pp_basedir')
             self.multiple = None
 
@@ -162,7 +166,7 @@ class RTorrent(object):
         if self.add is True:
             logger.info("Attempting to load torrent. Filepath is : %s" % self.filepath)
             logger.info("label is : %s" % self.label)
-            loadit = self.client.load_torrent(self.filepath, self.label, self.start)
+            loadit = self.client.load_torrent(self.filepath, self.label, self.start, self.applylabel, self.basedir)
             if loadit:
                 logger.info('Successfully loaded torrent.')
                 torrent_hash = self.get_the_hash()

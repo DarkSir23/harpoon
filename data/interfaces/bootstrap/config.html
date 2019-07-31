@@ -1,0 +1,110 @@
+<%inherit file="base.html"/>
+<%!
+    import harpoon
+%>
+<%def name="headerIncludes()">
+    <div id="subhead_container">
+        <div id="subhead_menu">
+        </div>
+    </div>
+</%def>
+<%def name="body()">
+<h1>${title}</h1>
+    <form action="configUpdate" method="post">
+
+        <div role="tab-table" class="hidden">
+
+            <div>
+                <ul class="nav nav-tabs" role="tablist" id="configtabs">
+                    <li role="presentation" id="1" aria-controls="webinterface"><a role="tab" data-toggle="tab" aria-controls="webinterface" href="#webinterface">Interface</a></li>
+                    <li role="presentation" id="2" aria-controls="alliancedefaults"><a role="tab" data-toggle="tab" aria-controls="alliancedefaults" href="#alliancedefaults">AllianceDefaults</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane" id="webinterface">
+                        <div class="configtable">
+                            <div class="row">
+                                <div class="col-md-6">
+                                </div>
+                                <div class="col-md-6">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="alliancedefaults">
+                        <div class="configtable">
+                            <div class="col-md-6">
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="downloadsettings">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="providers">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="searchprocessing">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="notifications">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="capabilities">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="filters">
+                        <div class="configtable">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- tabs -->
+            <div class="table_wrapper_button">
+                <input type="submit" value="Save changes" id="add" class="btn btn-primary">
+            </div>
+        </div>
+    </form>
+</%def>
+<%def name="javascriptIncludes()">
+  <script type="text/javascript">
+    function initThisPage()
+
+    {
+        "use strict";
+
+        // when the page first loads, hide all tab headers and panels
+        $("li[role='presentation']").attr("aria-selected", "false");
+        $("li[role='presentation']").removeClass('active');
+        $("div[role='tabpanel']").attr("aria-hidden", "true");
+        $("div[role='tabpanel']").removeClass('active');
+        // which one do we want to show
+        var tabnum = $("#current_tab").val();
+        var tabid = $("#" + tabnum);
+        var tabpanel = tabid.attr('aria-controls');
+        var tabpanelid = $("#" + tabpanel);
+        // show the tab header and panel we want
+        tabpanelid.attr("aria-hidden", "false");
+        tabpanelid.addClass('active');
+        tabid.attr("aria-selected", "true");
+        tabid.addClass('active');
+        $("div[role='tab-table']").removeClass('hidden');
+
+        // when a tab is clicked
+        $("li[role='presentation']").click(function(){
+            var tabnum = $(this).attr('id');    // store current tab for python
+            $("#current_tab").val(tabnum);
+        });
+
+
+    } // End Init
+
+    $(document).ready(function() {
+        initThisPage();
+    });
+  </script>
+</%def>
+<html><head></head><body></body></html>
