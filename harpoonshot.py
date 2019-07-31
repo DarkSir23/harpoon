@@ -85,8 +85,13 @@ except IndexError:
             filetype = '.file'
         elif 'sonarr_eventtype' in os.environ:
             eventtype = os.environ.get('sonarr_eventtype')
-            logger.info('Called from Sonarr, but as eventtype "%s".  Exiting.' % eventtype)
-            sys.exit(1)
+            logger.info('Called from Sonarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'test':
+                logger.info('Exiting successfully (Sonarr Test)')
+                sys.exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                sys.exit(1)
         else:
             logger.info('Unable to detect what client called harpoonshot...')
             logger.info('Environment: %s' % os.environ)
