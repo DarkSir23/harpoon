@@ -83,6 +83,10 @@ except IndexError:
             inputfile = os.environ.get('sonarr_release_title')
             label = sonarr_label
             filetype = '.file'
+        elif 'sonarr_eventtype' in os.environ:
+            eventtype = os.environ.get('sonarr_eventtype')
+            logger.info('Called from Sonarr, but as eventtype "%s".  Exiting.' % eventtype)
+            sys.exit(1)
         else:
             logger.info('Unable to detect what client called harpoonshot...')
             logger.info('Environment: %s' % os.environ)
