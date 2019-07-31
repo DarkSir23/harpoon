@@ -84,7 +84,7 @@ except IndexError:
             label = sonarr_label
             filetype = '.file'
         else:
-            logger.info('mylar_method not in os.environ, but it was called from mylar...')
+            logger.info('Unable to detect what client called harpoonshot...')
             #ignore non-torrent snatches...
             sys.exit(1)
     except:
