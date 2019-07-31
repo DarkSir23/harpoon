@@ -85,6 +85,7 @@ except IndexError:
             filetype = '.file'
         else:
             logger.info('Unable to detect what client called harpoonshot...')
+            logger.info('Environment: %s' % os.environ)
             #ignore non-torrent snatches...
             sys.exit(1)
     except:
