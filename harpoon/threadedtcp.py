@@ -121,7 +121,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
         self.__shutdown_request = False
 
     def is_running(self):
-        if self.__is_shutdown.isSet():
+        if self.__is_shut_down.isSet():
             return False
         else:
             return True
