@@ -21,6 +21,7 @@ import Queue
 import subprocess
 import SocketServer
 import optparse
+import socket
 import re
 import time
 import json
@@ -173,6 +174,10 @@ class QueueR(object):
             #sockme.start()
 
             HOST, PORT = "localhost", 50007
+            with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+                if sock.connect_ex((HOST, PORT)):
+                    logger.warn('Socket already open. Closing Harpoon.')
+                    os._exit(1)
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             server_thread = threading.Thread(target=server.serve_forever)
             #server_thread.daemon = True
