@@ -104,7 +104,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         import collections
         d = HQUEUE.listqueue
         queue_position = [i for i,t in enumerate(d) if t['item'] == item]
-        queue_pos = '%s/%s' % (''.join(str(e) for e in queue_position), SNQUEUE.qsize())
+        queue_pos = '%s/%s' % (''.join(str(e) for e in queue_position), HQUEUE.qsize())
         logger.info('queue position of %s' % queue_pos)
         return queue_pos
 
