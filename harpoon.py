@@ -200,10 +200,10 @@ class QueueR(object):
             #sockme = threading.Thread(target=socketlisten.listentome, args=(self.SNQUEUE,))
             #sockme.setdaemon = True
             #sockme.start()
-            time.sleep(2)
             HOST, PORT = "localhost", 50007
             with closing(checksocket.socket(checksocket.AF_INET, checksocket.SOCK_STREAM)) as sock:
                 res = sock.connect_ex((HOST, PORT))
+                logger.debug('Socket: %s' % res)
                 if res:
                     logger.info('Socket Still open.  Exiting.')
                     os._exit(1)
