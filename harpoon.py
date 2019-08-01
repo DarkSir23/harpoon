@@ -201,7 +201,7 @@ class QueueR(object):
             HOST, PORT = "localhost", 50007
             server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
-            server_thread = threading.Thread(target=server.serve_forever())
+            server_thread = threading.Thread(target=server.serve_forever)
             logger.debug('Server Thread: %s' % server_thread)
             self.server = server
             #server_thread.daemon = True
