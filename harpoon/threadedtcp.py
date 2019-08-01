@@ -108,5 +108,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         logger.info('queue position of %s' % queue_pos)
         return queue_pos
 
+
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
