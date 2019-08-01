@@ -59,6 +59,7 @@ class QueueR(object):
                        "Also supports direct dropping of .torrent files into a watch directory. "
                        "Supported client-side applications: "
                        "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
+        self.server = None
         self.ARGS = sys.argv[:]
         self.FULL_PATH = os.path.abspath(sys.executable)
         parser = optparse.OptionParser(description=description)
@@ -172,7 +173,7 @@ class QueueR(object):
             #sockme.start()
 
             HOST, PORT = "localhost", 50007
-            server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             server_thread = threading.Thread(target=server.serve_forever)
             #server_thread.daemon = True
             server_thread.start()
@@ -218,6 +219,8 @@ class QueueR(object):
                     popen_list = [self.FULL_PATH]
                     popen_list += self.ARGS
                     logger.debug("Args: %s" % (popen_list))
+                    if self.server:
+                        self.server.shutdown()
                     os.remove(self.pidfile)
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
