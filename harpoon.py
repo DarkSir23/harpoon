@@ -212,6 +212,7 @@ class QueueR(object):
                         port_open = False
                     else:
                         logger.debug('Socket error code: %s' % res)
+                time.sleep(2)
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
             server_thread = threading.Thread(target=self.server.serve_forever)
