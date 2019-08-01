@@ -217,7 +217,7 @@ class QueueR(object):
                 try:
                     popen_list = [sys.executable, self.FULL_PATH]
                     popen_list += self.ARGS
-                    logger.debug("Args: %s" % (popen.list))
+                    logger.debug("Args: %s" % (popen_list))
                     subprocess.Popen(popen_list, cwd=os.getcwd())
                     os._exit(0)
                 except Exception as e:
