@@ -212,7 +212,10 @@ class QueueR(object):
         while True:
             if self.restart:
                 logger.info('Restarting')
-                os.execv(sys.executable, args)
+                try:
+                    os.execv(sys.executable, args)
+                except Exception as e:
+                    logger.debug("Failed to restart: %s" % e)
             else:
                 self.worker_main(self.HQUEUE)
 
