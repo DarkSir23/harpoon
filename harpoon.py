@@ -213,8 +213,7 @@ class QueueR(object):
             if self.restart:
                 logger.info('Restarting')
                 try:
-                    # os.execv(sys.executable, args)
-                    logger.debug('args: %s' % self.ARGS)
+                    os.execv(sys.executable, self.ARGS)
                     self.restart = False
                 except Exception as e:
                     logger.debug("Failed to restart: %s" % e)
