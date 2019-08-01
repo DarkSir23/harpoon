@@ -178,8 +178,10 @@ class QueueR(object):
                 if sock.connect_ex((HOST, PORT)):
                     logger.warn('Socket already open. Closing Harpoon.')
                     os._exit(1)
-            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-            logger.debug('Server: %s' % self.server)
+            server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+            logger.debug('Server: %s' % server)
+            self.server = server
+            logger.debug('Class Server: %s' % self.server)
             server_thread = threading.Thread(target=self.server.serve_forever())
             #server_thread.daemon = True
             server_thread.start()
