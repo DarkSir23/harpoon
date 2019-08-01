@@ -204,7 +204,7 @@ class QueueR(object):
             with closing(checksocket.socket(checksocket.AF_INET, checksocket.SOCK_STREAM)) as sock:
                 res = sock.connect_ex((HOST, PORT))
                 logger.debug('Socket: %s' % res)
-                if res:
+                if res == 0:
                     logger.info('Socket Still open.  Exiting.')
                     os._exit(1)
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
