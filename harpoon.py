@@ -206,12 +206,10 @@ class QueueR(object):
                 with closing(checksocket.socket(checksocket.AF_INET, checksocket.SOCK_STREAM)) as sock:
                     res = sock.connect_ex((HOST, PORT))
                     if res == 0:
-                        logger.debug('Socket Still open.')
+                        pass
                     elif res == 61:
-                        logger.debug('Socket available.  Continuing.')
+                        logger.debug('[API] Socket available.  Continuing.')
                         port_open = False
-                    else:
-                        logger.debug('Socket error code: %s' % res)
                 time.sleep(2)
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
@@ -1048,16 +1046,16 @@ class QueueR(object):
         except OSError, e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        # dev_null = file('/dev/null', 'r')
-        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
-        #
-        # si = open('/dev/null', "r")
-        # so = open('/dev/null', "a+")
-        # se = open('/dev/null', "a+")
-        #
-        # os.dup2(si.fileno(), sys.stdin.fileno())
-        # os.dup2(so.fileno(), sys.stdout.fileno())
-        # os.dup2(se.fileno(), sys.stderr.fileno())
+        dev_null = file('/dev/null', 'r')
+        os.dup2(dev_null.fileno(), sys.stdin.fileno())
+
+        si = open('/dev/null', "r")
+        so = open('/dev/null', "a+")
+        se = open('/dev/null', "a+")
+
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)

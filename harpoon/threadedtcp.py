@@ -125,11 +125,8 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
 
 
     def serve_forever(self, poll_interval=0.5):
-        logger.debug('Step A')
         self.__is_shut_down.clear()
-        logger.debug('Step B')
         try:
-            logger.debug('Step C')
             while not self.__shutdown_request:
                 # XXX: Consider using another file descriptor or
                 # connecting to the socket to wake this up instead of
@@ -137,9 +134,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
                 # shutdown request and wastes cpu at all other times.
                 r, w, e = SocketServer._eintr_retry(select.select, [self], [], [],
                                        poll_interval)
-                # logger.debug('Step D: r: %s - w: %s - e: %s' % (r, w, e,))
                 if self in r:
-                    logger.debug('Step E')
                     self._handle_request_noblock()
         finally:
             self.__shutdown_request = False
