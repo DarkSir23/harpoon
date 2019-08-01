@@ -201,12 +201,16 @@ class QueueR(object):
             #sockme.setdaemon = True
             #sockme.start()
             HOST, PORT = "localhost", 50007
-            with closing(checksocket.socket(checksocket.AF_INET, checksocket.SOCK_STREAM)) as sock:
-                res = sock.connect_ex((HOST, PORT))
-                logger.debug('Socket: %s' % res)
-                if res == 0:
-                    logger.info('Socket Still open.  Exiting.')
-                    os._exit(1)
+            port_open = True
+            while port_open:
+                with closing(checksocket.socket(checksocket.AF_INET, checksocket.SOCK_STREAM)) as sock:
+                    res = sock.connect_ex((HOST, PORT))
+                    logger.debug('Socket: %s' % res)
+                    if res == 0:
+                        logger.info('Socket Still open.')
+                    else:
+                        logger.info('Socket available.  Continuing.')
+                        port_open = False
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
             server_thread = threading.Thread(target=self.server.serve_forever)
