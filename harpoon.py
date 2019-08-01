@@ -179,7 +179,7 @@ class QueueR(object):
                     logger.warn('Socket already open. Closing Harpoon.')
                     os._exit(1)
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-            server_thread = threading.Thread(target=server.serve_forever)
+            server_thread = threading.Thread(target=self.server.serve_forever)
             #server_thread.daemon = True
             server_thread.start()
             logger.info('Started...')
