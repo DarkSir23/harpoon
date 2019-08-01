@@ -58,7 +58,8 @@ class QueueR(object):
                        "Also supports direct dropping of .torrent files into a watch directory. "
                        "Supported client-side applications: "
                        "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
-        self.ARGS = sys.argv[1:]
+        self.ARGS = sys.argv[:]
+        self.ARGS.insert(0, sys.executable)
         parser = optparse.OptionParser(description=description)
         parser.add_option('-a', '--add', dest='add', help='Specify a filename to snatch from specified torrent client when monitor is running already.')
         parser.add_option('-s', '--hash', dest='hash', help='Specify a HASH to snatch from specified torrent client.')
@@ -213,6 +214,7 @@ class QueueR(object):
             if self.restart:
                 logger.info('Restarting')
                 try:
+                    logger.debug("Exec: %s\nArgs: %s" % (sys.executable, self.ARGS))
                     os.execv(sys.executable, self.ARGS)
                     self.restart = False
                 except Exception as e:
