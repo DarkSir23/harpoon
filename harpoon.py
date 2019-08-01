@@ -168,13 +168,13 @@ class QueueR(object):
         elif self.file is not None:
             logger.info('Adding file to queue via FILE %s [label:%s]' % (self.file, options.label))
             self.HQUEUE.put({'mode':  'file-add',
-                              'item':  self.file,
-                              'label': options.label})
+                             'item':  self.file,
+                             'label': options.label})
         elif self.hash is not None:
             logger.info('Adding file to queue via HASH %s [label:%s]' % (self.hash, options.label))
             self.HQUEUE.put({'mode':  'hash-add',
-                              'item':  self.hash,
-                              'label': options.label})
+                             'item':  self.hash,
+                             'label': options.label})
         else:
             logger.info('Not enough information given - specify hash / filename')
             return

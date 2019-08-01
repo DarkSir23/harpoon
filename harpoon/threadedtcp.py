@@ -1,7 +1,7 @@
 import SocketServer
 import json
 
-from harpoon import logger
+from harpoon import logger, SOCKET_API
 from harpoon import HQUEUE as HQUEUE
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
@@ -82,14 +82,14 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             if mode == 'file':
                 logger.info('[API-AWARE] Adding file to queue via FILE %s [label:%s]' % (data['file'], data['label']))
                 HQUEUE.put({'mode':  'file-add',
-                             'item':  data['file'],
-                             'label': data['label']})
+                            'item':  data['file'],
+                            'label': data['label']})
 
             elif mode == 'hash':
                 logger.info('[API-AWARE] Adding file to queue via HASH %s [label:%s]' % (data['hash'], data['label']))
                 HQUEUE.put({'mode':  'hash-add',
-                             'item':  data['hash'],
-                             'label': data['label']})
+                            'item':  data['hash'],
+                            'label': data['label']})
             else:
                 logger.info('[API-AWARE] Unsupported mode or error in parsing. Ignoring request [%s]' % data)
                 return False
