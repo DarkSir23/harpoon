@@ -199,10 +199,11 @@ class QueueR(object):
             #sockme.start()
 
             HOST, PORT = "localhost", 50007
-            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+            server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
-            server_thread = threading.Thread(target=self.server.serve_forever())
+            server_thread = threading.Thread(target=server.serve_forever())
             logger.debug('Server Thread: %s' % server_thread)
+            self.server = server
             #server_thread.daemon = True
             server_thread.start()
             logger.info('Started...')
