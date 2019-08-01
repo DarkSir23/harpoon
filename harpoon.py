@@ -60,6 +60,7 @@ class QueueR(object):
                        "Supported client-side applications: "
                        "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
         self.server = None
+        self.server_thread = None
         self.ARGS = sys.argv[:]
         self.FULL_PATH = os.path.abspath(sys.executable)
         parser = optparse.OptionParser(description=description)
@@ -201,10 +202,10 @@ class QueueR(object):
             HOST, PORT = "localhost", 50007
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
-            server_thread = threading.Thread(target=self.server.serve_forever)
-            logger.debug('Server Thread: %s' % server_thread)
+            self.server_thread = threading.Thread(target=self.server.serve_forever)
+            logger.debug('Server Thread: %s' % self.server_thread)
             #server_thread.daemon = True
-            server_thread.start()
+            self.server_thread.start()
             logger.info('Started...')
 
         if options.add:
@@ -230,6 +231,8 @@ class QueueR(object):
                         while self.server.is_running():
                             logger.debug("Running? %s" % self.server.is_running())
                             time.sleep(1)
+                    if self.server_thread:
+                        self.server_thread.daemon = True
                     os.remove(self.pidfile)
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
