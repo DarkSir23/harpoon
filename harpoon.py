@@ -154,38 +154,6 @@ class QueueR(object):
         #harpoon.SNPOOL.daemon = True
         #harpoon.SNPOOL.start()
 
-        #for threading
-        self.HQUEUE = HQUEUE
-        self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
-        self.SNPOOL.setdaemon = True
-        self.SNPOOL.start()
-        harpoon.MAINTHREAD = threading.current_thread()
-        logger.debug("Threads: %s" % threading.enumerate())
-
-        logger.info('TV-Client set to : %s' % config.GENERAL['tv_choice'])
-
-        if self.daemon is True:
-            #if it's daemonized, fire up the soccket listener to listen for add requests.
-            logger.info('[HARPOON] Initializing the API-AWARE portion of Harpoon.')
-            #socketlisten.listentome(self.SNQUEUE,)
-            #sockme = threading.Thread(target=socketlisten.listentome, args=(self.SNQUEUE,))
-            #sockme.setdaemon = True
-            #sockme.start()
-
-            HOST, PORT = "localhost", 50007
-            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-            logger.debug('Class Server: %s' % self.server)
-            server_thread = threading.Thread(target=self.server.serve_forever())
-            logger.debug('Server Thread: %s' % server_thread)
-            #server_thread.daemon = True
-            server_thread.start()
-            logger.info('Started...')
-
-        if options.add:
-            logger.info('Adding file to queue %s' % options.add)
-            self.HQUEUE.put(options.add)
-            return
-
         if self.monitor:
             self.SCHED = Scheduler()
             logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
@@ -209,6 +177,42 @@ class QueueR(object):
         else:
             logger.info('Not enough information given - specify hash / filename')
             return
+
+        #for threading
+        self.HQUEUE = HQUEUE
+        self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
+        self.SNPOOL.setdaemon = True
+        self.SNPOOL.start()
+        harpoon.MAINTHREAD = threading.current_thread()
+        logger.debug("Threads: %s" % threading.enumerate())
+
+        logger.info('TV-Client set to : %s' % config.GENERAL['tv_choice'])
+
+
+
+        if self.daemon is True:
+            #if it's daemonized, fire up the soccket listener to listen for add requests.
+            logger.info('[HARPOON] Initializing the API-AWARE portion of Harpoon.')
+            #socketlisten.listentome(self.SNQUEUE,)
+            #sockme = threading.Thread(target=socketlisten.listentome, args=(self.SNQUEUE,))
+            #sockme.setdaemon = True
+            #sockme.start()
+
+            HOST, PORT = "localhost", 50007
+            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+            logger.debug('Class Server: %s' % self.server)
+            server_thread = threading.Thread(target=self.server.serve_forever())
+            logger.debug('Server Thread: %s' % server_thread)
+            #server_thread.daemon = True
+            server_thread.start()
+            logger.info('Started...')
+
+        if options.add:
+            logger.info('Adding file to queue %s' % options.add)
+            self.HQUEUE.put(options.add)
+            return
+
+
         logger.info('Web: %s' % config.WEB)
         if config.WEB['http_enable']:
             logger.debug("Starting web server")
@@ -1026,16 +1030,16 @@ class QueueR(object):
         except OSError, e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        # dev_null = file('/dev/null', 'r')
-        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
-        #
-        # si = open('/dev/null', "r")
-        # so = open('/dev/null', "a+")
-        # se = open('/dev/null', "a+")
-        #
-        # os.dup2(si.fileno(), sys.stdin.fileno())
-        # os.dup2(so.fileno(), sys.stdout.fileno())
-        # os.dup2(se.fileno(), sys.stderr.fileno())
+        dev_null = file('/dev/null', 'r')
+        os.dup2(dev_null.fileno(), sys.stdin.fileno())
+
+        si = open('/dev/null', "r")
+        so = open('/dev/null', "a+")
+        se = open('/dev/null', "a+")
+
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)
