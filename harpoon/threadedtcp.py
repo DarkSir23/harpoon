@@ -121,7 +121,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
         self.__shutdown_request = False
 
     def is_shut_down(self):
-        return __is_shut_down.isSet()
+        return self.__is_shut_down.isSet()
 
 
     def serve_forever(self, poll_interval=0.5):
