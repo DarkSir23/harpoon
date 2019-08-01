@@ -59,7 +59,7 @@ class QueueR(object):
                        "Also supports direct dropping of .torrent files into a watch directory. "
                        "Supported client-side applications: "
                        "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
-        self.ARGS = sys.argv[:1]
+        self.ARGS = sys.argv[1:]
         self.FULL_PATH = os.path.abspath(sys.executable)
         parser = optparse.OptionParser(description=description)
         parser.add_option('-a', '--add', dest='add', help='Specify a filename to snatch from specified torrent client when monitor is running already.')
