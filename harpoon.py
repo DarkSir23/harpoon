@@ -18,6 +18,7 @@ import sys, os
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'lib'))
 
 import Queue
+import subprocess
 import SocketServer
 import optparse
 import re
@@ -58,8 +59,8 @@ class QueueR(object):
                        "Also supports direct dropping of .torrent files into a watch directory. "
                        "Supported client-side applications: "
                        "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
-        self.ARGS = sys.argv[:]
-        self.ARGS.insert(0, sys.executable)
+        self.ARGS = sys.argv[:1]
+        self.FULL_PATH = os.path.abspath(sys.executable)
         parser = optparse.OptionParser(description=description)
         parser.add_option('-a', '--add', dest='add', help='Specify a filename to snatch from specified torrent client when monitor is running already.')
         parser.add_option('-s', '--hash', dest='hash', help='Specify a HASH to snatch from specified torrent client.')
@@ -215,8 +216,10 @@ class QueueR(object):
                 logger.info('Restarting')
                 try:
                     logger.debug("Exec: %s\nArgs: %s" % (sys.executable, self.ARGS))
-                    os.execv(sys.executable, self.ARGS)
-                    self.restart = False
+                    popen_list = [sys.executable, self.FULL_PATH]
+                    popen_list += self.ARGS
+                    subprocess.Popen(popen_list, cwd=os.getcwd())
+                    os._exit(0)
                 except Exception as e:
                     logger.debug("Failed to restart: %s" % e)
             else:
