@@ -132,7 +132,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
                 # shutdown request and wastes cpu at all other times.
                 r, w, e = SocketServer._eintr_retry(select.select, [self], [], [],
                                        poll_interval)
-                logger.debug('Step D')
+                logger.debug('Step D: r: %s - w: %s - e: %s' % (r, w, e,))
                 if self in r:
                     logger.debug('Step E')
                     self._handle_request_noblock()
