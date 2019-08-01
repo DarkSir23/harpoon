@@ -215,9 +215,9 @@ class QueueR(object):
             if self.restart:
                 logger.info('Restarting')
                 try:
-                    logger.debug("Exec: %s\nArgs: %s" % (sys.executable, self.ARGS))
                     popen_list = [sys.executable, self.FULL_PATH]
                     popen_list += self.ARGS
+                    logger.debug("Args: %s" % (popen.list))
                     subprocess.Popen(popen_list, cwd=os.getcwd())
                     os._exit(0)
                 except Exception as e:
