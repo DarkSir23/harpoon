@@ -1,7 +1,7 @@
 import SocketServer
 import json
-# import select
-# import threading
+import select
+import threading
 
 from harpoon import logger, SOCKET_API
 from harpoon import HQUEUE as HQUEUE
