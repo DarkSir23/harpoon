@@ -198,7 +198,7 @@ class QueueR(object):
             #sockme = threading.Thread(target=socketlisten.listentome, args=(self.SNQUEUE,))
             #sockme.setdaemon = True
             #sockme.start()
-
+            time.sleep(2)
             HOST, PORT = "localhost", 50007
             self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
