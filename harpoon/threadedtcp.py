@@ -124,6 +124,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
         if self.__is_shut_down.isSet():
             return False
         else:
+            logger.debug('Still running.  Why?')
             return True
 
     def serve_forever(self, poll_interval=0.5):
@@ -143,6 +144,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
                 if self in r:
                     logger.debug('Step E')
                     self._handle_request_noblock()
+            logger.debug('Step G - Shutting Down')
         finally:
             self.__shutdown_request = False
             self.__is_shut_down.set()
