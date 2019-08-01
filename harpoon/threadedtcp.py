@@ -1,5 +1,6 @@
 import SocketServer
 import json
+import select
 
 from harpoon import logger, SOCKET_API
 from harpoon import HQUEUE as HQUEUE
@@ -110,4 +111,27 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    pass
+    def serve_forever(self, poll_interval=0.5):
+        """Handle one request at a time until shutdown.
+
+        Polls for shutdown every poll_interval seconds. Ignores
+        self.timeout. If you need to do periodic tasks, do them in
+        another thread.
+        """
+        logger.debug('Step A')
+        self.__is_shut_down.clear()
+        try:
+            logger.debug('Step B')
+            while not self.__shutdown_request:
+                # XXX: Consider using another file descriptor or
+                # connecting to the socket to wake this up instead of
+                # polling. Polling reduces our responsiveness to a
+                # shutdown request and wastes cpu at all other times.
+                logger.debug('Step C')
+                r, w, e = SocketServer._eintr_retry(select.select, [self], [], [],
+                                       poll_interval)
+                if self in r:
+                    self._handle_request_noblock()
+        finally:
+            self.__shutdown_request = False
+            self.__is_shut_down.set()
