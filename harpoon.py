@@ -215,8 +215,8 @@ class QueueR(object):
             if self.restart:
                 logger.info('Restarting')
                 try:
-                    # popen_list = [self.FULL_PATH]
-                    popen_list = self.ARGS
+                    popen_list = [self.FULL_PATH]
+                    popen_list += self.ARGS
                     logger.debug("Args: %s" % (popen_list))
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
