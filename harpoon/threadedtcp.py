@@ -110,7 +110,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         return queue_pos
 
 
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, object):
+    pass
 
     def serve_forever(self, poll_interval=0.5):
         logger.debug('Step A')
