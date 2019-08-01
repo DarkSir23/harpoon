@@ -1030,16 +1030,16 @@ class QueueR(object):
         except OSError, e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        dev_null = file('/dev/null', 'r')
-        os.dup2(dev_null.fileno(), sys.stdin.fileno())
-
-        si = open('/dev/null', "r")
-        so = open('/dev/null', "a+")
-        se = open('/dev/null', "a+")
-
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
+        # dev_null = file('/dev/null', 'r')
+        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
+        #
+        # si = open('/dev/null', "r")
+        # so = open('/dev/null', "a+")
+        # se = open('/dev/null', "a+")
+        #
+        # os.dup2(si.fileno(), sys.stdin.fileno())
+        # os.dup2(so.fileno(), sys.stdout.fileno())
+        # os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)
