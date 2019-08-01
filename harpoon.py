@@ -153,6 +153,7 @@ class QueueR(object):
         #harpoon.SNPOOL = Process(target=self.worker_main, args=(self.SNQUEUE,))
         #harpoon.SNPOOL.daemon = True
         #harpoon.SNPOOL.start()
+        self.HQUEUE = HQUEUE
 
         if self.monitor:
             self.SCHED = Scheduler()
@@ -179,7 +180,6 @@ class QueueR(object):
             return
 
         #for threading
-        self.HQUEUE = HQUEUE
         self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
         self.SNPOOL.setdaemon = True
         self.SNPOOL.start()
