@@ -120,12 +120,9 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
         self.__is_shut_down = threading.Event()
         self.__shutdown_request = False
 
-    def is_running(self):
-        if self.__is_shut_down.isSet():
-            return False
-        else:
-            logger.debug('Still running.  Why?')
-            return True
+    def is_shut_down(self):
+        return __is_shut_down.isSet()
+
 
     def serve_forever(self, poll_interval=0.5):
         logger.debug('Step A')
@@ -154,3 +151,4 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
         self.__shutdown_request = True
         self.__is_shut_down.wait()
         logger.debug('Shutdown request received.')
+

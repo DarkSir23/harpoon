@@ -240,7 +240,7 @@ class QueueR(object):
                     logger.debug("Args: %s" % (popen_list))
                     if self.server:
                         self.server.shutdown()
-                        while self.server.is_running():
+                        while not self.server.is_shut_down():
                             logger.debug("Running? %s" % self.server.is_running())
                             time.sleep(1)
                     os.remove(self.pidfile)
