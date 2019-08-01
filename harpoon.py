@@ -218,7 +218,8 @@ class QueueR(object):
                     popen_list = [self.FULL_PATH]
                     popen_list += self.ARGS
                     logger.debug("Args: %s" % (popen_list))
-                    subprocess.Popen(popen_list, cwd=os.getcwd())
+                    po = subprocess.Popen(popen_list, cwd=os.getcwd())
+                    logger.debug("Process: %s" % po)
                     os._exit(0)
                 except Exception as e:
                     logger.debug("Failed to restart: %s" % e)
