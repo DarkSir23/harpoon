@@ -199,11 +199,10 @@ class QueueR(object):
             #sockme.start()
 
             HOST, PORT = "localhost", 50007
-            server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+            self.server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
             logger.debug('Class Server: %s' % self.server)
-            server_thread = threading.Thread(target=server.serve_forever)
+            server_thread = threading.Thread(target=self.server.serve_forever)
             logger.debug('Server Thread: %s' % server_thread)
-            self.server = server
             #server_thread.daemon = True
             server_thread.start()
             logger.info('Started...')
@@ -228,6 +227,8 @@ class QueueR(object):
                     logger.debug("Args: %s" % (popen_list))
                     if self.server:
                         self.server.shutdown()
+                        while self.server.is_running():
+                            pass
                     os.remove(self.pidfile)
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
