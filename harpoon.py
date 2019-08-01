@@ -226,9 +226,10 @@ class QueueR(object):
                     popen_list += self.ARGS
                     logger.debug("Args: %s" % (popen_list))
                     if self.server:
+                        logger.debug("Running? %s" % self.server.is_running())
                         self.server.shutdown()
                         while self.server.is_running():
-                            pass
+                            time.sleep(1)
                     os.remove(self.pidfile)
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
