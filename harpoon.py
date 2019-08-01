@@ -72,6 +72,8 @@ class QueueR(object):
         parser.add_option('-p', '--pidfile', dest='pidfile', help='specify a pidfile location to store pidfile for daemon usage.')
         (options, args) = parser.parse_args()
 
+        self.restart = False
+
         if options.daemon:
             if sys.platform == 'win32':
                 print "Daemonize not supported under Windows, starting normally"
@@ -205,16 +207,18 @@ class QueueR(object):
         logger.info('Web: %s' % config.WEB)
         if config.WEB['http_enable']:
             logger.debug("Starting web server")
-            webStart.initialize(options=config.WEB, basepath=harpoon.DATADIR)
+            webStart.initialize(options=config.WEB, basepath=harpoon.DATADIR, parent=self)
 
         while True:
-            logger.info('Info: Loop from init')
-            self.worker_main(self.HQUEUE)
+            if self.restart:
+                logger.info('Restarting')
+                os.execv(sys.executable, args)
+            else:
+                self.worker_main(self.HQUEUE)
 
     def worker_main(self, queue):
 
         while True:
-            logger.info('Info: Look from worker_main')
             if self.monitor:
                 if not len(self.SCHED.get_jobs()):
                     logger.debug('Restarting Scanner Job')

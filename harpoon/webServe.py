@@ -33,6 +33,8 @@ def serve_template(templatename, **kwargs):
 
 class WebInterface(object):
 
+    def __init__(self, parent):
+        self.parent = parent
 
     @cherrypy.expose
     def index(self):
@@ -89,4 +91,10 @@ class WebInterface(object):
             msg = '1 item removed.'
         else:
             msg = '%s items removed.' % removeditems
+        return self.home(msg=msg)
+
+    @cherrypy.expose
+    def restart(self):
+        self.parent.restart = True
+        msg = "Restarting harpoon.  Refresh in 20 seconds."
         return self.home(msg=msg)

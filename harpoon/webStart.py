@@ -6,7 +6,7 @@ import harpoon
 from harpoon import logger
 from harpoon.webServe import WebInterface
 
-def initialize(options=None, basepath=None):
+def initialize(options=None, basepath=None, parent=None):
 
     if options is None:
         options = {}
@@ -97,7 +97,7 @@ def initialize(options=None, basepath=None):
     # Prevent time-outs
     try:
         cherrypy.engine.timeout_monitor.unsubscribe()
-        cherrypy.tree.mount(WebInterface(), str(options['http_root']), config=conf)
+        cherrypy.tree.mount(WebInterface(parent=parent), str(options['http_root']), config=conf)
         cherrypy.engine.autoreload.subscribe()
         cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
