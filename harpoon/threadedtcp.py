@@ -149,3 +149,8 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
             self.__shutdown_request = False
             self.__is_shut_down.set()
         logger.debug('Step F')
+
+    def shutdown(self):
+        self.__shutdown_request = True
+        self.__is_shut_down.wait()
+        logger.debug('Shutdown request received.')
