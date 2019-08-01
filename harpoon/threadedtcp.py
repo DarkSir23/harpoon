@@ -1,3 +1,9 @@
+import SocketServer
+import json
+
+from harpoon import logger
+from harpoon import HQUEUE as HQUEUE
+
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
