@@ -114,5 +114,5 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
     def serve_forever(self, poll_interval=0.5):
         logger.debug('Step A')
-        super(SocketServer.TCPServer, self).serve_forever(poll_interval=poll_interval)
+        super(ThreadedTCPServer, self).serve_forever(poll_interval=poll_interval)
         logger.debug('Step B')
