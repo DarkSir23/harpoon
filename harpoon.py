@@ -208,11 +208,13 @@ class QueueR(object):
             webStart.initialize(options=config.WEB, basepath=harpoon.DATADIR)
 
         while True:
+            logger.info('Info: Loop from init')
             self.worker_main(self.HQUEUE)
 
     def worker_main(self, queue):
 
         while True:
+            logger.info('Info: Look from worker_main')
             if self.monitor:
                 if not len(self.SCHED.get_jobs()):
                     logger.debug('Restarting Scanner Job')
