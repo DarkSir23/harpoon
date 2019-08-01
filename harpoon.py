@@ -218,6 +218,7 @@ class QueueR(object):
                     popen_list = [self.FULL_PATH]
                     popen_list += self.ARGS
                     logger.debug("Args: %s" % (popen_list))
+                    os.remove(self.pidfile)
                     po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     logger.debug("Process: %s" % po.poll())
                     os._exit(0)
