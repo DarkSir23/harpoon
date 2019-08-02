@@ -156,33 +156,10 @@ class QueueR(object):
         #harpoon.SNPOOL = Process(target=self.worker_main, args=(self.SNQUEUE,))
         #harpoon.SNPOOL.daemon = True
         #harpoon.SNPOOL.start()
-        self.HQUEUE = HQUEUE
 
-        if self.monitor:
-            self.SCHED = Scheduler()
-            logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
-            self.scansched = self.ScheduleIt(self.HQUEUE, self.working_hash)
-            job = self.SCHED.add_interval_job(func=self.scansched.Scanner, minutes=2)
-            # start the scheduler now
-            self.SCHED.start()
-            #run the scanner immediately on startup.
-            self.scansched.Scanner()
-
-        elif self.file is not None:
-            logger.info('Adding file to queue via FILE %s [label:%s]' % (self.file, options.label))
-            self.HQUEUE.put({'mode':  'file-add',
-                             'item':  self.file,
-                             'label': options.label})
-        elif self.hash is not None:
-            logger.info('Adding file to queue via HASH %s [label:%s]' % (self.hash, options.label))
-            self.HQUEUE.put({'mode':  'hash-add',
-                             'item':  self.hash,
-                             'label': options.label})
-        else:
-            logger.info('Not enough information given - specify hash / filename')
-            return
 
         #for threading
+        self.HQUEUE = HQUEUE
         self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
         self.SNPOOL.setdaemon = True
         self.SNPOOL.start()
@@ -218,6 +195,31 @@ class QueueR(object):
             server_thread.daemon = True
             server_thread.start()
             logger.info('Started...')
+
+        if self.monitor:
+            self.SCHED = Scheduler()
+            logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
+            self.scansched = self.ScheduleIt(self.HQUEUE, self.working_hash)
+            job = self.SCHED.add_interval_job(func=self.scansched.Scanner, minutes=2)
+            # start the scheduler now
+            self.SCHED.start()
+            #run the scanner immediately on startup.
+            self.scansched.Scanner()
+
+        elif self.file is not None:
+            logger.info('Adding file to queue via FILE %s [label:%s]' % (self.file, options.label))
+            self.HQUEUE.put({'mode':  'file-add',
+                             'item':  self.file,
+                             'label': options.label})
+        elif self.hash is not None:
+            logger.info('Adding file to queue via HASH %s [label:%s]' % (self.hash, options.label))
+            self.HQUEUE.put({'mode':  'hash-add',
+                             'item':  self.hash,
+                             'label': options.label})
+        else:
+            logger.info('Not enough information given - specify hash / filename')
+            return
+
 
         if options.add:
             logger.info('Adding file to queue %s' % options.add)
@@ -491,7 +493,7 @@ class QueueR(object):
                     logger.info(u"Executing command " + str(script_cmd))
 
                     try:
-                        queue.ckupdate(item['item'], {'status': 'Fetching'})
+                        queue.ckupdate(item['item'], {'status': 'Fetching', 'stage': 'current'})
                         p = subprocess.Popen(script_cmd, env=dict(harpoon_env), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                         output, error = p.communicate()
                         if error:
@@ -503,7 +505,7 @@ class QueueR(object):
                         continue
                     else:
                         snatch_status = 'COMPLETED'
-                queue.ckupdate(item['item'], {'status': 'Processing'})
+                queue.ckupdate(item['item'], {'status': 'Processing', 'stage': 'current'})
                 if all([snstat['label'] == config.SONARR['sonarr_label'], config.GENERAL['tv_choice'] == 'sonarr']):  #probably should be sonarr_label instead of 'tv'
                     logger.debug('[HARPOON] - Sonarr Detected')
                     #unrar it, delete the .rar's and post-process against the items remaining in the given directory.

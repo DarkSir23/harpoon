@@ -61,15 +61,16 @@ class WebInterface(object):
         return serve_template(templatename="hashfile.html", title="Hashfile Viewer", hashinfo=hashinfo)
 
     @cherrypy.expose
-    def confirm(self, action=None, data=None):
+    def confirm(self, action=None, data=None, type=None):
         if action:
-            return serve_template(templatename="confirm.html", title="Confirmation", action=action, data=data)
+            return serve_template(templatename="confirm.html", title="Confirmation", action=action, data=data, type=type)
         else:
             return self.home
 
     @cherrypy.expose
     def removeItems(self, type=None, item=None):
         removeditems = 0
+        msg = ''
         if type == 'failed':
             for key in harpoon.HQUEUE.ckqueue().keys():
                 if harpoon.HQUEUE.ckqueue()[key]['stage'] == 'failed':
@@ -87,10 +88,17 @@ class WebInterface(object):
                     removeditems += 1
                 else:
                     pass
-        if removeditems == 1:
-            msg = '1 item removed.'
-        else:
-            msg = '%s items removed.' % removeditems
+        elif type == 'singleactive' and item:
+            if item in harpoon.HQUEUE.ckqueue().keys():
+                msg = harpoon.HQUEUE.remove(item, removefile=False)
+        elif type == 'singleactivewithfile' and item:
+            if item in harpoon.HQUEUE.ckqueue().keys():
+                msg = harpoon.HQUEUE.remove(item, removefile=True)
+        if len(msg) == 0:
+            if removeditems == 1:
+                msg = '1 item removed.'
+            else:
+                msg = '%s items removed.' % removeditems
         return self.home(msg=msg)
 
     @cherrypy.expose

@@ -78,18 +78,17 @@
             </td>
             <td>${item['timestamp']}</td>
             <td>
-                % if item['stage'] == 'current' or item['stage'] == 'to-do':
-                    <a href="confirm?action=removeItem&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
-                    <a href="confirm?action=removeItemAndHash&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
+                % if item['stage'] == 'to-do':
+                    <a href="confirm?action=removeItem&type=singleactive&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
+                    <a href="confirm?action=removeItem&type=singleactivewithfile&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
+                % elif item['stage'] == 'current':
+                    &nbsp;
                 % else:
-                    <a href="confirm?action=removeItem&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
+                    <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
                 %endif
             </td>
         </tr>
         % endfor
     </table>
 </div>
-
-</%def>
-<%def name="javascriptIncludes()">
 </%def>

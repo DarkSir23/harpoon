@@ -23,7 +23,7 @@
                     <div class="input-group">
                         % if action == 'removeItem':
                             <h4>Confirm removal of ${data}</h4>
-                            <a class="button btn btn-sm btn-warning" href="removeItems?type=single&item=${data}"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;
+                            <a class="button btn btn-sm btn-warning" href="removeItems?type=${type}&item=${data}"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;
                         % elif action == 'clearFailed':
                             <h4>Confirm removal of Failed Items</h4>
                             <a class="button btn btn-sm btn-warning" href="removeItems?type=failed"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;

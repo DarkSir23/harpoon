@@ -1,5 +1,13 @@
 import Queue
 from common import currentTime
+from harpoon import logger, hconfig
+import os
+
+DATADIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+CONF_LOCATION = os.path.join(DATADIR, 'conf', 'harpoon.conf')
+
+config = hconfig.config(CONF_LOCATION)
 
 class hQueue:
 
@@ -24,6 +32,33 @@ class hQueue:
 
     def queuelist(self):
         return list(self.SNQUEUE.queue)
+
+    def remove(self, hash, removefile=False):
+        qsize = self.qsize()
+        logger.debug('[QUEUE] Removal started (Queue Size: %s)' % qsize)
+        msg = ''
+        if qsize:
+            for x in range(0, qsize):
+                item = self.SNQUEUE.get(block=True)
+                if not item['item'] == hash:
+                    logger.debug('[QUEUE] Nope')
+                    self.SNQUEUE.put(item)
+                else:
+                    logger.debug('[QUEUE] Found it')
+                    if hash in self.CKQUEUE.keys():
+                        msg += "Item '%s' removed from queue.\n" % self.CKQUEUE[hash]['name']
+                        logger.debug('[QUEUE] %s' % msg)
+                        self.ckupdate(hash, {'stage': 'failed', 'status': 'Removed from Queue'})
+                        if removefile:
+                            try:
+                                filename = os.path.join(str(config.GENERAL['torrentfile_dir']), str(item['label']), str(item['item']) + '.' + str(item['mode']))
+                                os.remove(filename)
+                                msg += "File '%s' removed." % filename
+                                logger.info('[USER] File %s removed' % filename)
+                            except Exception as e:
+                                logger.info('[USER] File could not be removed: %s' % e)
+                                msg += "File '%s' could not be removed.  Reason: %s" % (filename, e)
+            return msg
 
 
 
