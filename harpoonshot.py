@@ -87,12 +87,12 @@ except IndexError:
         elif 'sonarr_eventtype' in os.environ:
             eventtype = os.environ.get('sonarr_eventtype')
             logger.info('Called from Sonarr, but as eventtype "%s".' % eventtype)
-            if eventtype == 'test':
+            if eventtype == 'Test':
                 logger.info('Exiting successfully (Sonarr Test)')
-                sys.exit(0)
+                os._exit(0)
             else:
                 logger.info('Failing, unknown type')
-                sys.exit(1)
+                os._exit(1)
         else:
             logger.info('Unable to detect what client called harpoonshot...')
             logger.info('Environment: %s' % os.environ)
@@ -100,7 +100,7 @@ except IndexError:
             sys.exit(1)
     except:
         logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
-        sys.exit(1)
+        os._exit(1)
 else:
     if mode == 'sonarr':
         inputfile = os.environ.get('sonarr_release_title')
