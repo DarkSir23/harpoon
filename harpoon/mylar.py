@@ -17,37 +17,37 @@ import os
 import time
 import json
 import requests
-from harpoon import logger
+from harpoon import logger, config
 
 class Mylar(object):
 
     def __init__(self, mylar_info):
-       self.mylar_url = mylar_info['mylar_url']
-       self.mylar_apikey = mylar_info['mylar_apikey']
-       self.mylar_label = mylar_info['mylar_label']
-       self.mylar_headers = mylar_info['mylar_headers']
-       self.applylabel = mylar_info['applylabel']
-       self.torrentfile_dir = mylar_info['torrentfile_dir']
-       self.defaultdir = mylar_info['defaultdir']
-       self.issueid = mylar_info['issueid']
-       self.snstat = mylar_info['snstat']
+        self.mylar_url = config.MYLAR['mylar_url']
+        self.mylar_apikey = config.MYLAR['mylar_apikey']
+        self.mylar_label = config.MYLAR['mylar_label']
+        self.mylar_headers = config.MYLAR['mylar_headers']
+        self.applylabel = config.GENERAL['applylabel']
+        self.torrentfile_dir = config.GENERAL['torrentfile_dir']
+        self.defaultdir = config.GENERAL['defaultdir']
+        self.issueid = mylar_info['issueid']
+        self.snstat = mylar_info['snstat']
 
     def post_process(self):
-       logger.info('snstat: %s' % self.snstat)
-       issueid = None
-       comicid = None
-       nzb_name = None
-       nzb = False
-       try:
-           logger.debug('attempting to open: %s' % os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.hash'))
-           with open(os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.hash')) as dfile:
+        logger.info('snstat: %s' % self.snstat)
+        issueid = None
+        comicid = None
+        nzb_name = None
+        nzb = False
+        try:
+           logger.debug('Attempting to open: %s' % os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.mylar.hash'))
+           with open(os.path.join(self.torrentfile_dir, self.mylar_label, self.snstat['hash'] + '.mylar.hash')) as dfile:
                data = json.load(dfile)
-       except Exception as e:
-           logger.error('[%s] not able to load .hash file.' % e)
+        except Exception as e:
+           logger.error('[%s] not able to load .mylar.hash file.' % e)
            #for those that were done outside of Mylar or using the -s switch on the cli directly by hash
            nzb_name = 'Manual Run'
-       else:
-           logger.debug('loaded .hash successfully - extracting info.')
+        else:
+           logger.debug('loaded .mylar.hash successfully - extracting info.')
            try:
                nzb_name = data['mylar_release_name']
            except:
@@ -62,7 +62,7 @@ class Mylar(object):
                    nzb_name = data['mylar_torrent_filename']
 
            if self.issueid is None:
-               if 'mylar_issuearcid' != 'None':
+               if data['mylar_issuearcid'] != 'None':
                    issueid = data['mylar_issuearcid']
                else:
                    if data['mylar_release_pack'] == 'False':
@@ -76,49 +76,65 @@ class Mylar(object):
                issueid = self.issueid
                comicid = None
 
-       if self.issueid is not None and nzb_name == 'Manual Run':
-           issueid = self.issueid
-           comicid = None
-           nzb_name = self.snstat['name']
+        url = self.mylar_url + '/api'
+        if all([self.applylabel is True, self.snstat['label'] != 'None']):
+            logger.info('1')
+            if nzb is True:
+                logger.info('1-1')
+                newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['extendedname'])
+            else:
+                logger.info('1-2')
+                if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])):
+                    newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])
+                else:
+                    if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'])):
+                        newpath = os.path.join(self.defaultdir, self.snstat['label'])
+        else:
+            logger.info('2')
+            if nzb is True:
+                logger.info('2-1')
+                newpath = os.path.join(self.defaultdir, self.snstat['extendedname'])
+            else:
+                logger.info('2-2')
+                newpath = os.path.join(self.defaultdir, self.snstat['name'])
 
-       url = self.mylar_url + '/api'
-       if all([self.applylabel is True, self.snstat['label'] != 'None']):
-           logger.info('1')
+        url = self.mylar_url + '/api'
+        if all([self.applylabel is True, self.snstat['label'] != 'None']):
            if nzb is True:
-               logger.info('1-1')
                newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['extendedname'])
            else:
-               logger.info('1-2')
                if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])):
                    newpath = os.path.join(self.defaultdir, self.snstat['label'], self.snstat['name'])
                else:
                    if os.path.isdir(os.path.join(self.defaultdir, self.snstat['label'])):
                        newpath = os.path.join(self.defaultdir, self.snstat['label'])
-       else:
-           logger.info('2')
+        else:
            if nzb is True:
-               logger.info('2-1')
                newpath = os.path.join(self.defaultdir, self.snstat['extendedname'])
            else:
-               logger.info('2-2')
                newpath = os.path.join(self.defaultdir, self.snstat['name'])
 
-       logger.info('newpath: %s' % newpath)
-       payload = {'cmd':         'forceProcess',
+        payload = {'cmd':         'forceProcess',
                   'apikey':      self.mylar_apikey,
                   'nzb_name':    nzb_name,
                   'issueid':     issueid,
                   'comicid':     comicid,
                   'nzb_folder':  newpath}
 
-       logger.info('[MYLAR] Posting url: %s' % url)
-       logger.info('[MYLAR] Posting to completed download handling now: %s' % payload)
+        r = requests.post(url, params=payload, headers=self.mylar_headers)
+        #response = r.json()
+        logger.debug('content: %s' % r.content)
 
-       r = requests.post(url, params=payload, headers=self.mylar_headers)
-       #response = r.json()
-       logger.debug('content: %s' % r.content)
+        try:
+           r = requests.post(url, params=payload, headers=self.mylar_headers, timeout=0.001)
+        except Exception as e:
+           if any(['Connection refused' in e, 'Timeout' in e]):
+               logger.warn('Unable to connect to Mylar server. Please check that it is online [%s].' % e)
+           else:
+               logger.warn('%s' % e)
+           return False
 
-       logger.debug('[MYLAR] status_code: %s' % r.status_code)
-       logger.info('[MYLAR] Successfully post-processed : ' + self.snstat['name'])
+        #response = r.json()
+        logger.debug('content: %s' % r.content)
 
-       return True
+        return True

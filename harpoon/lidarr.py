@@ -18,17 +18,17 @@ import time
 import shutil
 import requests
 
-from harpoon import logger
+from harpoon import logger, config
 
 class Lidarr(object):
 
     def __init__(self, lidarr_info):
-        self.lidarr_url = lidarr_info['lidarr_url']
-        self.lidarr_label = lidarr_info['lidarr_label']
-        self.lidarr_headers = lidarr_info['lidarr_headers']
-        self.applylabel = lidarr_info['applylabel']
-        self.defaultdir = lidarr_info['defaultdir']
-        self.torrentfile_dir = lidarr_info['torrentfile_dir']
+        self.lidarr_url = config.LIDARR['lidarr_url']
+        self.lidarr_label = config.LIDARR['lidarr_label']
+        self.lidarr_headers = config.LIDARR['lidarr_headers']
+        self.applylabel = config.GENERAL['applylabel']
+        self.defaultdir = config.GENERAL['defaultdir']
+        self.torrentfile_dir = config.GENERAL['torrentfile_dir']
         self.snstat = lidarr_info['snstat']
 
 
@@ -66,8 +66,11 @@ class Lidarr(object):
                 logger.warn('error returned from lidarr call. Aborting.')
                 return False
             else:
-                if dt['state'] == 'completed':
+                if dt['status'] == 'completed':
                     logger.info('[LIDARR] Successfully post-processed : ' + self.snstat['name'])
+                    check = False
+                elif any([dt['status'] == 'failed', dt['status'] == 'aborted', dt['status'] == 'cancelled']):
+                    logger.info('[LIDARR] FAiled to post-process : ' + self.snstat['name'])
                     check = False
                 else:
                     time.sleep(10)

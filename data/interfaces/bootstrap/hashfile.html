@@ -1,0 +1,19 @@
+<%inherit file="base.html"/>
+<%!
+    import harpoon
+    from harpoon import json2html
+%>
+<%def name="headerIncludes()">
+    <div id="subhead_container" class="row">
+        <div id="subhead_menu"  class="col-xs-12 col-md-8">
+        </div>
+        <div class="clearfix visible-xs"><hr/></div>
+        <div class="col-xs-12 col-md-4">
+        </div>
+    </div>
+</%def>
+<%def name="body()">
+${json2html.json2html.convert(json=hashinfo, table_attributes="class=\"display table table-striped table-hover table-bordered table-condensed\"")}
+</%def>
+<%def name="javascriptIncludes()">
+</%def>

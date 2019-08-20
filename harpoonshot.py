@@ -22,6 +22,7 @@ import time
 import sys
 import ConfigParser
 
+
 import logging
 from logging import handlers
 
@@ -58,6 +59,7 @@ logger.addHandler(file_handler)
 filecontent = None
 
 try:
+    logger.info('Args: %s' % sys.argv)
     mode = sys.argv[1]
     args = sys.argv[1:]
 except IndexError:
@@ -77,13 +79,28 @@ except IndexError:
             else:
                 logger.info('mylar_method is not set to torrent or nzb, so I\'m not sure what to do.')
                 sys.exit(1)
+        elif 'sonarr_release_title' in os.environ:
+            mode = 'sonarr'
+            inputfile = os.environ.get('sonarr_release_title')
+            label = sonarr_label
+            filetype = '.file'
+        elif 'sonarr_eventtype' in os.environ:
+            eventtype = os.environ.get('sonarr_eventtype')
+            logger.info('Called from Sonarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'Test':
+                logger.info('Exiting successfully (Sonarr Test)')
+                os._exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                os._exit(1)
         else:
-            logger.info('mylar_method not in os.environ, but it was called from mylar...')
+            logger.info('Unable to detect what client called harpoonshot...')
+            logger.info('Environment: %s' % os.environ)
             #ignore non-torrent snatches...
             sys.exit(1)
     except:
         logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
-        sys.exit(1)
+        os._exit(1)
 else:
     if mode == 'sonarr':
         inputfile = os.environ.get('sonarr_release_title')
@@ -114,15 +131,18 @@ else:
                 n -= 2
             except IndexError:
                 break
+        logger.debug('Dict: %s' % mydict)
         if 'DownloadID' in mydict.keys(): # LazyLibrarian book or audiobook
-            mode = 'lazylibrarian'
+            # mode = 'lazylibrarian'
+            mode = ''
             inputfile = mydict['DownloadID']
             if len(inputfile) > 20:
                 inputfile = inputfile.upper()
             label = lazylibrarian_label
-            filetype = '.hash'
+            filetype = 'hash'
             filecontent = mydict
         else:
+            logger.debug('Not enough Arguments: %s' % args)
             logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
             sys.exit(1)
 

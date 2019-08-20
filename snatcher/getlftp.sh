@@ -44,6 +44,9 @@ else
 fi
 
 lftp<<END_SCRIPT
+set log:enabled yes
+set log:file "/tmp/lftp.log"
+set log:file/xfer "/tmp/lftptransfer.log"
 open sftp://${HOST}:${PORT}
 user ${PARAM}
 $LCMD

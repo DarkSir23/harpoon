@@ -1,0 +1,45 @@
+<%inherit file="base.html"/>
+<%!
+    import harpoon
+%>
+<%def name="headerIncludes()">
+    <div id="subhead_container" class="row">
+        <div id="subhead_menu"  class="col-xs-12 col-md-8">
+        </div>
+        <div class="clearfix visible-xs"><hr/></div>
+        <div class="col-xs-12 col-md-4">
+        </div>
+    </div>
+</%def>
+<%def name="body()">
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Confirmation
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        % if action == 'removeItem':
+                            <h4>Confirm removal of ${data}</h4>
+                            <a class="button btn btn-sm btn-warning" href="removeItems?type=${type}&item=${data}"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;
+                        % elif action == 'clearFailed':
+                            <h4>Confirm removal of Failed Items</h4>
+                            <a class="button btn btn-sm btn-warning" href="removeItems?type=failed"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;
+                        % elif action == 'clearCompleted':
+                            <h4>Confirm removal Completed Items</h4>
+                            <a class="button btn btn-sm btn-warning" href="removeItems?type=completed"><i class="fa fa-minus-circle"></i> Confirm Removal</a>&nbsp;
+                        % elif action == 'restart':
+                            <h4>Confirm restart of Harpoon</h4>
+                            <a class="button btn btn-sm btn-warning" href="restart"><i class="fa fa-refresh"></i> Confirm Restart</a>
+                        % endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</%def>
+<%def name="javascriptIncludes()">
+</%def>

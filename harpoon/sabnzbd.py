@@ -84,7 +84,7 @@ class SABnzbd(object):
                 logger.info('queue: %s' % queueresponse)
                 logger.info('Queue status : %s' % queueinfo['status'])
                 logger.info('Queue mbleft : %s' % queueinfo['mbleft'])
-                if any([str(queueinfo['status']) == 'Downloading', str(queueinfo['status']) == 'Idle']) and float(queueinfo['mbleft']) > 0:
+                if str(queueinfo['status']) == 'Downloading':
                     logger.info('[SABNZBD] Dowwnload is not yet finished')
                     return {'completed': False}
             except Exception as e:
@@ -95,11 +95,12 @@ class SABnzbd(object):
             hist_params = {'mode':      'history',
                            'failed':    0,
                            'output':    'json',
+                           'limit':     500,
                            'apikey':    self.sab_apikey}
             hist = requests.get(self.sab_url, params=hist_params, verify=False)
             historyresponse = hist.json()
             histqueue = historyresponse['history']
-            found = None
+            found = {'completed': True, 'failed': True}
             try:
                 for hq in histqueue['slots']:
                     # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
@@ -122,7 +123,7 @@ class SABnzbd(object):
                     elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':
                         # get the stage / error message and see what we can do
                         stage = hq['stage_log']
-                        for x in stage[0]:
+                        for x in stage:
                             if 'Failed' in x['actions'] and any([x['name'] == 'Unpack', x['name'] == 'Repair']):
                                 if 'moving' in x['actions']:
                                     logger.warn(
@@ -132,7 +133,15 @@ class SABnzbd(object):
                                     logger.warn(
                                         '[SABNZBD] Failure occured during the Unpack/Repair phase of SABnzbd. This is probably a bad file: %s' %
                                         x['actions'])
-                                break
+                                    found = {'completed': True,
+                                             'failed': True}
+                            if any([x['name'] == 'Download', x['name'] == 'Fail']):
+                                logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
+                                found = {'completed': True,
+                                         'failed': True}
+                    elif hq['nzo_id'] == sendresponse:
+                        logger.warn('[SABNZBD] Unexpected response: %s' % hq)
+                        found = {'completed': False}
             except Exception as e:
                 logger.warn('error %s' % e)
 
