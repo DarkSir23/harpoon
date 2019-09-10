@@ -27,4 +27,4 @@ def is_py3():
 if is_py3():
     import xmlrpc.client as xmlrpclib
 else:
-    import xmlrpclib
+    import xmlrpc.client

@@ -14,12 +14,12 @@
 #  along with Harpoon.  If not, see <http://www.gnu.org/licenses/>.
 
 import threading
-import SocketServer
+import socketserver
 import json
 import harpoon
 from harpoon import logger
 
-class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         data = self.recv()
@@ -40,7 +40,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def _send(socket, data):
         try:
             serialized = json.dumps(data)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise Exception('You can only send JSON-serializable data')
         # send the length of the serialized data first
         socket.send('%d\n' % len(serialized))
@@ -63,7 +63,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             next_offset += recv_size
         try:
             deserialized = json.loads(view.tobytes())
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise Exception('Data received was not in JSON format')
         return deserialized
 
@@ -90,7 +90,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         return
 
 
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 #def client(ip, port, message):

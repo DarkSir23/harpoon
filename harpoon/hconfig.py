@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import os, sys
 from harpoon import common
 
@@ -16,7 +16,7 @@ class config:
 
 
     def __init__(self, location):
-        self.conf = ConfigParser.SafeConfigParser()
+        self.conf = configparser.SafeConfigParser()
         if not os.path.exists(location):
             self.createConfig()
         self.conf.read(location)

@@ -17,7 +17,7 @@
 import sys, os
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'lib'))
 
-import Queue
+import queue
 import subprocess
 import optparse
 import re
@@ -31,7 +31,7 @@ import hashlib
 import bencode
 import threading
 import shutil
-from StringIO import StringIO
+from io import StringIO
 
 import harpoon
 from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp
@@ -42,8 +42,8 @@ from harpoon import CURRENT_DOWNFOLDER, CURRENT_DOWNLOAD
 from harpoon.threadedtcp import ThreadedTCPRequestHandler, ThreadedTCPServer
 
 
-from apscheduler.scheduler import Scheduler
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers import interval
 #global variables
 #this is required here to get the log path below
 
@@ -83,7 +83,7 @@ class QueueR(object):
 
         if options.daemon:
             if sys.platform == 'win32':
-                print "Daemonize not supported under Windows, starting normally"
+                print("Daemonize not supported under Windows, starting normally")
                 self.daemon = False
             else:
                 self.daemon = True
@@ -121,8 +121,8 @@ class QueueR(object):
             if self.daemon:
                 self.createpid = True
                 try:
-                    file(self.pidfile, 'w').write("pid\n")
-                except IOError, e:
+                    open(self.pidfile, 'w').write("pid\n")
+                except IOError as e:
                     raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
             else:
                 self.createpid = False
@@ -199,10 +199,10 @@ class QueueR(object):
             logger.info('Started...')
 
         if self.monitor:
-            self.SCHED = Scheduler()
+            self.SCHED = BackgroundScheduler()
             logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
             self.scansched = self.ScheduleIt(self.HQUEUE, self.working_hash)
-            job = self.SCHED.add_interval_job(func=self.scansched.Scanner, minutes=2)
+            job = self.SCHED.add_job(func=self.scansched.Scanner, trigger=interval.IntervalTrigger(minutes=2))
             # start the scheduler now
             self.SCHED.start()
             #run the scanner immediately on startup.
@@ -294,7 +294,7 @@ class QueueR(object):
 
             # Check for client type.  If no client set, assume rtorrent.
 
-            if 'client' not in item.keys():
+            if 'client' not in list(item.keys()):
                 item['client'] = 'rtorrent'
 
             #Sonarr stores torrent names without the extension which throws things off.
@@ -337,7 +337,7 @@ class QueueR(object):
             if (snstat is None or not snstat['completed']) and self.partial is False:
                 if snstat is None:
                     ckqueue_entry = queue.ckqueue()[item['item']]
-                    if 'retry_count' in ckqueue_entry.keys():
+                    if 'retry_count' in list(ckqueue_entry.keys()):
                         retry_count = ckqueue_entry['retry_count'] + 1
                     else:
                         retry_count = 1
@@ -370,7 +370,7 @@ class QueueR(object):
                                'label': item['label'],
                                'client': item['client']})
                     queue.ckupdate(item['item'],{'stage': 'to-do', 'status': 'Still downloading in client'})
-            elif snstat and 'failed' in snstat.keys() and snstat['failed']:
+            elif snstat and 'failed' in list(snstat.keys()) and snstat['failed']:
                 logger.info('Torrent or NZB returned status of "failed".  Removing queue item.')
                 if item['client'] == 'sabnzbd' and config.SAB['sab_cleanup']:
                     sa_params = {}
@@ -406,12 +406,12 @@ class QueueR(object):
                     else:
                         shell_cmd = sys.executable
 
-                    curScriptName = shell_cmd + ' ' + str(tmp_script).decode("string_escape")
+                    # curScriptName = shell_cmd + ' ' + str(tmp_script).decode("string_escape")
                     if snstat['mirror'] is True:
                         #downlocation = snstat['folder']
                         logger.info('trying to convert : %s' % snstat['folder'])
                         try:
-                            downlocation = snstat['folder'].encode('utf-8')
+                            downlocation = str(snstat['folder'].encode('utf-8'))
                             logger.info('[HARPOON] downlocation: %s' % downlocation)
                         except Exception as e:
                             logger.info('utf-8 error: %s' % e)
@@ -427,10 +427,10 @@ class QueueR(object):
                         #if it's one file in a sub-directory vs one-file in the root...
                         #if os.path.join(snstat['folder'], snstat['name']) != snstat['files'][0]:
                         if os.path.join(tmpfolder, tmpname) != snstat['files'][0]:
-                            downlocation = snstat['files'][0].encode('utf-8')
+                            downlocation = str(snstat['files'][0].encode('utf-8'))
                         else:
                             #downlocation = os.path.join(snstat['folder'], snstat['files'][0])
-                            downlocation = os.path.join(tmpfolder, snstat['files'][0].encode('utf-8'))
+                            downlocation = str(os.path.join(tmpfolder, snstat['files'][0].encode('utf-8')))
                             # downlocation = re.sub(",", "\\,", downlocation)
 
                     labelit = None
@@ -499,8 +499,8 @@ class QueueR(object):
                     logger.info('Label: %s' % labelit)
                     logger.info('Multiple Seedbox: %s' % multiplebox)
 
-                    script_cmd = shlex.split(curScriptName)# + [downlocation, labelit, multiplebox]
-                    logger.info(u"Executing command " + str(script_cmd))
+                    # script_cmd = shlex.split(curScriptName)# + [downlocation, labelit, multiplebox]
+                    # logger.info("Executing command " + str(script_cmd))
 
                     try:
                         queue.ckupdate(item['item'], {'status': 'Fetching', 'stage': 'current'})
@@ -515,6 +515,8 @@ class QueueR(object):
                         # if output:
                         #    logger.info('[OUTPUT] %s'% output)
                     except Exception as e:
+                        if harpoon.CURRENT_DOWNLOAD.exitlevel == 1:
+                            queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Manually aborted'})
                         logger.warn('Exception occured: %s' % e)
                         continue
                     else:
@@ -858,7 +860,7 @@ class QueueR(object):
                         except:
                             logger.warn('[MYLAR] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item['mode'] + '].  Trying possible alternate naming.')
                             try:
-                                os.remove(os.path.join(self.torrentfile_dir, snstat['label'], snstat['hash'] + '.mylar.hash'))
+                                os.remove(os.path.join(config.GENERAL['torrentfile_dir'], snstat['label'], snstat['hash'] + '.mylar.hash'))
                                 logger.info('[MYLAR] File removed by hash from system so no longer queuable')
                             except:
                                 logger.warn('[MYLAR] Unable to remove file from snatch queue directory [' + item['item'] + '.mylar.' + item['mode'] + ']. You should delete it manually to avoid re-downloading.')
@@ -908,7 +910,7 @@ class QueueR(object):
 
     def cleanup_check(self, item, script_cmd, downlocation, snstat):
         logger.info('[CLEANUP-CHECK] item: %s' % item)
-        if 'client' in item.keys() and config.SAB['sab_cleanup'] and item['client'] == 'sabnzbd':
+        if 'client' in list(item.keys()) and config.SAB['sab_cleanup'] and item['client'] == 'sabnzbd':
             import subprocess
             logger.info('[HARPOON] Triggering cleanup')
             sa_params = {}
@@ -1044,7 +1046,7 @@ class QueueR(object):
                 # Exit the parent process
                 logger.debug('Forking once...')
                 os._exit(0)
-        except OSError, e:
+        except OSError as e:
             sys.exit("1st fork failed: %s [%d]" % (e.strerror, e.errno))
 
         os.setsid()
@@ -1059,25 +1061,25 @@ class QueueR(object):
             if pid > 0:
                 logger.debug('Forking twice...')
                 os._exit(0) # Exit second parent process
-        except OSError, e:
+        except OSError as e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        dev_null = file('/dev/null', 'r')
-        os.dup2(dev_null.fileno(), sys.stdin.fileno())
-
-        si = open('/dev/null', "r")
-        so = open('/dev/null', "a+")
-        se = open('/dev/null', "a+")
-
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
+        # dev_null = open('/dev/null', 'r')
+        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
+        #
+        # si = open('/dev/null', "r")
+        # so = open('/dev/null', "a+")
+        # se = open('/dev/null', "a+")
+        #
+        # os.dup2(si.fileno(), sys.stdin.fileno())
+        # os.dup2(so.fileno(), sys.stdout.fileno())
+        # os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)
         if self.createpid:
             logger.info("Writing PID %d to %s", pid, self.pidfile)
-            with file(self.pidfile, 'w') as fp:
+            with open(self.pidfile, 'w') as fp:
                 fp.write("%s\n" % pid)
 
     def shutdown(self):
@@ -1120,7 +1122,7 @@ class QueueR(object):
                             logger.info('hash:' + str(hash))
                             logger.info('working_hash:' + str(self.current_hash))
                             # dupchk = [x for x in self.queue.ckqueue() if x['hash'] == hash]
-                            dupchk = hash in HQUEUE.ckqueue().keys()
+                            dupchk = hash in list(HQUEUE.ckqueue().keys())
                             if all([hash is not None, not dupchk]):
                                 logger.info('Adding : ' + f + ' to queue.')
 
@@ -1233,12 +1235,12 @@ class QueueR(object):
                                 try:
                                     filecontent = json.load(open(actualfile))
                                     if filecontent:
-                                        if 'data' in filecontent.keys():
-                                            if 'downloadClient' in filecontent['data'].keys():
+                                        if 'data' in list(filecontent.keys()):
+                                            if 'downloadClient' in list(filecontent['data'].keys()):
                                                 client = filecontent['data']['downloadClient'].lower()
-                                        elif 'Source' in filecontent.keys():
+                                        elif 'Source' in list(filecontent.keys()):
                                             client = filecontent['Source'].lower()
-                                        elif 'mylar_client' in filecontent.keys():
+                                        elif 'mylar_client' in list(filecontent.keys()):
                                             client = filecontent['mylar_client'].lower()
                                         else:
                                             client = None
@@ -1255,7 +1257,7 @@ class QueueR(object):
 
                             #test here to make sure the file isn't being worked on currently & doesnt exist in queue already
                             # dupchk = [x for x in HQUEUE.ckqueue() if x['hash'] == hashfile]
-                            if hashfile in HQUEUE.ckqueue().keys():
+                            if hashfile in list(HQUEUE.ckqueue().keys()):
                                 dupchk = HQUEUE.ckqueue()[hashfile]
                             else:
                                 dupchk = None
@@ -1404,12 +1406,12 @@ class QueueR(object):
             except:
                 pass
 
-            if u'\u2014' in name:
-                name = re.sub(u'\u2014', ' - ', name)
+            if '\u2014' in name:
+                name = re.sub('\u2014', ' - ', name)
             try:
-                u_name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').strip()
+                u_name = str(unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').strip())
             except TypeError:
-                u_name = name.encode('ASCII', 'ignore').strip()
+                u_name = str(name.encode('ASCII', 'ignore').strip())
 
             name_filesafe = re.sub('[\:\'\"\,\?\!\\\]', '', u_name)
             name_filesafe = re.sub('[\/\*]', '-', name_filesafe)

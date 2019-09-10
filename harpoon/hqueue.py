@@ -1,5 +1,5 @@
-import Queue
-from common import currentTime
+import queue
+from .common import currentTime
 from harpoon import logger, hconfig
 import os
 
@@ -12,7 +12,7 @@ config = hconfig.config(CONF_LOCATION)
 class hQueue:
 
     def __init__(self):
-        self.SNQUEUE = Queue.Queue()
+        self.SNQUEUE = queue.Queue()
 
         # secondary queue to keep track of what's not been done, scheduled to be done, and completed.
         # 4 stages = to-do, current, reload, completed.
@@ -45,7 +45,7 @@ class hQueue:
                     self.SNQUEUE.put(item)
                 else:
                     logger.debug('[QUEUE] Found it')
-                    if hash in self.CKQUEUE.keys():
+                    if hash in list(self.CKQUEUE.keys()):
                         msg += "Item '%s' removed from queue.\n" % self.CKQUEUE[hash]['name']
                         logger.debug('[QUEUE] %s' % msg)
                         self.ckupdate(hash, {'stage': 'failed', 'status': 'Removed from Queue'})
@@ -65,8 +65,8 @@ class hQueue:
     ### CKQUEUE ###
 
     def ckupdate(self, key, item):
-        if key in self.CKQUEUE.keys():
-            for itemkey in item.keys():
+        if key in list(self.CKQUEUE.keys()):
+            for itemkey in list(item.keys()):
                 self.CKQUEUE[key][itemkey] = item[itemkey]
             self.CKQUEUE[key]['timestamp'] = currentTime()
         else:
@@ -74,7 +74,7 @@ class hQueue:
             self.CKQUEUE[key]['timestamp'] = currentTime()
 
     def ckremove(self, key):
-        if key in self.CKQUEUE.keys():
+        if key in list(self.CKQUEUE.keys()):
             del self.CKQUEUE[key]
 
     def ckappend(self, item):

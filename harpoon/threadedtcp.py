@@ -1,4 +1,4 @@
-import SocketServer
+import socketserver
 import json
 import select
 import threading
@@ -6,7 +6,7 @@ import threading
 from harpoon import logger, SOCKET_API
 from harpoon import HQUEUE as HQUEUE
 
-class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         d = self.request.recv(1024)
@@ -26,7 +26,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                 logger.info('[API-AWARE] Request received via API for listing of current queue')
                 currentqueue = None
                 if HQUEUE.qsize() != 0:
-                    for x in HQUEUE.ckqueue().keys():
+                    for x in list(HQUEUE.ckqueue().keys()):
                         if HQUEUE.ckqueue()[x]['stage'] == 'current':
                             currentqueue = x
                             logger.info('currentqueue: %s' % currentqueue)
@@ -46,7 +46,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def _send(self, socket, data):
         try:
             serialized = json.dumps(data)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise Exception('You can only send JSON-serializable data')
         # send the length of the serialized data first
         socket.send('%d\n' % len(serialized))
@@ -69,7 +69,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             next_offset += recv_size
         try:
             deserialized = json.loads(view.tobytes())
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise Exception('Data received was not in JSON format')
         return deserialized
 
@@ -111,7 +111,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         return queue_pos
 
 
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, object):
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer, object):
 
     def __init__(self, server_address, RequestHandlerClass):
         super(ThreadedTCPServer, self).__init__(server_address, RequestHandlerClass)
@@ -132,7 +132,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, obj
                 # connecting to the socket to wake this up instead of
                 # polling. Polling reduces our responsiveness to a
                 # shutdown request and wastes cpu at all other times.
-                r, w, e = SocketServer._eintr_retry(select.select, [self], [], [],
+                r, w, e = socketserver._eintr_retry(select.select, [self], [], [],
                                        poll_interval)
                 if self in r:
                     self._handle_request_noblock()

@@ -37,22 +37,22 @@ def info(hash=None, label=None, mode=None, filename=None):
                 hashinfo = {
                     'name': 'Manually Added NZB File'
                 }
-        if 'name' not in hashinfo.keys():
-            if 'sourceTitle' in hashinfo.keys():
+        if 'name' not in list(hashinfo.keys()):
+            if 'sourceTitle' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['sourceTitle']
-            elif 'BookName' in hashinfo.keys():
+            elif 'BookName' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['BookName']
-            elif 'mylar_release_name' in hashinfo.keys():
+            elif 'mylar_release_name' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['mylar_release_name']
-            elif 'mylar_release_nzbname' in hashinfo.keys():
+            elif 'mylar_release_nzbname' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['mylar_release_nzbname']
-            elif 'Title' in hashinfo.keys() and 'AuxInfo' in hashinfo.keys():
+            elif 'Title' in list(hashinfo.keys()) and 'AuxInfo' in list(hashinfo.keys()):
                 hashinfo['name'] = '%s %s' % (hashinfo['Title'],hashinfo['AuxInfo'])
-            elif 'lidarr_release_title' in hashinfo.keys():
+            elif 'lidarr_release_title' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['lidarr_release_title']
-            elif 'radarr_release_title' in hashinfo.keys():
+            elif 'radarr_release_title' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['radarr_release_title']
-            elif 'sonarr_release_title' in hashinfo.keys():
+            elif 'sonarr_release_title' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['sonarr_release_title']
             else:
                 hashinfo['name'] = 'Unknown'

@@ -1,6 +1,6 @@
-from __future__ import with_statement
 
-import hqueue
+
+from . import hqueue
 import threading
 import cherrypy
 import subprocess

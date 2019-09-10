@@ -94,7 +94,7 @@ class Radarr(object):
         #we can't run the downloadmoviescan (ie. manual post-processing) since for some reason radarr will push the new download
         #to the original location regardless of any setting previously (it must be storing it in the download table or something)
         name = self.snstat['name']
-        if 'extendedname' in self.snstat.keys():
+        if 'extendedname' in list(self.snstat.keys()):
             name = self.snstat['extendedname']
         if self.applylabel is True:
             if self.snstat['label'] == 'None':
@@ -236,8 +236,8 @@ class Radarr(object):
             r = requests.get(url, headers=self.radarr_headers)
             data = r.json()
 
-            data['path'] = u"" + newpath.decode('utf-8')
-            data['folderName'] = u"" + self.snstat['name'].decode('utf-8')
+            data['path'] = "" + newpath.decode('utf-8')
+            data['folderName'] = "" + self.snstat['name'].decode('utf-8')
             url = self.radarr_url + '/api/movie'
             #set the new path in the json - assume that the torrent name is ALSO the folder name
             #could set folder name to file name via an option..possible to-do.
@@ -271,8 +271,8 @@ class Radarr(object):
             r = requests.get(url, headers=self.radarr_headers)
             data = r.json()
 
-            data['path'] = u"" + newpath.decode('utf-8')
-            data['folderName'] = u"" + self.snstat['name'].decode('utf-8')
+            data['path'] = "" + newpath.decode('utf-8')
+            data['folderName'] = "" + self.snstat['name'].decode('utf-8')
             url = self.radarr_url + '/api/movie'
             #set the new path in the json - assume that the torrent name is ALSO the folder name
             #could set folder name to file name via an option..possible to-do.

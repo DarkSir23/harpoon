@@ -1,21 +1,21 @@
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
-from common import convert_version_tuple_to_str, join_uri, update_uri
-from lib.xmlrpc.clients.http import HTTPServerProxy
-from lib.xmlrpc.clients.scgi import SCGIServerProxy
-from lib.xmlrpc.transports.basic_auth import BasicAuthTransport
+from .common import convert_version_tuple_to_str, join_uri, update_uri
+from .lib.xmlrpc.clients.http import HTTPServerProxy
+from .lib.xmlrpc.clients.scgi import SCGIServerProxy
+from .lib.xmlrpc.transports.basic_auth import BasicAuthTransport
 
 
 try:
     from requests.packages.urllib3 import disable_warnings
     disable_warnings()
 except ImportError:
-    print 'Unable to disable warnings for non-https authentication.'
+    print('Unable to disable warnings for non-https authentication.')
 
 # Try import requests transport (optional)
 try:
-    from lib.xmlrpc.transports.requests_ import RequestsTransport
+    from .lib.xmlrpc.transports.requests_ import RequestsTransport
 except ImportError:
     RequestsTransport = None
 
@@ -32,7 +32,7 @@ class Connection(object):
 
         # Transform + Parse URI
         self.uri = self._transform_uri(uri)
-        self.scheme = urllib.splittype(self.uri)[0]
+        self.scheme = urllib.parse.splittype(self.uri)[0]
 
         # Construct RPC Client
         self.sp = self._get_sp(self.scheme, sp)
@@ -147,7 +147,7 @@ class Connection(object):
 
     @staticmethod
     def _transform_uri(uri):
-        scheme = urllib.splittype(uri)[0]
+        scheme = urllib.parse.splittype(uri)[0]
 
         if scheme == 'httprpc' or scheme.startswith('httprpc+'):
             # Try find HTTPRPC transport (token after '+' in 'httprpc+https'), otherwise assume HTTP

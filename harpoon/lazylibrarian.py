@@ -36,7 +36,7 @@ class LazyLibrarian(object):
     def post_process(self):
 
         url = self.lazylibrarian_url + '/api'
-        if 'extendedname' in self.snstat.keys():
+        if 'extendedname' in list(self.snstat.keys()):
             nzbname = self.snstat['extendedname']
         else:
             nzbname = self.snstat['name']
@@ -53,7 +53,7 @@ class LazyLibrarian(object):
         midbase = os.path.basename(midpath)
         defaultbase = os.path.basename(self.defaultdir)
         movefile = False
-        if self.lazylibrarian_filedata and 'BookID' in self.lazylibrarian_filedata.keys():
+        if self.lazylibrarian_filedata and 'BookID' in list(self.lazylibrarian_filedata.keys()):
             process_suffix = ' LL.(%s)' % self.lazylibrarian_filedata['BookID']
         else:
             process_suffix = ' PROCESS'

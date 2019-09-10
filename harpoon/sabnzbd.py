@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Harpoon.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import requests
 import os
 import sys

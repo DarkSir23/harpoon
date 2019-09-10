@@ -20,14 +20,14 @@ import time
 import shutil
 import traceback
 from base64 import b16encode, b32decode
-import ConfigParser
+import configparser
 
-import hashlib, StringIO
+import hashlib, io
 import bencode
-from torrent.helpers.variable import link, symlink, is_rarfile
+from .torrent.helpers.variable import link, symlink, is_rarfile
 
 
-import torrent.clients.rtorrent as TorClient
+from .torrent.clients import rtorrent as TorClient
 
 import harpoon
 from harpoon import logger, CONF_LOCATION
@@ -65,7 +65,7 @@ class RTorrent(object):
         if CONF_LOCATION is None:
             logger.warn('Unable to find config.')
             return None
-        config = ConfigParser.RawConfigParser()
+        config = configparser.RawConfigParser()
         config.read(CONF_LOCATION)
         self.applylabel = config.getboolean('general', 'applylabel')
         logger.info('Config: %s' % self.applylabel)

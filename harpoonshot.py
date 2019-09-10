@@ -17,10 +17,9 @@
 import os
 import re
 import json
-import requests
 import time
 import sys
-import ConfigParser
+import configparser
 
 
 import logging
@@ -29,7 +28,7 @@ from logging import handlers
 ##config
 #this is required here to get the log path below
 datadir = os.path.dirname(os.path.realpath(__file__))
-config = ConfigParser.RawConfigParser()
+config = configparser.RawConfigParser()
 config.read(os.path.join(datadir, 'conf', 'harpoon.conf'))
 
 log_path = config.get('general', 'logpath')
@@ -82,6 +81,10 @@ except IndexError:
         elif 'sonarr_release_title' in os.environ:
             mode = 'sonarr'
             inputfile = os.environ.get('sonarr_release_title')
+            if '//' in inputfile:
+                inputfile = re.sub('-', '//', inputfile).strip()
+            if '/' in inputfile:
+                inputfile = inputfile.replace('/', '-')
             label = sonarr_label
             filetype = '.file'
         elif 'sonarr_eventtype' in os.environ:
@@ -93,6 +96,25 @@ except IndexError:
             else:
                 logger.info('Failing, unknown type')
                 os._exit(1)
+        elif 'lidarr_release_title' in os.environ:
+            mode = 'lidarr'
+            inputfile = os.environ.get('lidarr_release_title')
+            if '//' in inputfile:
+                inputfile = re.sub('-', '//', inputfile).strip()
+            if '/' in inputfile:
+                inputfile = inputfile.replace('/', '-')
+            label = lidarr_label
+            filetype = '.file'
+        elif 'lidarr_eventtype' in os.environ:
+            eventtype = os.environ.get('lidarr_eventtype')
+            logger.info('Called from Lidarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'Test':
+                logger.info('Exiting successfully (Lidarr Test)')
+                os._exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                os._exit(1)
+
         else:
             logger.info('Unable to detect what client called harpoonshot...')
             logger.info('Environment: %s' % os.environ)
@@ -132,7 +154,7 @@ else:
             except IndexError:
                 break
         logger.debug('Dict: %s' % mydict)
-        if 'DownloadID' in mydict.keys(): # LazyLibrarian book or audiobook
+        if 'DownloadID' in list(mydict.keys()): # LazyLibrarian book or audiobook
             # mode = 'lazylibrarian'
             mode = ''
             inputfile = mydict['DownloadID']
@@ -149,7 +171,6 @@ else:
     else:
         logger.warn('Cannot determine if item came from sonarr / radarr / mylar / lidarr / lazylibrarian ... Unable to harpoon item. ')
         sys.exit(1)
-
 logger.info("Name to use: %s" % inputfile)
 
 path = os.path.join(torrentfile_dir, label)

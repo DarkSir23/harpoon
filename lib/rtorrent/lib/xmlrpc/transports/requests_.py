@@ -1,11 +1,11 @@
 import requests as requests
 import requests.auth as requestsauth
-import xmlrpclib
+import xmlrpc.client
 
 
-class RequestsTransport(xmlrpclib.Transport):
+class RequestsTransport(xmlrpc.client.Transport):
     def __init__(self, secure, auth=None, proxies=None, verify_ssl=True):
-        xmlrpclib.Transport.__init__(self)
+        xmlrpc.client.Transport.__init__(self)
 
         self.secure = secure
 
@@ -52,7 +52,7 @@ class RequestsTransport(xmlrpclib.Transport):
             return self.parse_response(response)
 
         # Invalid response returned
-        raise xmlrpclib.ProtocolError(
+        raise xmlrpc.client.ProtocolError(
             host + handler,
             response.status_code, response.reason,
             response.headers
@@ -67,12 +67,12 @@ class RequestsTransport(xmlrpclib.Transport):
 
         # Basic Authentication
         if method == 'basic':
-            print 'basic authentication method being used.'
+            print('basic authentication method being used.')
             return requestsauth.HTTPBasicAuth(username, password)
 
         # Digest Authentication
         if method == 'digest':
-            print 'digest authentication method being used.'
+            print('digest authentication method being used.')
             return requestsauth.HTTPDigestAuth(username, password)
 
         raise NotImplementedError('Unsupported authentication method: %r' % method)

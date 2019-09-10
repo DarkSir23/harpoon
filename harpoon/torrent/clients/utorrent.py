@@ -4,6 +4,11 @@ from libs.utorrent.client import UTorrentClient
 
 # Only compatible with uTorrent 3.0+
 
+class Oops(Exception):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
+
 class TorrentClient(object):
     def __init__(self):
         self.conn = None
@@ -41,7 +46,7 @@ class TorrentClient(object):
 
     def get_torrent(self, torrent):
         if not torrent[26]:
-            raise 'Only compatible with uTorrent 3.0+'
+            raise Oops('Only compatible with uTorrent 3.0+')
 
         torrent_files = []
         torrent_completed = False

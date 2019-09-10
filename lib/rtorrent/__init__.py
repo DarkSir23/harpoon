@@ -17,19 +17,19 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os.path
 import time
-import xmlrpclib
+import xmlrpc.client
 
-from connection import Connection
-from common import find_torrent, join_uri, \
+from .connection import Connection
+from .common import find_torrent, join_uri, \
     update_uri, is_valid_port, convert_version_tuple_to_str
-from lib.torrentparser import TorrentParser
-from rpc import Method
-from torrent import Torrent
-from group import Group
-import rpc  # @UnresolvedImport
+from .lib.torrentparser import TorrentParser
+from .rpc import Method
+from .torrent import Torrent
+from .group import Group
+from . import rpc  # @UnresolvedImport
 
 __version__ = "0.2.9"
 __author__ = "Chris Lucas"
@@ -165,7 +165,7 @@ class RTorrent:
         """
         p = self._get_conn()
         tp = TorrentParser(torrent)
-        torrent = xmlrpclib.Binary(tp._raw_torrent)
+        torrent = xmlrpc.client.Binary(tp._raw_torrent)
         info_hash = tp.info_hash
 
         func_name = self._get_load_function("raw", start, verbose)
@@ -229,7 +229,7 @@ class RTorrent:
             torrent = open(torrent, "rb").read()
 
         if file_type in ["raw", "file"]:
-            finput = xmlrpclib.Binary(torrent)
+            finput = xmlrpc.client.Binary(torrent)
         elif file_type == "url":
             finput = torrent
 
@@ -537,6 +537,6 @@ class_methods_pair = {
     tracker.Tracker: tracker.methods,
     peer.Peer: peer.methods,
 }
-for c in class_methods_pair.keys():
+for c in list(class_methods_pair.keys()):
     rpc._build_rpc_methods(c, class_methods_pair[c])
     _build_class_methods(c)

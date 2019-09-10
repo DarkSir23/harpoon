@@ -14,7 +14,7 @@
 #  along with Harpoon.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from lib.rtorrent import RTorrent
 
@@ -107,7 +107,7 @@ class TorrentClient(object):
         return torrent_info if torrent_info else False
 
     def load_torrent(self, filepath, rtorr_label, start, applylabel=None, rtorr_dir=None):
-        print('filepath to torrent file set to : ' + filepath)
+        print(('filepath to torrent file set to : ' + filepath))
 
         torrent = self.conn.load_torrent(filepath, verify_load=True)
         if not torrent:
@@ -115,21 +115,21 @@ class TorrentClient(object):
 
         if rtorr_label:
             torrent.set_custom(1, rtorr_label)
-            print('Setting label for torrent to : ' + rtorr_label)
+            print(('Setting label for torrent to : ' + rtorr_label))
 
         if all([applylabel is True, rtorr_label is not None]):
             new_location = os.path.join(rtorr_dir, rtorr_label)
             torrent.set_directory(new_location)
-            print('Setting directory for torrent to : %s' % new_location)
+            print(('Setting directory for torrent to : %s' % new_location))
 
         print('Successfully loaded torrent.')
 
         #note that if set_directory is enabled, the torrent has to be started AFTER it's loaded or else it will give chunk errors and not seed
         if start:
-            print('[' + str(start) + '] Now starting torrent.')
+            print(('[' + str(start) + '] Now starting torrent.'))
             torrent.start()
         else:
-            print('[' + str(start) + '] Not starting torrent due to configuration setting.')
+            print(('[' + str(start) + '] Not starting torrent due to configuration setting.'))
         return True
 
     def start_torrent(self, torrent):

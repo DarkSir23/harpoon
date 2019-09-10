@@ -83,31 +83,31 @@
 
 
 import errno
-import httplib
+import http.client
 import re
 import socket
-import urllib
-import xmlrpclib
+import urllib.request, urllib.parse, urllib.error
+import xmlrpc.client
 
 
-class SCGITransport(xmlrpclib.Transport):
+class SCGITransport(xmlrpc.client.Transport):
     # Added request() from Python 2.7 xmlrpclib here to backport to Python 2.6
     def request(self, host, handler, request_body, verbose=0):
         #retry request once if cached connection has gone cold
         for i in (0, 1):
             try:
                 return self.single_request(host, handler, request_body, verbose)
-            except socket.error, e:
+            except socket.error as e:
                 if i or e.errno not in (errno.ECONNRESET, errno.ECONNABORTED, errno.EPIPE):
                     raise
-            except httplib.BadStatusLine: #close after we sent request
+            except http.client.BadStatusLine: #close after we sent request
                 if i:
                     raise
 
     def single_request(self, host, handler, request_body, verbose=0):
         # Add SCGI headers to the request.
         headers = {'CONTENT_LENGTH': str(len(request_body)), 'SCGI': '1'}
-        header = '\x00'.join(('%s\x00%s' % item for item in headers.iteritems())) + '\x00'
+        header = '\x00'.join(('%s\x00%s' % item for item in headers.items())) + '\x00'
         header = '%d:%s' % (len(header), header)
         request_body = '%s,%s' % (header, request_body)
 
@@ -115,7 +115,7 @@ class SCGITransport(xmlrpclib.Transport):
 
         try:
             if host:
-                host, port = urllib.splitport(host)
+                host, port = urllib.parse.splitport(host)
                 addrinfo = socket.getaddrinfo(host, int(port), socket.AF_INET,
                                               socket.SOCK_STREAM)
                 sock = socket.socket(*addrinfo[0][:3])
@@ -147,7 +147,7 @@ class SCGITransport(xmlrpclib.Transport):
                                                   maxsplit=1)
 
         if self.verbose:
-            print 'body:', repr(response_body)
+            print('body:', repr(response_body))
 
         p.feed(response_body)
         p.close()

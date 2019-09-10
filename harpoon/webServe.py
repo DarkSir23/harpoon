@@ -5,7 +5,7 @@ import random
 import re
 import threading
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import calendar
 from shutil import copyfile, rmtree
 import json
@@ -16,7 +16,7 @@ from harpoon import logger
 from cherrypy.lib.static import serve_file
 from mako import exceptions
 from mako.lookup import TemplateLookup
-import hashfile
+from . import hashfile
 
 
 def serve_template(templatename, **kwargs):
@@ -52,7 +52,7 @@ class WebInterface(object):
         if hash:
             queuehash = harpoon.HQUEUE.ckqueue()[hash]
             logger.debug(queuehash)
-            if 'label' in queuehash.keys():
+            if 'label' in list(queuehash.keys()):
                 hashinfo = hashfile.info(hash=hash, label=queuehash['label'])
             else:
                 hashinfo = {}
@@ -72,28 +72,31 @@ class WebInterface(object):
         removeditems = 0
         msg = ''
         if type == 'failed':
-            for key in harpoon.HQUEUE.ckqueue().keys():
+            for key in list(harpoon.HQUEUE.ckqueue().keys()):
                 if harpoon.HQUEUE.ckqueue()[key]['stage'] == 'failed':
                     harpoon.HQUEUE.ckremove(key=key)
                     removeditems += 1
         elif type == 'completed':
-            for key in harpoon.HQUEUE.ckqueue().keys():
+            for key in list(harpoon.HQUEUE.ckqueue().keys()):
                 if harpoon.HQUEUE.ckqueue()[key]['stage'] == 'completed':
                     harpoon.HQUEUE.ckremove(key=key)
                     removeditems += 1
         elif type == 'single' and item:
-            if item in harpoon.HQUEUE.ckqueue().keys():
+            if item in list(harpoon.HQUEUE.ckqueue().keys()):
                 if harpoon.HQUEUE.ckqueue()[item]['stage'] in ['failed', 'completed']:
                     harpoon.HQUEUE.ckremove(key=item)
                     removeditems += 1
                 else:
                     pass
         elif type == 'singleactive' and item:
-            if item in harpoon.HQUEUE.ckqueue().keys():
+            if item in list(harpoon.HQUEUE.ckqueue().keys()):
                 msg = harpoon.HQUEUE.remove(item, removefile=False)
         elif type == 'singleactivewithfile' and item:
-            if item in harpoon.HQUEUE.ckqueue().keys():
+            if item in list(harpoon.HQUEUE.ckqueue().keys()):
                 msg = harpoon.HQUEUE.remove(item, removefile=True)
+        elif type == 'activedownload':
+            if harpoon.CURRENT_DOWNLOAD and harpoon.CURRENT_DOWNLOAD.isopen:
+                msg = harpoon.CURRENT_DOWNLOAD.abort_download()
         if len(msg) == 0:
             if removeditems == 1:
                 msg = '1 item removed.'
@@ -108,10 +111,5 @@ class WebInterface(object):
         return self.home(msg=msg)
 
 
-    def find_status_files(self):
-        percents = []
-        for root, dirs, files in os.walk(harpoon.CURRENT_DOWNFOLDER):
-            for file in files:
-                if file.endswith(".lftp-pget-status"):
-                    filename = os.path.join(root, file)
+
 

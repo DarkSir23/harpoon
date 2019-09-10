@@ -5,6 +5,7 @@ import cherrypy
 import harpoon
 from harpoon import logger
 from harpoon.webServe import WebInterface
+import portend
 
 def initialize(options=None, basepath=None, parent=None):
 
@@ -31,6 +32,7 @@ def initialize(options=None, basepath=None, parent=None):
         'tools.sessions.storage_type': "File",
         'tools.sessions.storage_path': os.path.join(basepath, "sessions"),
         'tools.sessions.timeout': 120,
+        # 'engine.timeout_monitor.on': False,
     }
     if https_enabled:
         options_dict['server.ssl_certificate'] = https_cert
@@ -96,16 +98,16 @@ def initialize(options=None, basepath=None, parent=None):
     logger.debug('config: %s' % conf)
     # Prevent time-outs
     try:
-        cherrypy.engine.timeout_monitor.unsubscribe()
+        # cherrypy.engine.timeout_monitor.unsubscribe()
         cherrypy.tree.mount(WebInterface(parent=parent), str(options['http_root']), config=conf)
         cherrypy.engine.autoreload.subscribe()
-        cherrypy.process.servers.check_port(str(options['http_host']), options['http_port'])
+        portend.Checker().assert_free(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
     except IOError:
-        print 'Failed to start on port: %i. is something else running?' % (options['http_port'])
+        print('Failed to start on port: %i. is something else running?' % (options['http_port']))
         sys.exit(1)
     except Exception as e:
-        print 'Error: %s' % e
+        print('Error: %s' % e)
         sys.exit(1)
     cherrypy.server.wait()
 

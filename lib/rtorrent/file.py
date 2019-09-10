@@ -19,9 +19,9 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # from rtorrent.rpc import Method
-import rpc
+from . import rpc
 
-from common import safe_repr
+from .common import safe_repr
 
 Method = rpc.Method
 
@@ -33,7 +33,7 @@ class File:
         self._rt_obj = _rt_obj
         self.info_hash = info_hash  # : info hash for the torrent the file is associated with
         self.index = index  # : The position of the file within the file list
-        for k in kwargs.keys():
+        for k in list(kwargs.keys()):
             setattr(self, k, kwargs.get(k, None))
 
         self.rpc_id = "{0}:f{1}".format(

@@ -21,13 +21,13 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from base64 import b64encode
-import httplib
-import xmlrpclib
+import http.client
+import xmlrpc.client
 
 
-class BasicAuthTransport(xmlrpclib.Transport):
+class BasicAuthTransport(xmlrpc.client.Transport):
     def __init__(self, secure=False, username=None, password=None):
-        xmlrpclib.Transport.__init__(self)
+        xmlrpc.client.Transport.__init__(self)
 
         self.secure = secure
 
@@ -50,13 +50,13 @@ class BasicAuthTransport(xmlrpclib.Transport):
 
         if self.secure:
             try:
-                self._connection = host, httplib.HTTPSConnection(chost, None, **(x509 or {}))
+                self._connection = host, http.client.HTTPSConnection(chost, None, **(x509 or {}))
             except AttributeError:
                 raise NotImplementedError(
                     "your version of httplib doesn't support HTTPS"
                 )
         else:
-            self._connection = host, httplib.HTTPConnection(chost)
+            self._connection = host, http.client.HTTPConnection(chost)
 
         return self._connection[1]
 
@@ -79,7 +79,7 @@ class BasicAuthTransport(xmlrpclib.Transport):
             if response.status == 200:
                 self.verbose = verbose
                 return self.parse_response(response)
-        except xmlrpclib.Fault:
+        except xmlrpc.client.Fault:
             raise
         except Exception:
             self.close()
@@ -88,7 +88,7 @@ class BasicAuthTransport(xmlrpclib.Transport):
         #discard any response data and raise exception
         if response.getheader("content-length", 0):
             response.read()
-        raise xmlrpclib.ProtocolError(
+        raise xmlrpc.client.ProtocolError(
             host + handler,
             response.status, response.reason,
             response.msg,

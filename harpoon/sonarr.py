@@ -32,7 +32,7 @@ class Sonarr(object):
     def post_process(self):
         url = self.sonarr_url + '/api/command'
         name = self.snstat['name']
-        if 'extendedname' in self.snstat.keys():
+        if 'extendedname' in list(self.snstat.keys()):
             name = self.snstat['extendedname']
         if self.applylabel is True:
             if self.snstat['label'] == 'None':
