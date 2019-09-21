@@ -1,0 +1,47 @@
+<%!
+    import harpoon
+    import threading
+    from collections import OrderedDict
+    import datetime
+    from hurry.filesize import size
+%>
+<%
+    items = OrderedDict(sorted(harpoon.HQUEUE.ckqueue().items(), key=lambda x: x[1]['timestamp'], reverse=True))
+    activeItem = None
+    for key in items.keys():
+        if items[key]['stage'] == 'current':
+            activeItem = items[key]
+%>
+<%
+    if harpoon.CURRENT_DOWNLOAD:
+        stats = harpoon.CURRENT_DOWNLOAD.get_stats()
+    else:
+        stats = {'total': 0, 'trans': 0, 'currentfile': 'Error', 'percent': 0}
+%>
+
+% if activeItem:
+<div class="panel panel-primary">
+    <div class="panel-heading"><div class="panel-title">Active Item: ${activeItem['name'].replace('.',' ')}</div></div>
+    <div class="panel-body">
+        <div><b>Hashfile</b>: <a href="hashfile?hash=${activeItem['hash']}">${activeItem['hash']}</a></div>
+        % if activeItem['status'] == 'Fetching':
+        <div><b>Current File</b>: ${stats['currentfile']} (${int(stats['percent'])}%)</div>
+            <div class="progress">
+                <div
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                        role="progressbar"
+                        style="width: ${int(stats['percent'])}%;"
+                        aria-valuenow="${stats['percent']}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                >
+                    ${size(stats['trans'])}/${size(stats['total'])}
+                </div>
+            </div>
+        % else:
+        <b>Status</b>:${activeItem['status']}
+        % endif
+
+    </div>
+</div>
+% endif

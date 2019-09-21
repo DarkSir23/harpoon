@@ -30,6 +30,7 @@ from .rpc import Method
 from .torrent import Torrent
 from .group import Group
 from . import rpc  # @UnresolvedImport
+from harpoon import logger
 
 __version__ = "0.2.9"
 __author__ = "Chris Lucas"
@@ -44,6 +45,7 @@ class RTorrent:
     def __init__(self, uri, auth=None, verify_server=False, verify_ssl=True, sp=None, sp_kwargs=None):
 
         self.connection = Connection(uri, auth, verify_ssl, sp, sp_kwargs)
+        logger.debug('TEST: C')
         self.torrents = []  # : List of L{Torrent} instances
 
         self._torrent_cache = []
@@ -165,6 +167,8 @@ class RTorrent:
         """
         p = self._get_conn()
         tp = TorrentParser(torrent)
+        logger.debug('Torrent: %s' % torrent)
+        #tp = torrent_parser.TorrentFileParser(torrent)
         torrent = xmlrpc.client.Binary(tp._raw_torrent)
         info_hash = tp.info_hash
 

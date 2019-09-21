@@ -48,6 +48,18 @@ class WebInterface(object):
         return serve_template(templatename='index.html', title="Queue Status", msg=msg)
 
     @cherrypy.expose
+    def utilities(self, msg=None):
+        return serve_template(templatename='utilities.html', title="Utilities", msg=msg)
+
+    @cherrypy.expose
+    def table_content(self):
+        return serve_template(templatename='table-content.html', title="Queue Status")
+
+    @cherrypy.expose
+    def active_content(self):
+        return serve_template(templatename='active-content.html', title="Active Status")
+
+    @cherrypy.expose
     def hashfile(self, hash=None):
         if hash:
             queuehash = harpoon.HQUEUE.ckqueue()[hash]
@@ -110,6 +122,65 @@ class WebInterface(object):
         msg = "Restarting harpoon.  Refresh in 20 seconds."
         return self.home(msg=msg)
 
+    @cherrypy.expose
+    def add_label(self, label_name=None):
+        logger.debug('LABEL: %s' % label_name)
+        msg = ''
+        if label_name:
+            harpoon_location = os.path.join(harpoon.config.GENERAL['torrentfile_dir'], label_name)
+            download_location = os.path.join(harpoon.config.GENERAL['defaultdir'], label_name)
+            if os.path.exists(harpoon_location):
+                msg += 'Label already exists in %s<br/>' % harpoon.config.GENERAL['torrentfile_dir']
+            else:
+                try:
+                    os.mkdir(harpoon_location)
+                    msg += 'Label added to %s<br/>' % harpoon.config.GENERAL['torrentfile_dir']
+                except:
+                    msg += 'Something went wrong.'
 
+            if os.path.exists(download_location):
+                msg += 'Label already exists in %s<br/>' % harpoon.config.GENERAL['defaultdir']
+            else:
+                try:
+                    os.mkdir(download_location)
+                    msg += 'Label added to %s<br/>' % harpoon.config.GENERAL['defaultdir']
+                except:
+                    msg += 'Something went wrong.'
+        return self.utilities(msg=msg)
 
-
+    @cherrypy.expose
+    def add_file(self, label=None, file=[], **kwargs):
+        uploadcount = 0
+        msg=''
+        logger.debug('[UPLOADFILE] Args: %s' % kwargs)
+        for key in kwargs.keys():
+            singlefile = kwargs[key]
+            filename = singlefile.filename
+            logger.debug('File: %s' % filename)
+            basefile, extension = os.path.splitext(filename)
+            if extension.lower() in ['.torrent', '.nzb']:
+                if label:
+                    destination = os.path.join(harpoon.config.GENERAL['torrentfile_dir'], label, filename).encode('utf-8')
+                else:
+                    destination = os.path.join(harpoon.config.GENERAL['torrentfile_dir'], filename).encode('utf-8')
+                if os.path.exists(destination):
+                    logger.debug('[UPLOADFILE] Deleting existing file')
+                    os.remove(destination)
+                result = bytearray()
+                while True:
+                    data = singlefile.file.read(8192)
+                    if not data:
+                        break
+                    result += data
+                try:
+                    with open(destination, "wb") as outfile:
+                        outfile.write(result)
+                    msg += 'File uploaded: %s<br>' % filename
+                    uploadcount += 1
+                except Exception as e:
+                    msg += 'File not uploaded %s<br>' % filename
+            else:
+                msg += 'Invalid file type: %s' % filename
+        if uploadcount:
+            self.parent.scansched.Scanner()
+        return self.utilities(msg=msg)

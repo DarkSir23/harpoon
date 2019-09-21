@@ -142,7 +142,7 @@ class QueueR(object):
         self.CURRENT_DOWNFOLDER = CURRENT_DOWNFOLDER
 
 
-        self.extensions = ['mkv', 'avi', 'mp4', 'mpg', 'mov', 'cbr', 'cbz', 'flac', 'mp3', 'alac', 'epub', 'mobi', 'pdf', 'azw3', '4a', 'm4b', 'm4a']
+        self.extensions = ['mkv', 'avi', 'mp4', 'mpg', 'mov', 'cbr', 'cbz', 'flac', 'mp3', 'alac', 'epub', 'mobi', 'pdf', 'azw3', '4a', 'm4b', 'm4a', 'lit']
         if config.GENERAL['newextensions'] is not None:
             for x in newextensions.split(","):
                 if x != "":
@@ -238,19 +238,20 @@ class QueueR(object):
             if self.restart:
                 logger.info('Restarting')
                 try:
-                    popen_list = [self.FULL_PATH]
-                    popen_list += self.ARGS
-                    logger.debug("Args: %s" % (popen_list))
-                    if self.server:
-                        self.server.shutdown()
-                        self.server.server_close()
-                        while not self.server.is_shut_down():
-                            logger.debug("Running? %s" % self.server.is_running())
-                            time.sleep(1)
-                    os.remove(self.pidfile)
-                    po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    logger.debug("Process: %s" % po.poll())
-                    os._exit(0)
+                    # popen_list = [self.FULL_PATH]
+                    # popen_list += self.ARGS
+                    # logger.debug("Args: %s" % (popen_list))
+                    # if self.server:
+                    #     self.server.shutdown()
+                    #     self.server.server_close()
+                    #     while not self.server.is_shut_down():
+                    #         logger.debug("Running? %s" % self.server.is_running())
+                    #         time.sleep(1)
+                    # os.remove(self.pidfile)
+                    # po = subprocess.Popen(popen_list, cwd=os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    # logger.debug("Process: %s" % po.poll())
+                    # os._exit(0)
+                    os.execl(sys.executable, sys.executable, *sys.argv)
                 except Exception as e:
                     logger.debug("Failed to restart: %s" % e)
             else:
@@ -406,20 +407,23 @@ class QueueR(object):
                     else:
                         shell_cmd = sys.executable
 
-                    # curScriptName = shell_cmd + ' ' + str(tmp_script).decode("string_escape")
+                    curScriptName = shell_cmd + ' ' + tmp_script
+                    # curScriptName = shell_cmd + ' ' + tmp_script.decode("string_escape")
                     if snstat['mirror'] is True:
-                        #downlocation = snstat['folder']
-                        logger.info('trying to convert : %s' % snstat['folder'])
-                        try:
-                            downlocation = str(snstat['folder'].encode('utf-8'))
-                            logger.info('[HARPOON] downlocation: %s' % downlocation)
-                        except Exception as e:
-                            logger.info('utf-8 error: %s' % e)
+                        downlocation = snstat['folder']
+                        # logger.info('trying to convert : %s' % snstat['folder'])
+                        # try:
+                        #     downlocation = snstat['folder'].decode('utf-8')
+                        #     logger.info('[HARPOON] downlocation: %s' % downlocation)
+                        # except Exception as e:
+                        #     logger.info('utf-8 error: %s' % e)
                     else:
                         try:
-                            tmpfolder = snstat['folder'].encode('utf-8')
-                            tmpname = snstat['name'].encode('utf-8')
-                            logger.info('[UTF-8 SAFETY] tmpfolder, tmpname: %s' % os.path.join(tmpfolder, tmpname))
+                            tmpfolder = snstat['folder']
+                            tmpname = snstat['name']
+                            # tmpfolder = snstat['folder'].encode('utf-8')
+                            # tmpname = snstat['name'].encode('utf-8')
+                            # logger.info('[UTF-8 SAFETY] tmpfolder, tmpname: %s' % os.path.join(tmpfolder, tmpname))
                         except:
                             pass
 
@@ -427,10 +431,12 @@ class QueueR(object):
                         #if it's one file in a sub-directory vs one-file in the root...
                         #if os.path.join(snstat['folder'], snstat['name']) != snstat['files'][0]:
                         if os.path.join(tmpfolder, tmpname) != snstat['files'][0]:
-                            downlocation = str(snstat['files'][0].encode('utf-8'))
+                            # downlocation = snstat['files'][0].decode('utf-8')
+                            downlocation = snstat['files'][0]
                         else:
                             #downlocation = os.path.join(snstat['folder'], snstat['files'][0])
-                            downlocation = str(os.path.join(tmpfolder, snstat['files'][0].encode('utf-8')))
+                            downlocation = os.path.join(tmpfolder, snstat['files'][0])
+                            # downlocation = os.path.join(tmpfolder, snstat['files'][0].decode('utf-8'))
                             # downlocation = re.sub(",", "\\,", downlocation)
 
                     labelit = None
@@ -458,7 +464,9 @@ class QueueR(object):
                     else:
                         self.CURRENT_DOWNFOLDER = config.GENERAL['defaultdir']
 
-                    if any([downlocation.endswith(ext) for ext in self.extensions]) or snstat['mirror'] is False:
+                    # if any([downlocation.endswith(ext) for ext in self.extensions]) or snstat['mirror'] is False:
+                    logger.debug('[HARPOON] Ext: %s' % os.path.splitext(downlocation)[1])
+                    if any([os.path.splitext(downlocation)[1].endswith(ext) for ext in self.extensions]) or snstat['mirror'] is False:
                         combined_lcmd = 'pget -c -n %s \"%s\"' % (config.GENERAL['lcmdsegments'], downlocation)
                         logger.debug('[HARPOON] file lcmd: %s' % combined_lcmd)
                         self.CURRENT_DOWNFOLDER = os.path.join(self.CURRENT_DOWNFOLDER, os.path.basename(downlocation))
@@ -499,11 +507,12 @@ class QueueR(object):
                     logger.info('Label: %s' % labelit)
                     logger.info('Multiple Seedbox: %s' % multiplebox)
 
-                    # script_cmd = shlex.split(curScriptName)# + [downlocation, labelit, multiplebox]
+                    script_cmd = shlex.split(curScriptName)# + [downlocation, labelit, multiplebox]
                     # logger.info("Executing command " + str(script_cmd))
 
                     try:
                         queue.ckupdate(item['item'], {'status': 'Fetching', 'stage': 'current'})
+                        logger.debug('JASON: %s' % type(downlocation))
                         harpoon.CURRENT_DOWNLOAD = sftp.SFTP(env=harpoon_env, mirror=self.mirror)
                         harpoon.CURRENT_DOWNLOAD.get(remoteloc = downlocation, localloc = self.CURRENT_DOWNFOLDER)
                         while harpoon.CURRENT_DOWNLOAD.isopen:
@@ -759,7 +768,8 @@ class QueueR(object):
                                'filedata':      ll_filedata}
                     ll = lazylibrarian.LazyLibrarian(ll_info)
                     logger.info('[LAZYLIBRARIAN] Processing')
-                    lazylibrarian_process = ll.post_process()
+                    ll_type = queue.ckqueue()[snstat['hash']]['ll_type']
+                    lazylibrarian_process = ll.post_process(ll_type=ll_type)
 
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                         logger.info('[HARPOON] Removing completed file from queue directory.')
@@ -1064,16 +1074,16 @@ class QueueR(object):
         except OSError as e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        # dev_null = open('/dev/null', 'r')
-        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
-        #
-        # si = open('/dev/null', "r")
-        # so = open('/dev/null', "a+")
-        # se = open('/dev/null', "a+")
-        #
-        # os.dup2(si.fileno(), sys.stdin.fileno())
-        # os.dup2(so.fileno(), sys.stdout.fileno())
-        # os.dup2(se.fileno(), sys.stderr.fileno())
+        dev_null = open('/dev/null', 'r')
+        os.dup2(dev_null.fileno(), sys.stdin.fileno())
+
+        si = open('/dev/null', "r")
+        so = open('/dev/null', "a+")
+        se = open('/dev/null', "a+")
+
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)
@@ -1112,6 +1122,7 @@ class QueueR(object):
             extensions = ['.file','.hash','.torrent','.nzb']
             for (dirpath, dirnames, filenames) in os.walk(config.GENERAL['torrentfile_dir'],followlinks=True):
                 for f in filenames:
+                    ll_type = ''
                     if any([f.endswith(ext) for ext in extensions]):
                         if f.endswith('.file'):
                             client = None
@@ -1244,6 +1255,14 @@ class QueueR(object):
                                             client = filecontent['mylar_client'].lower()
                                         else:
                                             client = None
+                                        if 'AuxInfo' in list(filecontent.keys()):
+                                            ll_type = filecontent['AuxInfo'].lower()
+                                            if ll_type == 'ebook':
+                                                ll_type = 'eBook'
+                                            elif ll_type == 'audiobook':
+                                                ll_type = 'AudioBook'
+                                            else:
+                                                ll_type= "Magazine"
                                 except Exception as e:
                                     try:
                                         with open(actualfile) as unknown_file:
@@ -1277,12 +1296,14 @@ class QueueR(object):
                                 logger.info('HASH not in queue - adding : ' + hashfile)
                                 logger.info('Client: %s' % client)
                                 logger.info('Queuefile: %s' % queuefile)
+                                logger.info('LL_Type: %s' % ll_type)
                                 hashinfo = hf.info(queuefile, label=label, mode=mode)
                                 self.queue.ckupdate(hashfile, {'hash':   hashfile,
                                                                'stage':  'to-do',
                                                                'name': hashinfo['name'],
                                                                'status': 'Waiting',
-                                                               'label': label})
+                                                               'label': label,
+                                                               'll_type': ll_type,})
                                 if client:
                                     self.queue.put({'mode':   mode,
                                                     'item':   hashfile,

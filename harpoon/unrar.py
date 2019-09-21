@@ -144,7 +144,7 @@ class UnRAR(object):
         baserar = rar_set['start_rar']
         # Extract.
         try:
-            output = subprocess.check_output( [ unrar_cmd, 'x', baserar ] )
+            output = subprocess.check_output( [ unrar_cmd, 'x', '-y', baserar ] )
         except CalledProcessError as e:
             if e.returncode == 3:
                 logger.warn('[RAR MANAGER] [Unrar Error 3] - Broken Archive.')

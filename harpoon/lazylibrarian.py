@@ -33,8 +33,8 @@ class LazyLibrarian(object):
         self.snstat = ll_info['snstat']
         logger.debug("---")
 
-    def post_process(self):
-
+    def post_process(self, ll_type=None):
+        logger.debug('[LAZYLIBRARIAN] Type: %s' % ll_type)
         url = self.lazylibrarian_url + '/api'
         if 'extendedname' in list(self.snstat.keys()):
             nzbname = self.snstat['extendedname']
@@ -138,10 +138,20 @@ class LazyLibrarian(object):
         #         brandnewpath = newpath
 
         logger.info('[LAZYLIBRARIAN] Path: %s' % process_path)
-        payload = {'cmd':  'forceProcess',
-                   'dir': process_path,
-                   'apikey': self.lazylibrarian_apikey,
-                   'ignoreclient': 'True',}
+
+        if ll_type == 'Magazine':
+            payload = {'cmd': 'forceProcess',
+                       'dir': process_path,
+                       'apikey': self.lazylibrarian_apikey,
+                       'ignoreclient': 'True',
+                       }
+        else:
+            payload = {'cmd':  'importAlternate',
+                       'dir': process_path,
+                       'apikey': self.lazylibrarian_apikey,
+                       'library': ll_type,
+                       'wait': 'True',
+                       'ignoreclient': 'True',}
 
         logger.info('[LAZYLIBRARIAN] Posting url: %s' % url)
         logger.info('[LAZYLIBRARIAN] Posting to completed download handling now: %s' % payload)

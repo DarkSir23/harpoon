@@ -23,6 +23,7 @@ import os.path
 import re
 import bencode
 import hashlib
+from harpoon import logger
 
 if is_py3():
     from urllib.request import urlopen  # @UnresolvedImport @UnusedImport
@@ -49,6 +50,7 @@ class TorrentParser():
 
         self._get_raw_torrent()
         assert self._raw_torrent is not None, "Couldn't get raw_torrent."
+        logger.debug('RTORRENT: Decoded: %s' % self._torrent_decoded)
         if self._torrent_decoded is None:
             self._decode_torrent()
         assert isinstance(self._torrent_decoded, dict), "Invalid torrent file."
@@ -57,10 +59,13 @@ class TorrentParser():
     def _is_raw(self):
         raw = False
         if isinstance(self.torrent, (str, bytes)):
+            logger.debug('RTORRENT: Decoding')
             if isinstance(self._decode_torrent(self.torrent), dict):
+                logger.debug('RTORRENT: Now Raw')
                 raw = True
             else:
                 # reset self._torrent_decoded (currently equals False)
+                logger.debug('RTORRENT: Nope.')
                 self._torrent_decoded = None
 
         return(raw)
@@ -68,12 +73,15 @@ class TorrentParser():
     def _get_raw_torrent(self):
         """Get raw torrent data by determining what self.torrent is"""
         # already raw?
+        logger.debug('RTORRENT: Checking')
         if self._is_raw():
+            logger.debug('RTORRENT: Is Raw')
             self.file_type = "raw"
             self._raw_torrent = self.torrent
             return
         # local file?
         if os.path.isfile(self.torrent):
+            logger.debug('RTORRENT: Is File')
             self.file_type = "file"
             self._raw_torrent = open(self.torrent, "rb").read()
         # url?
@@ -84,13 +92,18 @@ class TorrentParser():
     def _decode_torrent(self, raw_torrent=None):
         if raw_torrent is None:
             raw_torrent = self._raw_torrent
-        self._torrent_decoded = bencode.decode(raw_torrent)
-        return(self._torrent_decoded)
+        try:
+            self._torrent_decoded = bencode.bdecode(raw_torrent)
+            logger.debug('RTORRENT: %s' % self._torrent_decoded)
+            return self._torrent_decoded
+        except Exception as e:
+            logger.debug('RTORRENT ERROR: %s' % e)
+            return None
 
     def _calc_info_hash(self):
         self.info_hash = None
         if "info" in self._torrent_decoded.keys():
-                info_encoded = bencode.encode(self._torrent_decoded["info"])
+                info_encoded = bencode.bencode(self._torrent_decoded["info"])
 
                 if info_encoded:
                     self.info_hash = hashlib.sha1(info_encoded).hexdigest().upper()

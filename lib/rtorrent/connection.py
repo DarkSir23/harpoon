@@ -58,7 +58,7 @@ class Connection(object):
             # Construct server proxy with authentication transport
             return self.sp(self.uri, transport=self._construct_transport(), **self.sp_kwargs)
 
-        # Construct plain server proxy
+        # + plain server proxy
         return self.sp(self.uri, **self.sp_kwargs)
 
     def test(self):
@@ -102,10 +102,12 @@ class Connection(object):
 
         # Use basic authentication transport
         if method == 'basic':
+            log.debug('TEST: A')
             return BasicAuthTransport(secure, self.auth)
 
         # Unsupported authentication method
         if method == 'digest':
+            log.debug('TEST: B')
             raise Exception('Digest authentication requires the "requests" library')
 
         raise NotImplementedError('Unknown authentication method: %r' % method)

@@ -17,6 +17,7 @@ import os
 from urllib.parse import urlparse
 
 from lib.rtorrent import RTorrent
+from harpoon import logger
 
 class TorrentClient(object):
     def __init__(self):
@@ -41,6 +42,7 @@ class TorrentClient(object):
         url = self.cleanHost(host, protocol = True, ssl = rtorr_ssl)
 
         # Automatically add '+https' to 'httprpc' protocol if SSL is enabled
+
         if rtorr_ssl and url.startswith('httprpc://'):
             url = url.replace('httprpc://', 'httprpc+https://')
 
@@ -49,11 +51,11 @@ class TorrentClient(object):
         # rpc_url is only used on http/https scgi pass-through
         if parsed.scheme in ['http', 'https']:
             url += rpc_url
-
+        logger.debug('URL: %s' % url)
         if username and password:
             try:
                 self.conn = RTorrent(
-                    url,(auth, username, password),
+                    url, (auth, username, password),
                     verify_server=True,
                     verify_ssl=self.getVerifySsl(rtorr_verify)
             )
@@ -107,7 +109,7 @@ class TorrentClient(object):
         return torrent_info if torrent_info else False
 
     def load_torrent(self, filepath, rtorr_label, start, applylabel=None, rtorr_dir=None):
-        print(('filepath to torrent file set to : ' + filepath))
+        print('filepath to torrent file set to : ' + filepath)
 
         torrent = self.conn.load_torrent(filepath, verify_load=True)
         if not torrent:
@@ -115,12 +117,12 @@ class TorrentClient(object):
 
         if rtorr_label:
             torrent.set_custom(1, rtorr_label)
-            print(('Setting label for torrent to : ' + rtorr_label))
+            print('Setting label for torrent to : ' + rtorr_label)
 
         if all([applylabel is True, rtorr_label is not None]):
             new_location = os.path.join(rtorr_dir, rtorr_label)
             torrent.set_directory(new_location)
-            print(('Setting directory for torrent to : %s' % new_location))
+            print('Setting directory for torrent to : %s' % new_location)
 
         print('Successfully loaded torrent.')
 

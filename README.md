@@ -8,7 +8,7 @@ This is a python-cli based application that can either be run from the cli direc
 **Requirements**
 ----------
 - LINUX only
-- Python 2.7.9+ (for SNI support)
+- Python 3.6+
 - lftp
 - rutorrent client (running remotely - ie.seedbox)
 - sonarr        (optional)

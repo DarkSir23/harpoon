@@ -13,6 +13,8 @@ from harpoon import logger, hconfig
 
 
 
+def labels():
+    return sorted(next(os.walk(config.GENERAL['torrentfile_dir']))[1])
 
 
 SYS_ENCODING = 'utf-8'
@@ -36,3 +38,4 @@ HQUEUE = hqueue.hQueue()
 MAINTHREAD = None
 CURRENT_DOWNFOLDER = None
 CURRENT_DOWNLOAD = None
+

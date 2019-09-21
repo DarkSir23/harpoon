@@ -27,6 +27,6 @@ client = Client()
 client.connect(host, port)
 client.send(data)
 response = client.recv()
-print response
+print(response)
 client.close()
 

@@ -32,6 +32,7 @@ def initialize(options=None, basepath=None, parent=None):
         'tools.sessions.storage_type': "File",
         'tools.sessions.storage_path': os.path.join(basepath, "sessions"),
         'tools.sessions.timeout': 120,
+        'tools.sessions.clean_freq': 240,
         # 'engine.timeout_monitor.on': False,
     }
     if https_enabled:
@@ -103,6 +104,7 @@ def initialize(options=None, basepath=None, parent=None):
         cherrypy.engine.autoreload.subscribe()
         portend.Checker().assert_free(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
+
     except IOError:
         print('Failed to start on port: %i. is something else running?' % (options['http_port']))
         sys.exit(1)

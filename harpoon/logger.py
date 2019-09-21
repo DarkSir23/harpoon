@@ -32,7 +32,7 @@ def initLogger(logpath):
     # Setup file logger
     filename = os.path.join(logpath, 'harpoon.log')
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%d-%b-%Y %H:%M:%S')
-    file_handler = handlers.RotatingFileHandler(filename, maxBytes=1000000, backupCount=5)
+    file_handler = handlers.RotatingFileHandler(filename, 'w', encoding='utf-8', maxBytes=1000000, backupCount=5)
     file_handler.setLevel(logging.DEBUG)
 
     file_handler.setFormatter(file_formatter)
