@@ -5,4 +5,4 @@ harpoon.conf
 logs/
 cache/
 junk/
-.idea/git rm .idea
+.idea/
