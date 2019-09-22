@@ -38,29 +38,35 @@ class WebInterface(object):
 
     @cherrypy.expose
     def index(self):
+        cherrypy.session.load()
         logger.debug("Serving index")
         # raise cherrypy.HTTPRedirect("home")
         return self.home()
 
     @cherrypy.expose
     def home(self, msg=None):
+        cherrypy.session.load()
         logger.debug("Serving home")
         return serve_template(templatename='index.html', title="Queue Status", msg=msg)
 
     @cherrypy.expose
     def utilities(self, msg=None):
+        cherrypy.session.load()
         return serve_template(templatename='utilities.html', title="Utilities", msg=msg)
 
     @cherrypy.expose
     def table_content(self):
+        cherrypy.session.load()
         return serve_template(templatename='table-content.html', title="Queue Status")
 
     @cherrypy.expose
     def active_content(self):
+        cherrypy.session.load()
         return serve_template(templatename='active-content.html', title="Active Status")
 
     @cherrypy.expose
     def hashfile(self, hash=None):
+        cherrypy.session.load()
         if hash:
             queuehash = harpoon.HQUEUE.ckqueue()[hash]
             logger.debug(queuehash)
@@ -74,6 +80,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def confirm(self, action=None, data=None, type=None):
+        cherrypy.session.load()
         if action:
             return serve_template(templatename="confirm.html", title="Confirmation", action=action, data=data, type=type)
         else:
@@ -81,6 +88,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def removeItems(self, type=None, item=None):
+        cherrypy.session.load()
         removeditems = 0
         msg = ''
         if type == 'failed':
@@ -118,12 +126,14 @@ class WebInterface(object):
 
     @cherrypy.expose
     def restart(self):
+        cherrypy.session.load()
         self.parent.restart = True
         msg = "Restarting harpoon.  Refresh in 20 seconds."
         return self.home(msg=msg)
 
     @cherrypy.expose
     def add_label(self, label_name=None):
+        cherrypy.session.load()
         logger.debug('LABEL: %s' % label_name)
         msg = ''
         if label_name:
@@ -150,6 +160,7 @@ class WebInterface(object):
 
     @cherrypy.expose
     def add_file(self, label=None, file=[], **kwargs):
+        cherrypy.session.load()
         uploadcount = 0
         msg=''
         logger.debug('[UPLOADFILE] Args: %s' % kwargs)
@@ -183,4 +194,3 @@ class WebInterface(object):
                 msg += 'Invalid file type: %s' % filename
         if uploadcount:
             self.parent.scansched.Scanner()
-        return self.utilities(msg=msg)
