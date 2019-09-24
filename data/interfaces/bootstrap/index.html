@@ -36,17 +36,18 @@
 % endif
 <div id="active_content"></div>
 <h1>${title}</h1>
-<div>
-    test
-</div>
 <div id="table-content" class="table-responsive">
-Test2
 
 </div>
 </%def>
 
 <%def name="javascriptIncludes()">
 <script language="javascript" type="text/javascript">
+if (window.addEventListener) { // Mozilla, Netscape, Firefox
+    window.addEventListener('load', loadlink, false);
+} else if (window.attachEvent) { // IE
+    window.attachEvent('onload', loadlink);
+}
 function loadlink(){
     $('#table-content').load('table_content',function () {
     });
