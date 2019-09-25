@@ -32,6 +32,12 @@ class SFTP():
     def get(self, remoteloc, localloc):
         self.isopen = True
         try:
+            if not self.mirror:
+                if self.connection.isdir(remoteloc):
+                    logger.debug('SFTP: Fixing mirror status')
+                    self.mirror = True
+                    localloc = os.path.dirname(localloc)
+                    logger.debug('SFTP: New Local: %s' % localloc)
             if self.mirror:
                 logger.debug('SFTP: Getting mirror: %s' % remoteloc)
                 folder = os.path.basename(remoteloc)
