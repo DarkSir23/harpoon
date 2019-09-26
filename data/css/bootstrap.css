@@ -80,3 +80,8 @@ select {
 .bottom15 { padding-bottom:15px; }
 .bottom17 { padding-bottom:17px; }
 .bottom30 { padding-bottom:30px; }
+
+.navbar-brand {
+	margin:0 !important;
+	padding: 0px !important;
+}
