@@ -7,23 +7,18 @@
         items = OrderedDict(sorted(harpoon.HQUEUE.ckqueue().items(), key=lambda x: x[1]['timestamp'], reverse=True))
         %>
 
-    <table class="display table table-striped table-hover table-bordered table-condensed table-sm" id="queue-table">
-        <thead>
-            <tr>
-                <th class="name col-xs-3">Name</th>
-                <th class="status col-xs-3 text-center">Status</th>
-                <th class="hash col-xs-1">Hash</th>
-                <th class="timestamp col-xs-2">Time</th>
-                <th class="actions col-xs-3">Actions</th>
-
-            </tr>
-        </thead>
-
+  <div class="row m-1 bg-secondary text-white">
+    <div class="col-md-4 col-sm-12 col-xs-12 d-none d-md-inline-block">Name</div>
+    <div class="col-md-2 col-sm-6 col-xs-4 d-none d-md-inline-block">Status</div>
+    <div class="col-md-2 col-sm-6 col-xs-4 d-none d-md-inline-block">Hash</div>
+    <div class="col-md-2 col-sm-6 col-xs-4 d-none d-md-inline-block">Time</div>
+    <div class="col-md-2 col-sm-6 col-xs-12 d-none d-md-inline-block">Actions</div>
+  </div>
         % for key in items.keys():
         <% item = items[key] %>
         <%
             if item['stage'] == 'current':
-                rowclass = 'active'
+                rowclass = 'primary'
             elif item['stage'] == 'completed':
                 rowclass = 'success'
             elif item['stage'] == 'failed':
@@ -31,37 +26,29 @@
             else:
                 rowclass = 'info'
         %>
-        <tr class="${rowclass}">
-            <td>${item['name'].replace('.',' ')}</td>
-                    <%
-                        if harpoon.CURRENT_DOWNLOAD:
-                            stats = harpoon.CURRENT_DOWNLOAD.get_stats()
-                        else:
-                            stats = {'total': 0, 'trans': 0, 'currentfile': 'Error', 'percent': 0}
-                    %>
-            <td>
-                ${item['status']}
-            </td>
-            <td>
-                % if item['stage'] == 'current' or item['stage'] == 'to-do':
-                    <a href="hashfile?hash=${item['hash']}">${item['hash'][-6:]}</a>
-                % else:
-                    ${item['hash'][-6:]}
-                % endif
-            </td>
-            <td>${item['timestamp']}</td>
-            <td>
-                % if item['stage'] == 'to-do':
-                    <a href="confirm?action=removeItem&type=singleactive&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
-                    <a href="confirm?action=removeItem&type=singleactivewithfile&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
-                % elif item['stage'] == 'current':
-                    % if item['status'] == 'Fetching':
-                        <a href="removeItems?type=activedownload" class="btn btn-sm-btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>
-                    % endif
-                % else:
-                    <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
-                %endif
-            </td>
-        </tr>
+  <div class="row m-1 bg-${rowclass} text-white">
+    <div class="col-md-4 col-sm-12 col-xs-12">${item['name'].replace('.',' ')}</div>
+    <div class="col-md-2 col-sm-6 col-xs-4">${item['status']}</div>
+    <div class="col-md-2 col-sm-6 col-xs-4">
+        % if item['stage'] == 'current' or item['stage'] == 'to-do':
+            <a href="hashfile?hash=${item['hash']}">${item['hash'][-6:]}</a>
+        % else:
+            ${item['hash'][-6:]}
+        % endif
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-4">${item['timestamp']}</div>
+    <div class="col-md-2 col-sm-6 col-xs-12">
+        % if item['stage'] == 'to-do':
+            <a href="confirm?action=removeItem&type=singleactive&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
+            <a href="confirm?action=removeItem&type=singleactivewithfile&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
+        % elif item['stage'] == 'current':
+            % if item['status'] == 'Fetching':
+                <a href="removeItems?type=activedownload" class="btn btn-sm-btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>
+            % endif
+        % else:
+            <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
+        %endif
+    </div>
+  </div>
         % endfor
-    </table>
+

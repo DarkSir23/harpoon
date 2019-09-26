@@ -5,28 +5,9 @@
     from collections import OrderedDict
 %>
 <%def name="headerIncludes()">
-    <div id="subhead_container" class="row">
-      <form action="search" method="get">
-        <div id="subhead_menu"  class="col-xs-12 col-md-8">
-            <a href="confirm?action=clearFailed" class="btn btn-sm btn-primary" id="clearfailed"><i class="fa fa-remove"></i> Clear Failed</a>
-            <a href="confirm?action=clearCompleted" class="btn btn-sm btn-primary" id="clearcompleted"><i class="fa fa-remove"></i> Clear Finished</a>
-            <a href="confirm?action=restart" class="btn btn-sm btn-warning" id="restart"><i class="fa fa-refresh"></i> Restart Harpoon</a>
-        </div>
-        <div class="clearfix visible-xs"><hr/></div>
-        <div class="col-xs-12 col-md-4">
-<!--    <div class="form-group">
-          <label class="sr-only">Search</label>
-          <div class="input-group">
-            <input type="text"  id="name" name="name" placeholder="Player / Event / Opponent" name="title" class="form-control input-sm col-xs-12">
-            <span class="input-group-btn">
-              <button type="submit" value="Book" class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Search"><i class="fa fa-search"></i></button>
-            </span>
-          </div>
-        </div>
- -->
-        </div>
-      </form>
-    </div>
+<li class="nav-item pl-2 pt-1"><a href="confirm?action=clearFailed" class="btn btn-sm btn-primary" id="clearfailed"><i class="fa fa-remove"></i> Clear Failed</a></li>
+<li class="nav-item pl-2 pt-1"><a href="confirm?action=clearCompleted" class="btn btn-sm btn-primary" id="clearcompleted"><i class="fa fa-remove"></i> Clear Finished</a></li>
+<li class="nav-item pl-2 pt-1"><a href="confirm?action=restart" class="btn btn-sm btn-warning" id="restart"><i class="fa fa-refresh"></i> Restart Harpoon</a></li>
 </%def>
 <%def name="body()">
 % if msg:
@@ -34,9 +15,11 @@
         ${msg}
     </div>
 % endif
-<div id="active_content"></div>
-<h1>${title}</h1>
-<div id="table-content" class="table-responsive">
+<div id="active_content" class="container">
+
+</div>
+<div class="container"><h3>${title}</h3></div>
+<div id="table-content" class="container">
 
 </div>
 </%def>

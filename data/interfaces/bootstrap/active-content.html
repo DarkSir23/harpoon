@@ -20,9 +20,9 @@
 %>
 
 % if activeItem:
-<div class="panel panel-primary">
-    <div class="panel-heading"><div class="panel-title">Active Item: ${activeItem['name'].replace('.',' ')}</div></div>
-    <div class="panel-body">
+<div class="card bg-secondary text-white">
+    <div class="card-header"><h5 class="card-title">Active Item: ${activeItem['name'].replace('.',' ')}</h5></div>
+    <div class="card-body">
         <div><b>Hashfile</b>: <a href="hashfile?hash=${activeItem['hash']}">${activeItem['hash']}</a></div>
         % if activeItem['status'] == 'Fetching':
         <div><b>Current File</b>: ${stats['currentfile']} (${int(stats['percent'])}%)</div>
