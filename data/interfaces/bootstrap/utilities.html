@@ -19,53 +19,57 @@
     </div>
 % endif
 <div id="active_content"></div>
-<h1>${title}</h1>
+<div class="container"><h3>${title}</h3></div>
 <div class="container">
-    <div class="panel panel-default col-md-4 col-xs-12">
-        <div class="panel-heading">
-            <div class="panel-title">Labels</div>
-        </div>
-        <div class="panel-body">
-            <div>
-                <ul>
-                    % for label in harpoon.labels():
-                    <li>${label}</li>
-                    %endfor
-                </ul>
+    <div class="card-deck">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="card-title"><h5 align="center">Labels</h5></div>
             </div>
-            <form method="post" action="add_label" class="form-inline">
-                <div class="form-group">
-                    <label class="sr-only" for="label_name">Add a Label</label>
-                    <input type="text" class="form-control" id="label_name" name="label_name" placeholder="Add a Label">
+            <div class="card-body">
+                <div>
+                    <ul>
+                        %for label in harpoon.labels():
+                        <li>${label}</li>
+                            %endfor
+                    </ul>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-        </div>
-    </div>
-    <div class="panel panel-default col-md-4 col-xs-12">
-        <div class="panel-heading">
-            <div class="panel-title">Add a Torrent/NZB</div>
-        </div>
-        <div class="panel-body">
-            <div id="dropzone">
-                <form id="my-awesome-dropzone" class="dropzone needsclick dz-clickable" action="add_file">
-                    <div class="dropzone-previews"></div> <!-- this is where the previews should be shown. -->
-                    <div class="dz-message needsclick">
-                        Drop Torrent/NZB here or click to upload.<br>
+                <form method="post" action="add_label" class="form-inline">
+                    <div class="form-group">
+                        <label class="sr-only" for="label_name">Add a Label</label>
+                        <input type="text" class="form-control" id="label_name"
+                        name="label_name" placeholder="Add a Label">
                     </div>
-      <!-- Now setup your input fields -->
-                    <select name="label" placeholder="Label">
-                        % for label in harpoon.labels():
-                        <option value="${label}">${label}</option>
-                        % endfor
-                    </select>
-
-                    <button type="submit" class="btn btn-primary">Submit data and files!</button>
-            </form>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="card-title"><h5 align="center">Add a Torrent/NZB</h5></div>
+            </div>
+            <div class="card-body">
+                <div id="dropzone">
+                    <form id="my-awesome-dropzone" class="dropzone needsclick dz-clickable"
+                    action="add_file">
+                        <div class="dropzone-previews"></div>
+                        <!-- this is where the previews should be shown. -->
+                        <div class="dz-message needsclick">Drop Torrent/NZB here or click to upload.
+                            <br>
+                        </div>
+                        <!-- Now setup your input fields -->
+                        <label for="label">Label</label>
+                        <select name="label" id="label" placeholder="Label">
+                            % for label in harpoon.labels():
+                            <option value="${label}">${label}</option>
+                            % endfor
+                        </select>
+                        <button type="submit" class="btn btn-primary">Submit data and files!</button>
+                    </form>
                 </div>
+            </div>
         </div>
     </div>
-
 
 </div>
 </%def>

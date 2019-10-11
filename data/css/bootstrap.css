@@ -83,5 +83,5 @@ select {
 
 .navbar-brand {
 	margin:0 !important;
-	padding: 0px !important;
+	padding: 0px 0px 0px 15px !important;
 }

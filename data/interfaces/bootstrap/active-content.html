@@ -21,7 +21,7 @@
 
 % if activeItem:
 <div class="card bg-secondary text-white">
-    <div class="card-header"><h5 class="card-title">Active Item: ${activeItem['name'].replace('.',' ')}</h5></div>
+    <div class="card-header"><h6 class="card-title">Active Item: ${activeItem['name'].replace('.',' ')}</h6></div>
     <div class="card-body">
         <div><b>Hashfile</b>: <a href="hashfile?hash=${activeItem['hash']}">${activeItem['hash']}</a></div>
         % if activeItem['status'] == 'Fetching':
@@ -39,7 +39,7 @@
                 </div>
             </div>
         % else:
-        <b>Status</b>:${activeItem['status']}
+        <b>Status</b>: ${activeItem['status']}
         % endif
 
     </div>

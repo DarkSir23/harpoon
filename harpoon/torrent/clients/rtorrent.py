@@ -14,7 +14,7 @@
 #  along with Harpoon.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 from lib.rtorrent import RTorrent
 from harpoon import logger
@@ -54,15 +54,25 @@ class TorrentClient(object):
         logger.debug('URL: %s' % url)
         if username and password:
             try:
+                logger.debug('SECURE: username and password')
+                if parsed.scheme == 'https':
+                    newurl = url.replace('https://', 'https://%s:%s@' % (username, password))
+                elif parsed.scheme == 'http':
+                    newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
+                else:
+                    newurl = url
+                logger.debug('NEWURL: %s' % newurl)
                 self.conn = RTorrent(
-                    url, (auth, username, password),
-                    verify_server=True,
-                    verify_ssl=self.getVerifySsl(rtorr_verify)
+                    newurl,
+                    # verify_server=True,
+                    # verify_ssl=self.getVerifySsl(rtorr_verify)
             )
-            except:
+            except Exception as e:
+                logger.debug("Exception: %s" % e)
                 return False
         else:
             try:
+                logger.debug('INSECURE: no credentials')
                 self.conn = RTorrent(host)
             except:
                 return False
@@ -70,7 +80,7 @@ class TorrentClient(object):
         return self.conn
 
     def find_torrent(self, hash=None, filepath=None):
-        return self.conn.find_torrent(info_hash=hash, filepath=filepath)
+        return self.conn.find_torrent(info_hash=hash)
 
     def get_files(self, hash):
         a = self.conn.get_files(hash)
@@ -109,12 +119,14 @@ class TorrentClient(object):
         return torrent_info if torrent_info else False
 
     def load_torrent(self, filepath, rtorr_label, start, applylabel=None, rtorr_dir=None):
-        print('filepath to torrent file set to : ' + filepath)
-
+        logger.debug('filepath to torrent file set to : ' + filepath)
+        if not self.conn:
+            return False
         torrent = self.conn.load_torrent(filepath, verify_load=True)
         if not torrent:
             return False
 
+        logger.debug('Torrent: %s' % torrent)
         if rtorr_label:
             torrent.set_custom(1, rtorr_label)
             print('Setting label for torrent to : ' + rtorr_label)
@@ -165,19 +177,19 @@ class TorrentClient(object):
     def cleanHost(self, host, protocol = True, ssl = False, username = None, password = None):
         """  Return a cleaned up host with given url options set
             taken verbatim from CouchPotato
-    Changes protocol to https if ssl is set to True and http if ssl is set to false.
-    >>> cleanHost("localhost:80", ssl=True)
-    'https://localhost:80/'
-    >>> cleanHost("localhost:80", ssl=False)
-    'http://localhost:80/'
+            Changes protocol to https if ssl is set to True and http if ssl is set to false.
+            >>> cleanHost("localhost:80", ssl=True)
+            'https://localhost:80/'
+            >>> cleanHost("localhost:80", ssl=False)
+            'http://localhost:80/'
 
-    Username and password is managed with the username and password variables
-    >>> cleanHost("localhost:80", username="user", password="passwd")
-    'http://user:passwd@localhost:80/'
+            Username and password is managed with the username and password variables
+            >>> cleanHost("localhost:80", username="user", password="passwd")
+            'http://user:passwd@localhost:80/'
 
-    Output without scheme (protocol) can be forced with protocol=False
-    >>> cleanHost("localhost:80", protocol=False)
-    'localhost:80'
+            Output without scheme (protocol) can be forced with protocol=False
+            >>> cleanHost("localhost:80", protocol=False)
+            'localhost:80'
         """
 
         if not '://' in host and protocol:

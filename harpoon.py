@@ -1074,16 +1074,16 @@ class QueueR(object):
         except OSError as e:
             sys.exit("2nd fork failed: %s [%d]" % (e.strerror, e.errno))
 
-        dev_null = open('/dev/null', 'r')
-        os.dup2(dev_null.fileno(), sys.stdin.fileno())
-
-        si = open('/dev/null', "r")
-        so = open('/dev/null', "a+")
-        se = open('/dev/null', "a+")
-
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
+        # dev_null = open('/dev/null', 'r')
+        # os.dup2(dev_null.fileno(), sys.stdin.fileno())
+        #
+        # si = open('/dev/null', "r")
+        # so = open('/dev/null', "a+")
+        # se = open('/dev/null', "a+")
+        #
+        # os.dup2(si.fileno(), sys.stdin.fileno())
+        # os.dup2(so.fileno(), sys.stdout.fileno())
+        # os.dup2(se.fileno(), sys.stderr.fileno())
 
         pid = os.getpid()
         logger.info('Daemonized to PID: %s' % pid)
@@ -1187,6 +1187,9 @@ class QueueR(object):
                                 logger.info('label to be set to : ' + str(subdir))
                                 logger.info('Filepath set to : ' + str(fpath))
                                 tinfo = rtorrent.RTorrent(file=fpath, add=True, label=subdir)
+                                if not tinfo:
+                                    logger.debug('Unable to load .torrent file')
+                                    return False
                                 torrent_info = tinfo.main()
                                 logger.info(torrent_info)
                                 if torrent_info:

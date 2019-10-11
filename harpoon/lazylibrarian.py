@@ -49,7 +49,7 @@ class LazyLibrarian(object):
             filepath = os.path.join(self.defaultdir, nzbname)
         filebase = os.path.basename(filepath)
         logger.debug('[LAZYLIBRARIAN] Path: %s' % filepath)
-        midpath = os.path.abspath(os.path.join(filepath,os.pardir))
+        midpath = os.path.abspath(os.path.join(filepath, os.pardir))
         midbase = os.path.basename(midpath)
         defaultbase = os.path.basename(self.defaultdir)
         movefile = False
@@ -60,20 +60,21 @@ class LazyLibrarian(object):
         logger.info('[LAZYLIBRARIAN] Process Suffix: %s' % process_suffix)
         if midbase == defaultbase or midbase == self.snstat['label']:
             # name is 1 deep - if file, move it.  if folder, check for LL
+            filepath = filepath.encode('utf-8')
             if os.path.isfile(filepath):
                 logger.info('[LAZYLIBRARIAN] Prepping file to move')
-                process_path = filepath + process_suffix
+                process_path = filepath + process_suffix.encode('utf-8')
                 movefile = True
             elif os.path.isdir(filepath):
                 logger.info('[LAZYLIBRARIAN] Path is a folder')
-                if filepath.endswith(process_suffix):
+                if str(filepath).endswith(process_suffix):
                     logger.info('[LAZYLIBRARIAN] Folder is already properly named')
                     movefile = False
                     process_path = filepath
                 else:
                     logger.info('[LAZYLIBRARIAN] Renaming folder')
                     movefile = False
-                    process_path = filepath + process_suffix
+                    process_path = filepath + process_suffix.encode('utf-8')
                     if os.path.exists(process_path):
                         logger.info('[LAZYLIBRARIAN] Path Exists.  Renaming.')
                         os.rename(process_path, process_path + ' - %s' % common.currentTime())
@@ -91,10 +92,10 @@ class LazyLibrarian(object):
             os.rename(midpath, process_path)
             movefile = False
         if movefile:
-            logger.debug("[LAZYLIBRARIAN] Moving %s to %s" % (filepath, os.path.join(process_path, filebase)))
+            logger.debug("[LAZYLIBRARIAN] Moving %s to %s" % (filepath, os.path.join(process_path, filebase.encode('utf-8'))))
             if not os.path.exists(process_path):
                 os.mkdir(process_path)
-            shutil.move(filepath, os.path.join(process_path, filebase))
+            shutil.move(filepath, os.path.join(process_path, filebase.encode('utf-8')))
 
         # if self.lazylibrarian_filedata and 'BookID' in self.lazylibrarian_filedata.keys():
         #     movefile = True
