@@ -51,17 +51,17 @@ class TorrentClient(object):
         # rpc_url is only used on http/https scgi pass-through
         if parsed.scheme in ['http', 'https']:
             url += rpc_url
-        logger.debug('URL: %s' % url)
+        # logger.debug('URL: %s' % url)
         if username and password:
             try:
-                logger.debug('SECURE: username and password')
+                # logger.debug('SECURE: username and password')
                 if parsed.scheme == 'https':
                     newurl = url.replace('https://', 'https://%s:%s@' % (username, password))
                 elif parsed.scheme == 'http':
                     newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
                 else:
                     newurl = url
-                logger.debug('NEWURL: %s' % newurl)
+                # logger.debug('NEWURL: %s' % newurl)
                 self.conn = RTorrent(
                     newurl,
                     # verify_server=True,
@@ -72,7 +72,7 @@ class TorrentClient(object):
                 return False
         else:
             try:
-                logger.debug('INSECURE: no credentials')
+                # logger.debug('INSECURE: no credentials')
                 self.conn = RTorrent(host)
             except:
                 return False
