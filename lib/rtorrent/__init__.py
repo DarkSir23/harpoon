@@ -27,7 +27,7 @@ import os.path
 import rtorrent.rpc #@UnresolvedImport
 import sys
 import time
-
+from harpoon import logger
 
 if _py3:
     import xmlrpc.client as xmlrpclib #@UnresolvedImport
@@ -59,16 +59,18 @@ class RTorrent:
 
         assert self._verify_conn(self._get_xmlrpc_conn()) \
             is True, "rTorrent connection failed"
-
+        logger.debug('RTORRENT: Verified.')
         self.client_version_tuple = tuple([int(i) for i in \
                     self._get_xmlrpc_conn().system.client_version().split(".")])
 
         assert self._meets_version_requirement() is True, \
             "Error: Minimum rTorrent version required is {0}".format(
                                                 MIN_RTORRENT_VERSION_STR)
-
+        logger.debug('RTORRENT: Before update')
         self.update()
+        logger.debug('RTORRENT: Before get_torrents')
         self.get_torrents()
+        logger.debug('RTORRENT: After get_torrents')
 
     def _get_xmlrpc_conn(self):
         """Get ServerProxy instance"""
