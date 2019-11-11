@@ -61,9 +61,9 @@ class TorrentClient(object):
                     newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
                 else:
                     newurl = url
-                logger.debug('NEWURL: %s' % newurl)
+                # logger.debug('NEWURL: %s' % newurl)
                 self.conn = RTorrent(
-                    newurl,
+                    newurl, verbose=True
                     # verify_server=True,
                     # verify_ssl=self.getVerifySsl(rtorr_verify)
             )
