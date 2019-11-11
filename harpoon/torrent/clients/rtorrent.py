@@ -63,7 +63,7 @@ class TorrentClient(object):
                     newurl = url
                 # logger.debug('NEWURL: %s' % newurl)
                 self.conn = RTorrent(
-                    newurl, verbose=True
+                    newurl, _verbose=True
                     # verify_server=True,
                     # verify_ssl=self.getVerifySsl(rtorr_verify)
             )
