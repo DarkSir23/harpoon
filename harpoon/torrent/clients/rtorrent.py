@@ -18,6 +18,7 @@ from urllib.parse import urlparse, urlunparse
 
 from lib.rtorrent import RTorrent
 from harpoon import logger
+import traceback
 
 class TorrentClient(object):
     def __init__(self):
@@ -54,22 +55,19 @@ class TorrentClient(object):
         # logger.debug('URL: %s' % url)
         if username and password:
             try:
-                self.conn = RTorrent(url)
+                # logger.debug('SECURE: username and password')
+                if parsed.scheme == 'https':
+                    newurl = url.replace('https://', 'https://%s:%s@' % (username, password))
+                elif parsed.scheme == 'http':
+                    newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
+                else:
+                    newurl = url
+                # logger.debug('NEWURL: %s' % newurl)
+                self.conn = RTorrent(newurl)
             except Exception as e:
-                logger.debug('Connection Excepton 1: %s.  Trying alternate.' % e)
-                try:
-                    # logger.debug('SECURE: username and password')
-                    if parsed.scheme == 'https':
-                        newurl = url.replace('https://', 'https://%s:%s@' % (username, password))
-                    elif parsed.scheme == 'http':
-                        newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
-                    else:
-                        newurl = url
-                    # logger.debug('NEWURL: %s' % newurl)
-                    self.conn = RTorrent(newurl)
-                except Exception as e:
-                    logger.debug("Connection Exception 2: %s. Failing" % e)
-                    return False
+                logger.debug("Connection Exception: %s. Failing" % e)
+                logger.debug(traceback.format_exc())
+                return False
         else:
             try:
                 # logger.debug('INSECURE: no credentials')
