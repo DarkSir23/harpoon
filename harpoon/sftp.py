@@ -13,7 +13,15 @@ class SFTP():
             'trans': 0,
             'total': 0,
             'currentfile': '',
-            'percent': 0
+            'percent': 0,
+            'download_total': env['download_total'],
+            'prevfile': '',
+            'finished': 0,
+            'finishedpct': 0,
+            'filefinishedpct': 0,
+            'fileremainderpct': 0,
+            'totalpct': 0,
+
         }
         self.isopen = False
         self.exitlevel = 0
@@ -68,9 +76,16 @@ class SFTP():
         self.isopen = False
 
     def receivestatus(self, btrans, btotal):
+        if self.stats['currentfile'] != self.stats['prevfile']:
+            self.stats['finished'] += self.stats['total']
+            self.stats['prevfile'] = self.stats['currentfile']
         self.stats['trans'] = float(btrans)
         self.stats['total'] = float(btotal)
         if self.stats['trans'] and self.stats['total']:
+            self.stats['finishedpct'] = (self.stats['finished'] / self.stats['download_total']) * 100
+            self.stats['filefinishedpct'] = (self.stats['trans'] / self.stats['download_total']) * 100
+            self.stats['fileremainderpct'] = ((self.stats['total'] - self.stats['trans']) / self.stats['download_total']) * 100
+            self.stats['totalpct'] = ((self.stats['finished'] + self.stats['trans']) / self.stats['download_total']) * 100
             self.stats['percent'] = (self.stats['trans'] / self.stats['total']) * 100
 
     def get_stats(self):

@@ -28,14 +28,32 @@
         <div><b>Current File</b>: ${stats['currentfile']} (${int(stats['percent'])}%)</div>
             <div class="progress">
                 <div
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                        class="progress-bar progress-bar-striped progress-bar-animated"
                         role="progressbar"
-                        style="width: ${int(stats['percent'])}%;"
-                        aria-valuenow="${stats['percent']}"
+                        style="width: ${int(stats['finishedpct'])}%;"
+                        aria-valuenow="${stats['finishedpct']}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                >
+                </div>
+                <div
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                        role="progressbar"
+                        style="width: ${int(stats['filefinishedpct'])}%;"
+                        aria-valuenow="${stats['filefinishedpct']}"
                         aria-valuemin="0"
                         aria-valuemax="100"
                 >
                     ${size(stats['trans'])}/${size(stats['total'])}
+                </div>
+                <div
+                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                        role="progressbar"
+                        style="width: ${int(stats['fileremainderpct'])}%;"
+                        aria-valuenow="${stats['fileremainderpct']}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                >
                 </div>
             </div>
         % else:

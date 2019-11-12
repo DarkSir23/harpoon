@@ -458,6 +458,7 @@ class QueueR(object):
                     harpoon_env['harpoon_applylabel'] = str(config.GENERAL['applylabel']).lower()
                     harpoon_env['harpoon_defaultdir'] = config.GENERAL['defaultdir']
                     harpoon_env['harpoon_multiplebox'] = multiplebox
+                    harpoon_env['download_total'] = snstat['download_total']
 
                     if config.GENERAL['applylabel'] is True:
                         self.CURRENT_DOWNFOLDER = os.path.join(config.GENERAL['defaultdir'], labelit)

@@ -111,14 +111,16 @@ class SABnzbd(object):
                         nzbname = os.path.basename(hq['storage'])
                         found = {'completed': True,
                                  'name': re.sub('.nzb', '', hq['nzb_name']).strip(),
-                                 'extendedname' : nzbname,
+                                 'extendedname': nzbname,
                                  'folder': path_folder,
                                  'mirror': True,  # Change this
                                  'multiple': None,
                                  'label': hq['category'],
                                  'hash': hq['nzo_id'],
                                  'failed': False,
-                                 'files': []}
+                                 'files': [],
+                                 'download_total': hq['bytes']}
+                        logger.debug('Found: %s' % found)
                         break
                     elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':
                         # get the stage / error message and see what we can do
