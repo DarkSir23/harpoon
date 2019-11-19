@@ -43,7 +43,7 @@
             <a href="confirm?action=removeItem&type=singleactivewithfile&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
         % elif item['stage'] == 'current':
             % if item['status'] == 'Fetching':
-                <a href="removeItems?type=activedownload" class="btn btn-sm-btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>
+                <a href="removeItems?type=activedownload" class="btn btn-sm btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>
             % endif
         % else:
             <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
