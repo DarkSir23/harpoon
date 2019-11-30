@@ -17,21 +17,16 @@
 import sys, os
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), 'lib'))
 
-import queue
-import subprocess
 import optparse
 import re
 import time
 import json
 import requests
-import datetime
 import socket as checksocket
 from contextlib import closing
 import hashlib
 import bencode
 import threading
-import shutil
-from io import StringIO
 
 import harpoon
 from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp
@@ -535,7 +530,9 @@ class QueueR(object):
                 if all([snstat['label'] == config.SONARR['sonarr_label'], config.GENERAL['tv_choice'] == 'sonarr']):  #probably should be sonarr_label instead of 'tv'
                     logger.debug('[HARPOON] - Sonarr Detected')
                     #unrar it, delete the .rar's and post-process against the items remaining in the given directory.
+                    queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], config.SONARR['sonarr_label'] ,snstat['name']))
+                    queue.ckupdate(item['item'], {'status': 'Proessing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], config.SONARR['sonarr_label'], snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
@@ -590,7 +587,9 @@ class QueueR(object):
                 elif all([snstat['label'] == config.SICKRAGE['sickrage_label'], config.GENERAL['tv_choice'] == 'sickrage']):
                     logger.debug('[HARPOON] - Sickrage Detected')
                     #unrar it, delete the .rar's and post-process against the items remaining in the given directory.
+                    queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], config.SICKRAGE['sickrage_label'], snstat['name']))
+                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], config.SICKRAGE['sickrage_label'], snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
@@ -638,7 +637,9 @@ class QueueR(object):
                 elif snstat['label'] == config.RADARR['radarr_label']:
                     logger.debug('[HARPOON] - Radarr Detected')
                     #check list of files for rar's here...
+                    queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], config.RADARR['radarr_label'] ,snstat['name']))
+                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], config.RADARR['radarr_label'], snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
@@ -698,7 +699,9 @@ class QueueR(object):
                 elif snstat['label'] == config.LIDARR['lidarr_label']:
                     logger.debug('[HARPOON] - Lidarr Detected')
                     #check list of files for rar's here...
+                    queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], config.LIDARR['lidarr_label'] ,snstat['name']))
+                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], config.LIDARR['lidarr_label'], snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
@@ -748,7 +751,9 @@ class QueueR(object):
                 elif snstat['label'] == config.LAZYLIBRARIAN['lazylibrarian_label']:
                     logger.debug('[HARPOON] - Lazylibrarian Detected')
                     #unrar it, delete the .rar's and post-process against the items remaining in the given directory.
+                    queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], config.LAZYLIBRARIAN['lazylibrarian_label'] ,snstat['name']))
+                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], config.LAZYLIBRARIAN['lazylibrarian_label'], snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
@@ -1125,9 +1130,9 @@ class QueueR(object):
                 for f in filenames:
                     ll_type = ''
                     if any([f.endswith(ext) for ext in extensions]):
+                        client = None
                         if f.endswith('.file'):
-                            client = None
-                            #history only works with sonarr/radarr...
+                            #history only works with sonarr/radarr/lidarr...
                             #if any([f[-11:] == 'sonarr', f[-11:] == 'radarr']):
                             hash, client = self.history_poll(f[:-5])
                             logger.info('Client: %s' % client)
@@ -1266,7 +1271,9 @@ class QueueR(object):
                                             elif ll_type == 'audiobook':
                                                 ll_type = 'AudioBook'
                                             else:
-                                                ll_type= "Magazine"
+                                                ll_type = "Magazine"
+                                    else:
+                                        client = None
                                 except Exception as e:
                                     try:
                                         with open(actualfile) as unknown_file:
@@ -1327,7 +1334,7 @@ class QueueR(object):
 
                                 if mode != 'hash':
                                     try:
-                                        os.rename(fpath,npath)
+                                        os.rename(fpath, npath)
                                         logger.info('Succesfully renamed file to ' + npath)
                                     except Exception as e:
                                         logger.warn('[%s] Unable to rename file %s to %s' % (e, fpath, npath))
