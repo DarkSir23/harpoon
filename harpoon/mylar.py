@@ -50,40 +50,32 @@ class Mylar(object):
             logger.debug('loaded .mylar.hash successfully - extracting info.')
             try:
                 nzb_name = data['mylar_release_name']
-                logger.debug('A')
             except:
                 try:
                     if 'mylar_release_nzbname' in list(data.keys()):
                         # nzb_name HAS TO BE the filename itself so it can pp directly
                         nzb_name = os.path.basename(self.snstat['folder'])
                         nzb = True
-                        logger.debug('B1 - %s' % nzb_name)
                 except:
                     #if mylar_release_name doesn't exist, fall back to the torrent_filename.
                     #mylar retry issue will not have a release_name
                     nzb_name = data['mylar_torrent_filename']
-                    logger.debug('B2 - %s' % nzb_name)
 
             if self.issueid is None:
                 if 'mylar_issuearcid' in list(data.keys()) and data['mylar_issuearcid'] != 'None':
                     issueid = data['mylar_issuearcid']
-                    logger.debug('C1 - %s' % issueid)
                 else:
                     if data['mylar_release_pack'] == 'False':
                         issueid = data['mylar_issueid']
-                        logger.debug('C2 - %s' % issueid)
                     else:
                         issueid = None
-                        logger.debug(C3)
                 comicid = data['mylar_comicid']
                 logger.debug('D1 - %s' % comicid)
                 if comicid == 'None':
                     comicid = None
-                    logger('D2')
             else:
                 issueid = self.issueid
                 comicid = None
-                logger('D3')
             logger.debug("Info: %s" % self)
         url = self.mylar_url + '/api'
         if all([self.applylabel is True, self.snstat['label'] != 'None']):

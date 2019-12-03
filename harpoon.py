@@ -1202,8 +1202,8 @@ class QueueR(object):
                                     hashfile = str(torrent_info['hash']) + '.hash'
                                     os.rename(fpath, os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile))
                                 else:
-                                    logger.warn('something went wrong. Exiting')
-                                    sys.exit(1)
+                                    logger.warn('something went wrong. Skipping torrent file.')
+                                    continue
                                 queuefile = hashfile[:-5]
                                 hashfile = hashfile[:-5]
                                 mode = 'hash'
