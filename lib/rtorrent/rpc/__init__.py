@@ -96,6 +96,7 @@ class Method:
         if version != self.version:
             self.version = version
             self.varname = get_varname(self.rpc_call, self.version)
+
     def _get_method_type(self):
         """Determine whether method is a modifier or a retriever"""
         if self.method_name[:4] == "set_" or self.method_name[-4:] == ".set": return('m')  # modifier
