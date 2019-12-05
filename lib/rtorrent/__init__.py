@@ -668,10 +668,10 @@ _all_methods_list = [methods,
                      ]
 
 _all_methods_list97 = [methods,
-                       filemethods,
-                       torrentmethods,
-                       trackermethods,
-                       peermethods,
+                       filemethods97,
+                       torrentmethods97,
+                       trackermethods97,
+                       peermethods97,
                        ]
 
 class_methods_pair = {
