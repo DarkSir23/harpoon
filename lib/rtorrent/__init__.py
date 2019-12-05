@@ -89,8 +89,12 @@ class RTorrent:
                 _build_class_methods(c)
         else:
             methods = torrentmethods
-        retriever_methods = [m for m in methods
-                             if m.is_retriever() and m.is_available(self)]
+        if self.client_version >= (0, 9, 7):
+            retriever_methods = [m for m in methods97
+                                 if m.is_retriever() and m.is_available(self)]
+        else:
+            retriever_methods = [m for m in methods
+                                 if m.is_retriever() and m.is_available(self)]
         print('RTORRENT_TEMP: Retriever Methods: %s' % retriever_methods)
         m = Multicall(self)
         if self.client_version >= (0, 9, 7):
