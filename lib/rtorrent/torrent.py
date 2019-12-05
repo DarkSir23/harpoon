@@ -51,7 +51,6 @@ class Torrent:
         self.peers = []
         self.trackers = []
         self.files = []
-        logger.debug('RTORRENT_TEMP: Torrent version: %s' % str(self.rtorrent_version))
         self._call_custom_methods()
 
     def __repr__(self):

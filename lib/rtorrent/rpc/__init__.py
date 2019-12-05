@@ -172,6 +172,7 @@ class Multicall:
         @rtype: tuple
         """
         m = xmlrpclib.MultiCall(self.rt_obj._get_conn())
+        logger.debug('RTORRENT_TEMP: Calls: %s' % self.calls)
         for call in self.calls:
             method, args = call
             rpc_call = getattr(method, "rpc_call")

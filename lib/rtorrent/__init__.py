@@ -88,13 +88,13 @@ class RTorrent:
                 _build_rpc_methods(c, class_methods_pair97[c])
                 _build_class_methods(c)
             self.connection._update_rpc_methods()
-            logger.debug('RTORRENT_TEMP: RPC Methods: %s' % self.connection._get_rpc_methods())
+            # logger.debug('RTORRENT_TEMP: RPC Methods: %s' % self.connection._get_rpc_methods())
         else:
             methods = torrentmethods
 
         retriever_methods = [m for m in methods
                              if m.is_retriever() and m.is_available(self)]
-        print('RTORRENT_TEMP: Retriever Methods: %s' % retriever_methods)
+        # logger.debug('RTORRENT_TEMP: Retriever Methods: %s' % retriever_methods)
         m = Multicall(self)
         if self.client_version >= (0, 9, 7):
             MCFirstArg = ""
