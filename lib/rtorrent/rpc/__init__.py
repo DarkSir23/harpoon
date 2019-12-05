@@ -202,6 +202,7 @@ def call_method(class_obj, method, *args):
     @param method: L{Method} instance or name of raw RPC method
     @type method: Method or str
     """
+    logger.debug("RTORRENT_TEMP: Method: %s" % method)
     if method.is_retriever():
         args = args[:-1]
     else:

@@ -24,6 +24,7 @@ from . import peer
 from . import tracker
 from . import file
 from . import compat
+from harpoon import logger
 
 from .common import safe_repr
 
@@ -50,7 +51,7 @@ class Torrent:
         self.peers = []
         self.trackers = []
         self.files = []
-
+        logger.debug('RTORRENT_TEMP: Torrent version: %s' % str(self.rtorrent_version))
         self._call_custom_methods()
 
     def __repr__(self):
