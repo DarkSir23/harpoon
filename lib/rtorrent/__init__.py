@@ -24,7 +24,7 @@ import urllib
 import os.path
 import time
 from .compat import xmlrpclib
-
+from harpoon import logger
 from .connection import Connection
 from .common import find_torrent, join_uri, \
     update_uri, is_valid_port, convert_version_tuple_to_str
@@ -61,7 +61,8 @@ class RTorrent:
             self.connection.verify()
         for m in methods:
             if m.version != self.client_version:
-                print('Updating %s to version %s' % (m.varname, str(self.client_version)))
+                logger.debug('Updating %s to version %s' % (m.varname, str(self.client_version)))
+                m._update_version()
 
     @property
     def client(self):
@@ -90,6 +91,7 @@ class RTorrent:
             methods = torrentmethods
         retriever_methods = [m for m in methods
                              if m.is_retriever() and m.is_available(self)]
+        print('RTORRENT_TEMP: Retriever Methods: %s' % retriever_methods)
         m = Multicall(self)
         if self.client_version >= (0, 9, 7):
             MCFirstArg = ""

@@ -24,7 +24,7 @@ from lib.rtorrent.common import bool_to_int, convert_version_tuple_to_str,\
     safe_repr
 from lib.rtorrent.err import MethodError
 from lib.rtorrent.compat import xmlrpclib
-
+from harpoon import logger
 
 
 def get_varname(rpc_call, version):
@@ -155,6 +155,7 @@ class Multicall:
 
         # ensure method is available before adding
         if not method.is_available(self.rt_obj):
+
             _handle_unavailable_rpc_method(method, self.rt_obj)
 
         self.calls.append((method, args))
