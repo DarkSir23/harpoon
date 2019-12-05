@@ -534,7 +534,7 @@ class QueueR(object):
                         continue
                     else:
                         snatch_status = 'COMPLETED'
-                queue.ckupdate(item['item'], {'status': 'Processing', 'stage': 'current'})
+                # queue.ckupdate(item['item'], {'status': 'Processing', 'stage': 'current'})
                 if all([snstat['label'] == config.SONARR['sonarr_label'], config.GENERAL['tv_choice'] == 'sonarr']):  #probably should be sonarr_label instead of 'tv'
                     logger.debug('[HARPOON] - Sonarr Detected')
                     #unrar it, delete the .rar's and post-process against the items remaining in the given directory.

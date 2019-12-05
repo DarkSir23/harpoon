@@ -1,9 +1,10 @@
 import pysftp
 from pysftp.helpers import reparent, WTCallbacks, path_advance
 import os
+from logging import WARNING
 from harpoon import logger
 from paramiko import SFTPClient
-
+logger.getLogger("paramiko").setLevel(WARNING)
 
 class SFTP():
     def __init__(self, env, mirror=False):

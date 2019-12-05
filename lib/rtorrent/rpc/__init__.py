@@ -172,7 +172,7 @@ class Multicall:
         @rtype: tuple
         """
         m = xmlrpclib.MultiCall(self.rt_obj._get_conn())
-        logger.debug('RTORRENT_TEMP: Calls: %s' % self.calls)
+        # logger.debug('RTORRENT_TEMP: Calls: %s' % self.calls)
         for call in self.calls:
             method, args = call
             rpc_call = getattr(method, "rpc_call")
@@ -203,7 +203,7 @@ def call_method(class_obj, method, *args):
     @param method: L{Method} instance or name of raw RPC method
     @type method: Method or str
     """
-    logger.debug("RTORRENT_TEMP: Method: %s" % method)
+    # logger.debug("RTORRENT_TEMP: Method: %s" % method)
     if method.is_retriever():
         args = args[:-1]
     else:

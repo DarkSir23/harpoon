@@ -61,7 +61,7 @@ class RTorrent:
             self.connection.verify()
         for m in methods:
             if m.version != self.client_version:
-                logger.debug('Updating %s to version %s' % (m.varname, str(self.client_version)))
+                # logger.debug('Updating %s to version %s' % (m.varname, str(self.client_version)))
                 m._update_version(self.client_version)
 
     @property
