@@ -119,7 +119,7 @@ class SABnzbd(object):
                                  'hash': hq['nzo_id'],
                                  'failed': False,
                                  'files': [],
-                                 'download_total': hq['bytes']}
+                                 'total_filesize': hq['bytes']}
                         logger.debug('Found: %s' % found)
                         break
                     elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':

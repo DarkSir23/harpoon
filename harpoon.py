@@ -27,6 +27,7 @@ from contextlib import closing
 import hashlib
 import bencode
 import threading
+import traceback
 
 import harpoon
 from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp
@@ -304,7 +305,7 @@ class QueueR(object):
                     snstat = sab.query()
 
                 except Exception as e:
-                    logger.info('ERROR - %s' %e)
+                    logger.info('ERROR 307 - %s' %e)
                     snstat = None
             else:
                 try:
@@ -316,7 +317,8 @@ class QueueR(object):
                         rt = rtorrent.RTorrent(hash=item['item'], label=item['label'])
                     snstat = rt.main()
                 except Exception as e:
-                    logger.info('ERROR - %s' % e)
+                    logger.info('ERROR 319 - %s' % e)
+                    logger.debug('Traceback: %s' % traceback.format_exc())
                     snstat = None
 
                 #import torrent.clients.deluge as delu
@@ -358,14 +360,20 @@ class QueueR(object):
                                    'client': item['client']})
                         queue.ckupdate(item['item'],{'stage': 'to-do', 'status': 'Not found in client. Attempt %s' % retry_count, 'retry_count': retry_count})
                 else:
-                    logger.info('Still downloading in client....let\'s try again in 30 seconds.')
-                    time.sleep(30)
                     #we already popped the item out of the queue earlier, now we need to add it back in.
                     queue.put({'mode':  item['mode'],
                                'item':  item['item'],
                                'label': item['label'],
                                'client': item['client']})
                     queue.ckupdate(item['item'],{'stage': 'to-do', 'status': 'Still downloading in client'})
+                    if queue.qsize() > 4:
+                        delay = 5
+                    elif queue.qsize() > 2:
+                        delay = 15
+                    else:
+                        delay = 30
+                    logger.info('Still downloading in client....let\'s try again in %s seconds.' % delay)
+                    time.sleep(delay)
             elif snstat and 'failed' in list(snstat.keys()) and snstat['failed']:
                 logger.info('Torrent or NZB returned status of "failed".  Removing queue item.')
                 if item['client'] == 'sabnzbd' and config.SAB['sab_cleanup']:
@@ -376,7 +384,7 @@ class QueueR(object):
                         sab = sabnzbd.SABnzbd(params=sa_params, saburl=config.SAB['sab_url'])
                         snstat = sab.cleanup()
                     except Exception as e:
-                        logger.info('ERROR - %s' % e)
+                        logger.info('ERROR 379 - %s' % e)
                         snstat = None
                 try:
                     os.remove(os.path.join(config.GENERAL['torrentfile_dir'], item['label'],
@@ -453,7 +461,7 @@ class QueueR(object):
                     harpoon_env['harpoon_applylabel'] = str(config.GENERAL['applylabel']).lower()
                     harpoon_env['harpoon_defaultdir'] = config.GENERAL['defaultdir']
                     harpoon_env['harpoon_multiplebox'] = multiplebox
-                    harpoon_env['download_total'] = snstat['download_total']
+                    harpoon_env['download_total'] = snstat['total_filesize']
 
                     if config.GENERAL['applylabel'] is True:
                         self.CURRENT_DOWNFOLDER = os.path.join(config.GENERAL['defaultdir'], labelit)
@@ -865,7 +873,6 @@ class QueueR(object):
 
                     my = mylar.Mylar(mylar_info)
                     mylar_process = my.post_process()
-
                     logger.info('[MYLAR] Successfully auto-snatched!')
                     self.cleanup_check(item, script_cmd, downlocation, snstat)
                     if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
@@ -936,7 +943,7 @@ class QueueR(object):
                 sab = sabnzbd.SABnzbd(params=sa_params, saburl=config.SAB['sab_url'])
                 cleanup = sab.cleanup()
             except Exception as e:
-                logger.info('ERROR - %s' % e)
+                logger.info('ERROR 938 - %s' % e)
                 cleanup = None
 
             labelit = None

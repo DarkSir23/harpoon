@@ -60,7 +60,8 @@ class SFTP():
             else:
                 logger.debug('SFTP: Getting local: %s' % remoteloc)
                 self.stats['currentfile'] = os.path.basename(remoteloc)
-                self.connection.get('%s' % remoteloc, localpath=localloc, callback=self.receivestatus)
+#                self.connection.get('%s' % remoteloc, localpath=localloc, callback=self.receivestatus)
+                self.connection.get(remoteloc, localpath=localloc, callback=self.receivestatus)
         except UnicodeEncodeError as e:
             logger.exception('Error: %s' % e)
             pass
@@ -76,12 +77,14 @@ class SFTP():
         self.isopen = False
 
     def receivestatus(self, btrans, btotal):
+
         if self.stats['currentfile'] != self.stats['prevfile']:
             self.stats['finished'] += self.stats['total']
             self.stats['prevfile'] = self.stats['currentfile']
         self.stats['trans'] = float(btrans)
         self.stats['total'] = float(btotal)
-        if self.stats['trans'] and self.stats['total']:
+        # logger.debug('%s/%s - %s' % (self.stats['trans'], self.stats['total'], self.stats['download_total']))
+        if self.stats['trans'] and self.stats['total'] and self.stats['download_total']:
             self.stats['finishedpct'] = (self.stats['finished'] / self.stats['download_total']) * 100
             self.stats['filefinishedpct'] = (self.stats['trans'] / self.stats['download_total']) * 100
             self.stats['fileremainderpct'] = ((self.stats['total'] - self.stats['trans']) / self.stats['download_total']) * 100
@@ -156,6 +159,32 @@ class CustomConnection(pysftp.Connection):
 
 class CustomSFTPClient(SFTPClient):
 
+    def getfo(self, remotepath, fl, callback=None):
+        """
+        Copy a remote file (``remotepath``) from the SFTP server and write to
+        an open file or file-like object, ``fl``.  Any exception raised by
+        operations will be passed through.  This method is primarily provided
+        as a convenience.
+
+        :param object remotepath: opened file or file-like object to copy to
+        :param str fl:
+            the destination path on the local host or open file object
+        :param callable callback:
+            optional callback function (form: ``func(int, int)``) that accepts
+            the bytes transferred so far and the total bytes to be transferred
+        :return: the `number <int>` of bytes written to the opened file object
+
+        .. versionadded:: 1.10
+        """
+        file_size = self.stat(remotepath).st_size
+        logger.debug('SFTP: File Size: %s' % file_size)
+        with self.open(remotepath, "rb") as fr:
+            fr.prefetch(file_size)
+            return self._transfer_with_callback(
+                reader=fr, writer=fl, file_size=file_size, callback=callback
+            )
+
+
     def get(self, remotepath, localpath, callback=None):
         """
         Copy a remote file (``remotepath``) from the SFTP server to the local
@@ -179,3 +208,16 @@ class CustomSFTPClient(SFTPClient):
             raise IOError(
                 "size mismatch in get!  {} != {}".format(s.st_size, size)
             )
+
+
+    def _transfer_with_callback(self, reader, writer, file_size, callback):
+        size = 0
+        while True:
+            data = reader.read(32768)
+            writer.write(data)
+            size += len(data)
+            if len(data) == 0:
+                break
+            if callback is not None:
+                callback(size, file_size)
+        return size

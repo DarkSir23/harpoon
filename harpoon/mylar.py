@@ -122,17 +122,18 @@ class Mylar(object):
                   'comicid':     comicid,
                   'nzb_folder':  newpath}
 
-        r = requests.post(url, params=payload, headers=self.mylar_headers)
-        #response = r.json()
-        logger.debug('content: %s' % r.content)
+        # r = requests.post(url, params=payload, headers=self.mylar_headers)
+        # response = r.json()
+        # logger.debug('content: %s' % r.content)
 
         try:
-           r = requests.post(url, params=payload, headers=self.mylar_headers, timeout=0.01)
+           r = requests.post(url, params=payload, headers=self.mylar_headers, timeout=5)
         except Exception as e:
-           if any(['Connection refused' in e, 'Timeout' in e]):
-               logger.warn('Unable to connect to Mylar server. Please check that it is online [%s].' % e)
-           else:
-               logger.warn('%s' % e)
+           # if any(['Connection refused' in e, 'Timeout' in e]):
+           #    logger.warn('Unable to connect to Mylar server. Please check that it is online [%s].' % e)
+           # else:
+           #    logger.warn('%s' % e)
+           logger.warn('%s' % e)
            return False
 
         #response = r.json()

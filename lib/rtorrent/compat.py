@@ -18,23 +18,13 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from .common import convert_version_tuple_to_str
+import sys
 
 
-class RTorrentVersionError(Exception):
-    def __init__(self, min_version, cur_version):
-        self.min_version = min_version
-        self.cur_version = cur_version
-        self.msg = "Minimum version required: {0}".format(
-            convert_version_tuple_to_str(min_version))
+def is_py3():
+    return sys.version_info[0] == 3
 
-    def __str__(self):
-        return(self.msg)
-
-
-class MethodError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return(self.msg)
+if is_py3():
+    import xmlrpc.client as xmlrpclib
+else:
+    import xmlrpclib
