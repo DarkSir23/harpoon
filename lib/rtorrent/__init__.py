@@ -687,10 +687,10 @@ class_methods_pair = {
 
 class_methods_pair97 = {
     RTorrent: methods,
-    File: filemethods,
-    Torrent: torrentmethods,
-    Tracker: trackermethods,
-    Peer: peermethods,
+    File: filemethods97,
+    Torrent: torrentmethods97,
+    Tracker: trackermethods97,
+    Peer: peermethods97,
 }
 
 for c in class_methods_pair.keys():
