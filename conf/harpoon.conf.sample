@@ -18,6 +18,7 @@ AUTHENTICATION=
 SSL=true
 VERIFY_SSL=true
 STARTONLOAD=true
+USE_BASEDIR=false
 
 [sabnzbd]
 SAB_ENABLE=false

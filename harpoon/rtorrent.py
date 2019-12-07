@@ -91,6 +91,7 @@ class RTorrent(object):
                 self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
                 self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
                 self.rtorrent_verify = config.getboolean('rtorrent', 'verify_ssl')
+                self.rtorrent_usebasedir = config.getboolean('rtorrent', 'use_basedir', fallback=False)
                 self.basedir = config.get('post-processing', 'pp_basedir')
                 self.multiple = '1'
 
@@ -104,6 +105,7 @@ class RTorrent(object):
                 self.rtorrent_rpc = config.get('rtorrent2', 'rpc_url')
                 self.rtorrent_ssl = config.getboolean('rtorrent2', 'ssl')
                 self.rtorrent_verify = config.getboolean('rtorrent2', 'verify_ssl')
+                self.rtorrent_usebasedir = config.getboolean('rtorrent2', 'use_basedir', fallback=False)
                 self.basedir = config.get('post-processing2', 'pp_basedir2')
                 self.multiple = '2'
             else:
@@ -119,6 +121,7 @@ class RTorrent(object):
             self.rtorrent_rpc = config.get('rtorrent', 'rpc_url')
             self.rtorrent_ssl = config.getboolean('rtorrent', 'ssl')
             self.rtorrent_verify = config.get('rtorrent', 'verify_ssl')
+            self.rtorrent_usebasedir = config.getboolean('rtorrent', 'use_basedir', fallback=False)
             self.basedir = config.get('post-processing', 'pp_basedir')
             self.multiple = None
 
@@ -167,7 +170,7 @@ class RTorrent(object):
         if self.add is True:
             logger.info("Attempting to load torrent. Filepath is : %s" % self.filepath)
             logger.info("label is : %s" % self.label)
-            loadit = self.client.load_torrent(self.filepath, self.label, self.start, self.applylabel, self.basedir)
+            loadit = self.client.load_torrent(self.filepath, self.label, self.start, self.applylabel, self.basedir, self.rtorrent_usebasedir)
             if loadit:
                 logger.info('Successfully loaded torrent.')
                 torrent_hash = self.get_the_hash()

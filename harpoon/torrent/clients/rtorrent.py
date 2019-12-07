@@ -116,7 +116,7 @@ class TorrentClient(object):
 
         return torrent_info if torrent_info else False
 
-    def load_torrent(self, filepath, rtorr_label, start, applylabel=None, rtorr_dir=None):
+    def load_torrent(self, filepath, rtorr_label, start, applylabel=None, rtorr_dir=None, use_basedir=False):
         logger.debug('filepath to torrent file set to : ' + filepath)
         if not self.conn:
             return False
@@ -129,7 +129,7 @@ class TorrentClient(object):
             torrent.set_custom(1, rtorr_label)
             print('Setting label for torrent to : ' + rtorr_label)
 
-        if all([applylabel is True, rtorr_label is not None]):
+        if all([applylabel is True, rtorr_label is not None]) and not use_basedir:
             new_location = os.path.join(rtorr_dir, rtorr_label)
             torrent.set_directory(new_location)
             print('Setting directory for torrent to : %s' % new_location)

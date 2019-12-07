@@ -350,7 +350,7 @@ class QueueR(object):
                             logger.warn(
                                 '[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' +
                                 item['mode'] + ']. You should delete it manually to avoid re-downloading')
-                        queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed'})
+                        queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (Could not find on client)'})
                         self.not_loaded = 0
                         continue
                     else:
@@ -386,15 +386,15 @@ class QueueR(object):
                     except Exception as e:
                         logger.info('ERROR 379 - %s' % e)
                         snstat = None
-                try:
-                    os.remove(os.path.join(config.GENERAL['torrentfile_dir'], item['label'],
-                                           item['item'] + '.' + item['mode']))
-                    logger.info('[HARPOON] File removed')
-                except:
-                    logger.warn(
-                        '[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item[
-                            'mode'] + ']. You should delete it manually to avoid re-downloading')
-                queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed'})
+                # try:
+                #     os.remove(os.path.join(config.GENERAL['torrentfile_dir'], item['label'],
+                #                            item['item'] + '.' + item['mode']))
+                #     logger.info('[HARPOON] File removed')
+                # except:
+                #     logger.warn(
+                #         '[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item[
+                #             'mode'] + ']. You should delete it manually to avoid re-downloading')
+                queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (%s returned a failure)' % item['client']})
             else:
                 if self.exists is False:
                     import shlex, subprocess
@@ -529,7 +529,7 @@ class QueueR(object):
                         #    logger.info('[OUTPUT] %s'% output)
                     except Exception as e:
                         if harpoon.CURRENT_DOWNLOAD.exitlevel == 1:
-                            queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Manually aborted'})
+                            queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (Could not fetch from host)'})
                         logger.warn('Exception occured: %s' % e)
                         continue
                     else:
