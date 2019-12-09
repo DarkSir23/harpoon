@@ -32,7 +32,7 @@ import traceback
 import harpoon
 from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp
 from harpoon import HQUEUE as HQUEUE
-from harpoon import config
+from harpoon import config, watcher
 from harpoon.scanner import Scanner
 
 from harpoon import CURRENT_DOWNFOLDER, CURRENT_DOWNLOAD
@@ -196,14 +196,18 @@ class QueueR(object):
             logger.info('Started...')
 
         if self.monitor:
-            self.SCHED = BackgroundScheduler()
-            logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
-            self.scansched = Scanner(self.HQUEUE, self.working_hash)
-            job = self.SCHED.add_job(func=self.scansched.scan, trigger=interval.IntervalTrigger(minutes=2))
-            # start the scheduler now
-            self.SCHED.start()
-            #run the scanner immediately on startup.
-            self.scansched.scan()
+            # self.SCHED = BackgroundScheduler()
+            # logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
+            # self.scansched = Scanner(self.HQUEUE, self.working_hash)
+            # job = self.SCHED.add_job(func=self.scansched.scan, trigger=interval.IntervalTrigger(minutes=2))
+            # # start the scheduler now
+            # self.SCHED.start()
+            # #run the scanner immediately on startup.
+            # self.scansched.scan()
+            self.scanner = Scanner(self.HQUEUE, self.working_hash)
+            self.watcher = watcher.Watcher(self.scanner)
+            # Run for the first time
+            self.scanner.scan()
 
         elif self.file is not None:
             logger.info('Adding file to queue via FILE %s [label:%s]' % (self.file, options.label))
@@ -258,10 +262,12 @@ class QueueR(object):
 
         while True:
             if self.monitor:
-                if not len(self.SCHED.get_jobs()):
-                    logger.debug('Restarting Scanner Job')
-                    job = self.SCHED.add_interval_job(func=self.scansched.scan, minutes=2)
-                    self.SCHED.start()
+                # if not len(self.SCHED.get_jobs()):
+                #     logger.debug('Restarting Scanner Job')
+                #     job = self.SCHED.add_interval_job(func=self.scansched.scan, minutes=2)
+                #     self.SCHED.start()
+                if not self.watcher.observer.isAlive():
+                    self.watcher.observer.join()
             if self.hash_reload is False:
                 if queue.empty():
                     #do a time.sleep here so we don't use 100% cpu

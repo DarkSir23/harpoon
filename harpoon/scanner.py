@@ -1,6 +1,7 @@
-from harpoon import config, logger
+from harpoon import config, logger, rtorrent, sabnzbd
 from harpoon import HQUEUE
 from harpoon import hashfile as hf
+import json, requests, re, bencode, hashlib
 
 import os
 
