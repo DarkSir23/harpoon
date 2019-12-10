@@ -31,10 +31,11 @@ class LazyLibrarian(object):
         self.applylabel = config.GENERAL['applylabel']
         self.defaultdir = config.GENERAL['defaultdir']
         self.snstat = ll_info['snstat']
+        self.ll_type = ll_info['ll_type']
         logger.debug("---")
 
-    def post_process(self, ll_type=None):
-        logger.debug('[LAZYLIBRARIAN] Type: %s' % ll_type)
+    def post_process(self):
+        logger.debug('[LAZYLIBRARIAN] Type: %s' % self.ll_type)
         url = self.lazylibrarian_url + '/api'
         if 'extendedname' in list(self.snstat.keys()):
             nzbname = self.snstat['extendedname']
@@ -140,7 +141,7 @@ class LazyLibrarian(object):
 
         logger.info('[LAZYLIBRARIAN] Path: %s' % process_path)
 
-        if ll_type == 'Magazine':
+        if self.ll_type == 'Magazine':
             payload = {'cmd': 'forceProcess',
                        'dir': process_path,
                        'apikey': self.lazylibrarian_apikey,
@@ -150,7 +151,7 @@ class LazyLibrarian(object):
             payload = {'cmd':  'importAlternate',
                        'dir': process_path,
                        'apikey': self.lazylibrarian_apikey,
-                       'library': ll_type,
+                       'library': self.ll_type,
                        'wait': 'True',
                        'ignoreclient': 'True',}
 

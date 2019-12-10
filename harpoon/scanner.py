@@ -15,6 +15,7 @@ class Scanner:
         self.current_hash = working_hash
 
     def scan(self):
+        logger.info('SCANNER: Running New File Scan')
         extensions = ['.file', '.hash', '.torrent', '.nzb']
         for (dirpath, dirnames, filenames) in os.walk(config.GENERAL['torrentfile_dir'], followlinks=True):
             for f in filenames:

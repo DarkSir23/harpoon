@@ -7,6 +7,7 @@
 <%def name="headerIncludes()">
 <li class="nav-item pl-2 pt-1"><a href="confirm?action=clearFailed" class="btn btn-sm btn-primary" id="clearfailed"><i class="fa fa-remove"></i> Clear Failed</a></li>
 <li class="nav-item pl-2 pt-1"><a href="confirm?action=clearCompleted" class="btn btn-sm btn-primary" id="clearcompleted"><i class="fa fa-remove"></i> Clear Finished</a></li>
+<li class="nav-item pl-2 pt-1"><a href="force_refresh" class="btn btn-sm btn-primary" id="forcerefresh"><i class="fa fa-refresh"></i> Force Rescan</a></li>
 <li class="nav-item pl-2 pt-1"><a href="confirm?action=restart" class="btn btn-sm btn-warning" id="restart"><i class="fa fa-refresh"></i> Restart Harpoon</a></li>
 </%def>
 <%def name="body()">
@@ -42,8 +43,8 @@ function loadactive(){
 loadlink(); // This will run on page load
 loadactive();
 setInterval(function(){
-    loadlink() // this will run after every 5 seconds
-}, 5000);
+    loadlink() // this will run after every 2 seconds
+}, 2000);
 setInterval(function(){
     loadactive()
 }, 500);

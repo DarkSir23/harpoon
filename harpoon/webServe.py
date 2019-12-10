@@ -12,10 +12,11 @@ import json
 
 import cherrypy
 import harpoon
-from harpoon import logger
+from harpoon import logger, HQUEUE
 from cherrypy.lib.static import serve_file
 from mako import exceptions
 from mako.lookup import TemplateLookup
+from harpoon.scanner import Scanner
 from . import hashfile
 
 
@@ -194,3 +195,12 @@ class WebInterface(object):
                 msg += 'Invalid file type: %s' % filename
         if uploadcount:
             self.parent.scansched.Scanner()
+
+
+    @cherrypy.expose
+    def force_refresh(self):
+        cherrypy.session.load()
+        scanner = Scanner(HQUEUE, None)
+        scanner.scan()
+        msg = "Force Rescan Triggered"
+        return self.home(msg=msg)

@@ -62,7 +62,7 @@ class Connection(object):
         return self._client
 
     def connect(self):
-        log.debug('Connecting to server: %r', self.uri)
+        # log.debug('Connecting to server: %r', self.uri)
 
         if self.auth:
             # Construct server proxy with authentication transport
