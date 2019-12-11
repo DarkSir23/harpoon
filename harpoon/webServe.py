@@ -198,7 +198,7 @@ class WebInterface(object):
 
 
     @cherrypy.expose
-    def force_refresh(self):
+    def force_rescan(self):
         cherrypy.session.load()
         scanner = Scanner(HQUEUE, None)
         scanner.scan()
