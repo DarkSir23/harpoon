@@ -543,31 +543,36 @@ class QueueR(object):
 
                 if all([snstat['label'] == config.SONARR['sonarr_label'], config.GENERAL['tv_choice'] == 'sonarr']):  #probably should be sonarr_label instead of 'tv'
                     check_unrar = True
-                    label='sonarr'
+                    label_name='Sonarr'
+                    label = config.SONARR['sonarr_label']
                     pp_obj = sonarr.Sonarr
                     info = {'snstat': snstat}
                     plex_pp = True
                 elif all([snstat['label'] == config.SICKRAGE['sickrage_label'], config.GENERAL['tv_choice'] == 'sickrage']):
                     check_unrar = True
-                    label='sickrage'
+                    label_name = 'Sickrage'
+                    label = config.SICKRAGE['sickrage_label']
                     pp_obj = sickrage.Sickrage
                     info = {'snstat': snstat}
                     plex_pp = True
                 elif snstat['label'] == config.RADARR['radarr_label']:
                     check_unrar = True
-                    label = 'radarr'
+                    label_name = 'Radarr'
+                    label=config.RADARR['radarr_label']
                     pp_obj = radarr.Radarr
                     info = {'radarr_id': None, 'radarr_movie': None, 'snstat': snstat}
                     plex_pp = True
                 elif snstat['label'] == config.LIDARR['lidarr_label']:
                     check_unrar = True
-                    label = 'lidarr'
+                    label_name = 'Lidarr'
+                    label = config.LIDARR['lidarr_label']
                     pp_obj = lidarr.Lidarr
                     info = {'snstat': snstat}
                     plex_pp = True
                 elif snstat['label'] == config.LAZYLIBRARIAN['lazylibrarian_label']:
                     check_unrar = True
-                    label = 'lazylibrarian'
+                    label_name = 'LazyLibrarian'
+                    label = config.LAZYLIBRARIAN['lazylibrarian_label']
                     pp_obj = lazylibrarian.LazyLibrarian
                     ll_file = os.path.join(config.GENERAL['torrentfile_dir'], config.LAZYLIBRARIAN['lazylibrarian_label'], item['item'] + '.' + item['mode'])
                     ll_type = queue.ckqueue()[snstat['hash']]['ll_type']
@@ -583,6 +588,7 @@ class QueueR(object):
                     plex_pp = False
                 elif snstat['label'] == 'music':
                     check_unrar = True
+                    label_name = 'Music'
                     label = 'music'
                     pp_obj = None
                     info = None
@@ -590,23 +596,25 @@ class QueueR(object):
                 elif snstat['label'] == 'xxx':
                     check_unrar = True
                     label = 'xxx'
+                    label_name = 'XXX'
                     pp_obj = None
                     info = None
                     plex_pp = False
                 elif snstat['label'] == config.MYLAR['mylar_label']:
                     check_unrar = False
-                    label = 'mylar'
+                    label_name = 'Mylar'
+                    label = config.MYLAR['mylar_label']
                     pp_obj = mylar.Mylar
                     info = {'issueid': self.issueid, 'snstat': snstat}
                     plex_pp = False
                 else:
                     check_unrar = True
                     label = snstat['label']
+                    label_name = snstat['label']
                     pp_obj = None
                     info = None
                     plex_pp = False
-                log_label = label.upper()
-                label_name = label.capitalize()
+                log_label = label_name.upper()
 
                 # Process
                 logger.debug('[HARPOON] - %s detected' % label_name)
@@ -632,10 +640,12 @@ class QueueR(object):
                 if not any([item['mode'] == 'hash-add', item['mode'] == 'file-add']):
                     logger.info('[HARPOON] Removing completed file from queue directory.')
                     try:
-                        os.remove(os.path.join(config.GENERAL['torrentfile_dir'], label, item['item'] + '.' + item['mode']))
+                        #os.remove(os.path.join(config.GENERAL['torrentfile_dir'], label, item['item'] + '.' + item['mode']))
+                        hashfilename = queue.ckqueue()[item['item']]['hashfilename']
+                        os.remove(hashfilename)
                         logger.info('[HARPOON] File removed')
                     except:
-                        logger.warn('[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item['mode'] + ']. You should delete it manually to avoid re-downloading')
+                        logger.warn('[HARPOON] Unable to remove file from snatch queue directory [' + hashfilename + ']. You should delete it manually to avoid re-downloading')
 
                 # Radarr Specific
                 if label == 'radarr' and config.RADARR['radarr_keep_original_foldernames'] is True:

@@ -51,7 +51,8 @@ class hQueue:
                         self.ckupdate(hash, {'stage': 'failed', 'status': 'Removed from Queue'})
                         if removefile:
                             try:
-                                filename = os.path.join(str(config.GENERAL['torrentfile_dir']), str(item['label']), str(item['item']) + '.' + str(item['mode']))
+                                # filename = os.path.join(str(config.GENERAL['torrentfile_dir']), str(item['label']), str(item['item']) + '.' + str(item['mode']))
+                                filename = self.ckqueue()[hash]['hashfilename']
                                 os.remove(filename)
                                 msg += "File '%s' removed." % filename
                                 logger.info('[USER] File %s removed' % filename)

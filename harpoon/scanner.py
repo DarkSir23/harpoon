@@ -13,12 +13,14 @@ class Scanner:
         #    return
         self.queue = queue
         self.current_hash = working_hash
+        self.hashfilename = ''
 
     def scan(self):
         logger.info('SCANNER: Running New File Scan')
         extensions = ['.file', '.hash', '.torrent', '.nzb']
         for (dirpath, dirnames, filenames) in os.walk(config.GENERAL['torrentfile_dir'], followlinks=True):
             for f in filenames:
+                self.hashfilename = ''
                 ll_type = ''
                 if any([f.endswith(ext) for ext in extensions]):
                     client = None
@@ -58,7 +60,7 @@ class Scanner:
                                                 'label': label})
                             hashinfo = hf.info(filename=f, label=label)
                             self.queue.ckupdate(hash, {'hash': hash, 'name': hashinfo['name'],
-                                                       'stage': 'to-do', 'status': 'Waiting', 'label': label})
+                                                       'stage': 'to-do', 'status': 'Waiting', 'label': label, 'hashfilename': self.hashfilename})
 
                             if label is not None:
                                 fpath = os.path.join(config.GENERAL['torrentfile_dir'], label, f)
@@ -92,7 +94,8 @@ class Scanner:
                             logger.info(torrent_info)
                             if torrent_info:
                                 hashfile = str(torrent_info['hash']) + '.hash'
-                                os.rename(fpath, os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile))
+                                self.hashfilename = os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile)
+                                os.rename(fpath, self.hashfilename)
                             else:
                                 logger.warn('something went wrong. Skipping torrent file.')
                                 continue
@@ -117,7 +120,8 @@ class Scanner:
                             logger.debug('SAB Response: %s' % nzb_info)
                             if nzb_info:
                                 hashfile = str(nzb_info['nzo_id']) + '.hash'
-                                os.rename(fpath, os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile))
+                                self.hashfilename = os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile)
+                                os.rename(fpath, self.hashfilename)
                             else:
                                 logger.warn('something went wrong')
                             queuefile = hashfile[:-5]
@@ -197,6 +201,26 @@ class Scanner:
                                 pass
                                 # logger.info('HASH already exists in queue in a status of ' + xc['stage'] + ' - avoiding duplication: ' + hashfile)
                         else:
+                            newhashfile = str(hashfile) + '.hash'
+                            if label is not None:
+                                fpath = os.path.join(dirpath, f)
+                                # fpath = os.path.join(config.GENERAL['torrentfile_dir'], label, f)
+                                npath = os.path.join(config.GENERAL['torrentfile_dir'], label, newhashfile)
+                            else:
+                                fpath = os.path.join(dirpath, f)
+                                # fpath = os.path.join(config.GENERAL['torrentfile_dir'], f)
+                                npath = os.path.join(config.GENERAL['torrentfile_dir'], newhashfile)
+                            if mode != 'hash':
+                                try:
+                                    os.rename(fpath, npath)
+                                    logger.info('Succesfully renamed file to ' + npath)
+                                    self.hashfilename = npath
+                                except Exception as e:
+                                    logger.warn('[%s] Unable to rename file %s to %s' % (e, fpath, npath))
+                                    self.hashfilename = fpath
+                                    continue
+                            else:
+                                self.hashfilename = fpath
                             logger.info('HASH not in queue - adding : ' + hashfile)
                             logger.info('Client: %s' % client)
                             logger.info('Queuefile: %s' % queuefile)
@@ -207,7 +231,8 @@ class Scanner:
                                                            'name': hashinfo['name'],
                                                            'status': 'Waiting',
                                                            'label': label,
-                                                           'll_type': ll_type, })
+                                                           'll_type': ll_type,
+                                                           'hashfilename': self.hashfilename})
                             if client:
                                 self.queue.put({'mode': mode,
                                                 'item': hashfile,
@@ -217,21 +242,6 @@ class Scanner:
                                 self.queue.put({'mode': mode,
                                                 'item': hashfile,
                                                 'label': label})
-                            hashfile = str(hashfile) + '.hash'
-                            if label is not None:
-                                fpath = os.path.join(config.GENERAL['torrentfile_dir'], label, f)
-                                npath = os.path.join(config.GENERAL['torrentfile_dir'], label, hashfile)
-                            else:
-                                fpath = os.path.join(config.GENERAL['torrentfile_dir'], f)
-                                npath = os.path.join(config.GENERAL['torrentfile_dir'], hashfile)
-
-                            if mode != 'hash':
-                                try:
-                                    os.rename(fpath, npath)
-                                    logger.info('Succesfully renamed file to ' + npath)
-                                except Exception as e:
-                                    logger.warn('[%s] Unable to rename file %s to %s' % (e, fpath, npath))
-                                    continue
 
 
     def history_poll(self, torrentname):
@@ -281,7 +291,7 @@ class Scanner:
         if hash is not None:
 
             filepath = os.path.join(path, label, str(hash) + '.hash')
-
+            self.hashfilename = filepath
             # create empty file with the given filename and update the mtime
             with open(filepath, 'w') as outfile:
                 json.dump(info, outfile)

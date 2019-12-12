@@ -49,7 +49,9 @@ class UnRAR(object):
         #file_handler.setFormatter(file_formatter)
         #logger.addHandler(file_handler)
 
+
     def main(self):
+        logger.debug('[UNRAR] Path: %s' %self.path)
         status = 'None'
         dirlist = self.traverse_directories(self.path)
         rar_found = []
