@@ -1,6 +1,7 @@
 <%!
     import harpoon
     import threading
+    import os
     from collections import OrderedDict
 %>
         <%
@@ -39,14 +40,25 @@
     <div class="col-md-2 col-sm-6 col-xs-4">${item['timestamp']}</div>
     <div class="col-md-2 col-sm-6 col-xs-12">
         % if item['stage'] == 'to-do':
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from queue" data-name="${item['name']}" data-hash="${item['hash']}" data-type="singleactive" data-placement="top" title="Remove item from queue, but don't remove the hashfile."><i class="fa fa-times-circle"></i></button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from queue (with hashfile deletion)" data-name="${item['name']}" data-hash="${item['hash']}" data-type="singleactivewithfile" data-placement="top" title="Remove item from queue, also removing the hashfile"><i class="fa fa-times-circle"></i> <i class="fa fa-trash"></i></button>
+<!--
             <a href="confirm?action=removeItem&type=singleactive&data=${item['hash']}" class="btn btn-sm btn-warning" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove</a>
             <a href="confirm?action=removeItem&type=singleactivewithfile&data=${item['hash']}" class="btn btn-sm btn-danger" id="Remove Item and Hash File"><i class="fa fa-stop-circle"></i> Remove and Delete</a>
+-->
         % elif item['stage'] == 'current':
             % if item['status'] == 'Fetching':
-                <a href="removeItems?type=activedownload" class="btn btn-sm btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Abort current download" data-name="${item['name']}" data-hash="${item['hash']}" data-type="activedownload" data-placement="top" title="Stop the current download.  Does not remove the hashfile."><i class="fa fa-hand-middle-finger"></i></button>
+<!--                <a href="removeItems?type=activedownload" class="btn btn-sm btn-danger" id="Abort Download"><i class="fa fa-stop-circle"></i> Abort Download</a>-->
             % endif
         % else:
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from history" data-name="${item['name']}" data-hash="${item['hash']}" data-type="single" data-placement="top" title="Remove item from history.  If the hashfile still exists, this does not remove it."><i class="fa fa-times-circle"></i></button>
+            % if os.path.exists(item['hashfilename']):
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from history (With hashfile deletion" data-name="${item['name']}" data-hash="${item['hash']}" data-type="singlewithfile" data-placement="top" title="Remove item from history and delete hashfile."><i class="fa fa-times-circle"></i> <i class="fa fa-trash"> </i></button>
+            % endif
+        <!--
             <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>
+-->
         %endif
     </div>
   </div>

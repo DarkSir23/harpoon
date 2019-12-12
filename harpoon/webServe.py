@@ -109,6 +109,12 @@ class WebInterface(object):
                     removeditems += 1
                 else:
                     pass
+        elif type == 'singlewithfile' and item:
+            if item in list(harpoon.HQUEUE.ckqueue().keys()):
+                if harpoon.HQUEUE.ckqueue()[item]['stage'] in ['failed', 'completed']:
+                    msg = harpoon.HQUEUE.ckremove(key=item, removefile=True)
+                    removeditems += 1
+
         elif type == 'singleactive' and item:
             if item in list(harpoon.HQUEUE.ckqueue().keys()):
                 msg = harpoon.HQUEUE.remove(item, removefile=False)

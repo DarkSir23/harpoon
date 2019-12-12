@@ -74,9 +74,21 @@ class hQueue:
             self.CKQUEUE[key] = item
             self.CKQUEUE[key]['timestamp'] = currentTime()
 
-    def ckremove(self, key):
+    def ckremove(self, key, removefile=False):
+        msg = ''
         if key in list(self.CKQUEUE.keys()):
+            if removefile:
+                try:
+                    filename = self.CKQUEUE[key]['hashfilename']
+                    os.remove(filename)
+                    msg += "File '%s' removed." % filename
+                    logger.info('[USER] File %s removed' % filename)
+                except Exception as e:
+                    logger.info('[USER] File could not be removed: %s' % e)
+                    msg += "File '%s' could not be removed.  Reason: %s" % (filename, e)
             del self.CKQUEUE[key]
+        return msg
+
 
     def ckappend(self, item):
         return self.CKQUEUE.append(item)

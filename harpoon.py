@@ -622,7 +622,7 @@ class QueueR(object):
                     # unrar it, delete the .rar's and post-process against the items remaining in the given directory.
                     queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], label ,snstat['name']))
-                    queue.ckupdate(item['item'], {'status': 'Proessing'})
+                    queue.ckupdate(item['item'], {'status': 'Pro<bold>C</bold>essing'})
                     chkrelease = cr.main()
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], label, snstat['name']))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
