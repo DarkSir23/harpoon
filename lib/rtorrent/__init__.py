@@ -298,7 +298,7 @@ class RTorrent:
         if self.client_version >= (0, 9, 7):
             target = ""
             logger.debug('[OFFSPRING] P: %s - Func: %s - Target: %s - Torrent: %s' % (p, func_name, target, torrent))
-            getattr(p, func_name)(target, torrent)
+            getattr(p, func_name)(target, torrent.data)
         else:
             getattr(p, func_name)(torrent)
 
