@@ -95,6 +95,7 @@ class Scanner:
                             if torrent_info:
                                 hashfile = str(torrent_info['hash']) + '.hash'
                                 self.hashfilename = os.path.join(config.GENERAL['torrentfile_dir'], subdir, hashfile)
+                                logger.debug('[SCANNER] Sourcefile Exists: %s - Destfile Exists: %s' % (os.path.exists(fpath), os.path.exists(self.hashfilename)))
                                 os.rename(fpath, self.hashfilename)
                             else:
                                 logger.warn('something went wrong. Skipping torrent file.')

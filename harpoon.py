@@ -754,7 +754,7 @@ class QueueR(object):
                 else:
                     harpoon_env['harpoon_pp_passwd'] = ''
 
-            logger.debug('Params: %s' % harpoon_env)
+            # logger.debug('Params: %s' % harpoon_env)
             try:
                 p = subprocess.Popen(script_cmd, env=dict(harpoon_env), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 output, error = p.communicate()

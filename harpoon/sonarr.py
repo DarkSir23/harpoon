@@ -117,10 +117,13 @@ class Sonarr(object):
         checkit = False
 
         logger.info('[SONARR] Querying against active queue now for completion')
-        r = requests.get(url, headers=self.sonarr_headers)
-        logger.info(r.status_code)
-        results = r.json()
-
+        try:
+            r = requests.get(url, headers=self.sonarr_headers)
+            logger.info(r.status_code)
+            results = r.json()
+        except:
+            logger.debug('[SONARR] Unable to connect for some reason.  Will retry.')
+            results = []
         for x in results:
             try:
                 if x['downloadId']:

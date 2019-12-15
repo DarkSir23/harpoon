@@ -77,8 +77,8 @@ class LazyLibrarian(object):
                     movefile = False
                     process_path = filepath + process_suffix.encode('utf-8')
                     if os.path.exists(process_path):
-                        logger.info('[LAZYLIBRARIAN] Path Exists.  Renaming.')
-                        os.rename(process_path, process_path + ' - %s' % common.currentTime())
+                        logger.info('[LAZYLIBRARIAN] Path Exists.  Removing.')
+                        shutil.rmtree(process_path)
                     os.rename(filepath, process_path)
             else:
                 logger.debug('[LAZYLIBRARIAN] File not found')

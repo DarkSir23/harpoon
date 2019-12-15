@@ -136,9 +136,10 @@ class Radarr(object):
                 r = requests.get(url, params=None, headers=self.radarr_headers)
                 dt = r.json()
             except:
-                logger.warn('error returned from sonarr call. Aborting.')
+                logger.warn('error returned from radarr call. Aborting.')
                 return False
             else:
+                logger.debug('[RADARR] State: %s' % dt['state'])
                 if dt['state'] == 'completed':
                     logger.info('[RADARR] Successfully post-processed : ' + self.snstat['name'])
                     check = False
