@@ -78,8 +78,16 @@ class Sonarr(object):
         logger.info('[SONARR] Posting to completed download handling after a short 10s delay: %s' % payload)
         time.sleep(10)
 
-        r = requests.post(url, json=payload, headers=self.sonarr_headers)
-        data = r.json()
+        check_loop = True
+
+        while check_loop:
+            try:
+                r = requests.post(url, json=payload, headers=self.sonarr_headers)
+                data = r.json()
+                check_loop = False
+            except:
+                logger.debug(['[SONARR] Could not connect. Trying again in 10 seconds.'])
+                time.sleep(10)
 
         check = True
         while check:
