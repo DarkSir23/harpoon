@@ -54,7 +54,7 @@
         % else:
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from history" data-name="${item['name']}" data-hash="${item['hash']}" data-type="single" data-placement="top" title="Remove item from history.  If the hashfile still exists, this does not remove it."><i class="far fa-file-excel"></i></button>
             % if os.path.exists(item['hashfilename']):
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from history (With hashfile deletion" data-name="${item['name']}" data-hash="${item['hash']}" data-type="singlewithfile" data-placement="top" title="Remove item from history and delete hashfile."><i class="far fa-file-excel"></i> <i class="fa fa-trash"> </i></button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal" data-action="removeItem" data-description="Confirm removal from history (with hashfile deletion)" data-name="${item['name']}" data-hash="${item['hash']}" data-type="singlewithfile" data-placement="top" title="Remove item from history and delete hashfile."><i class="far fa-file-excel"></i> <i class="fa fa-trash"> </i></button>
             % endif
         <!--
             <a href="confirm?action=removeItem&type=single&data=${item['hash']}" class="btn btn-sm btn-primary" id="Remove Item"><i class="fa fa-stop-circle"></i> Remove from History</a>

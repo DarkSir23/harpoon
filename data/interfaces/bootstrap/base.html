@@ -53,7 +53,7 @@
           });
       });
     </script>
-    ${next.javascriptIncludes()}
+
     <script type="text/javascript">
       // Check or uncheck all checkboxes in the same table
       function toggleAll(e) {
@@ -111,7 +111,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <form action="removeItems">
+            <form action="removeItems" id="removeForm">
               <div class="modal-body">
                   <input type="hidden" id="type" name="type" class="type" value="single">
                   <input type="hidden" id="item" name="item" class="item" value="None">
@@ -196,8 +196,35 @@
       createCookie(name, "", -1);
       }
     </script>
+      <script type = " text/javascript">
+         $(function() {
+             $("#msg").hide();
+            % if msg:
+                popupmsg("${msg}");
+            % endif
+         });
+         function popupmsg(mymsg){
+             $('#msg').html(mymsg);
+             $('#msg').fadeIn('fast');
+             setTimeout(function() {
+                $('#msg').fadeOut('slow');
+                }, 5000);
+            }
+      </script>
+  <script type="text/javascript">
+    $("#removeForm").submit(function(event) {
+      event.preventDefault(); //prevent default action
+      var modal = $("#confirmModal");
+      var post_url = $(this).attr("action"); //get form action url
+      var form_data = $(this).serialize(); //Encode form elements for submission
 
-
+      $.post(post_url, form_data, function (data) {
+        popupmsg(data['msg']);
+      });
+      $("#confirmModal").modal('hide');
+    });
+  </script>
+    ${next.javascriptIncludes()}
   </body>
 </html>
 <%def name="javascriptIncludes()"></%def>

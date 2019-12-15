@@ -5,27 +5,36 @@
     from collections import OrderedDict
 %>
 <%def name="headerIncludes()">
-<li class="nav-item pl-2 pt-1"><a href="confirm?action=clearFailed" class="btn btn-sm btn-primary" id="clearfailed"><i class="fa fa-remove"></i> Clear Failed</a></li>
-<li class="nav-item pl-2 pt-1"><a href="confirm?action=clearCompleted" class="btn btn-sm btn-primary" id="clearcompleted"><i class="fa fa-remove"></i> Clear Finished</a></li>
-<li class="nav-item pl-2 pt-1"><a href="force_rescan" class="btn btn-sm btn-primary" id="forcerefresh"><i class="fa fa-refresh"></i> Force Rescan</a></li>
+<li class="nav-item pl-2 pt-1"><a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#confirmModal" data-description="Confirm removal from queue" data-name="Removed failed items from the queue?" data-type="failed"><i class="fa fa-remove"></i> Clear Failed</a></li>
+<li class="nav-item pl-2 pt-1"><a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#confirmModal" data-description="Confirm removal from queue" data-name="Removed finished items from the queue?" data-type="completed"><i class="fa fa-remove"></i> Clear Finished</a></li>
+<li class="nav-item pl-2 pt-1"><a href="#" class="btn btn-sm btn-primary" id="forcerescan"><i class="fa fa-refresh"></i> Force Rescan</a></li>
 <li class="nav-item pl-2 pt-1"><a href="confirm?action=restart" class="btn btn-sm btn-warning" id="restart"><i class="fa fa-refresh"></i> Restart Harpoon</a></li>
 </%def>
 <%def name="body()">
-% if msg:
-    <div class="alert alert-info" style="text-align: center; padding: 8px;">
-        ${msg}
-    </div>
-% endif
+<div id="msg" class="alert alert-info" style="text-align: center; padding: 8px;"></div>
 <div id="active_content" class="container py-1">
-
 </div>
 <div class="container py-1"><h3>${title}</h3></div>
-<div id="table-content" class="container">
+<div id="table-content"
+     class="container">
 
 </div>
 </%def>
 
 <%def name="javascriptIncludes()">
+<script type = "text/javascript">
+    $("#forcerescan").click(function() {
+
+       // post the form values via AJAX...
+       $.post('force_rescan', {}, function(data) {
+
+          // and set the title with the result
+          popupmsg(data['msg']);
+       });
+       return false ;
+    });
+
+</script>
 <script language="javascript" type="text/javascript">
 if (window.addEventListener) { // Mozilla, Netscape, Firefox
     window.addEventListener('load', loadlink, false);

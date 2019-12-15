@@ -105,6 +105,7 @@ def initialize(options=None, basepath=None, parent=None):
         cherrypy.engine.autoreload.subscribe()
         portend.Checker().assert_free(str(options['http_host']), options['http_port'])
         cherrypy.server.start()
+        cherrypy.config.update(options_dict)
 
     except IOError:
         print('Failed to start on port: %i. is something else running?' % (options['http_port']))

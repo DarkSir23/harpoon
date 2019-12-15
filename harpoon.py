@@ -189,6 +189,21 @@ class QueueR(object):
 
         self.HQUEUE = HQUEUE
 
+        logger.info('Web: %s' % config.WEB)
+        if config.WEB['http_enable']:
+            logger.debug("Starting web server")
+            webStart.initialize(options=config.WEB, basepath=harpoon.DATADIR, parent=self)
+
+        #for threading
+        self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
+        self.SNPOOL.setdaemon = True
+        self.SNPOOL.start()
+        harpoon.MAINTHREAD = threading.current_thread()
+        logger.debug("Threads: %s" % threading.enumerate())
+
+        logger.info('TV-Client set to : %s' % config.GENERAL['tv_choice'])
+
+
         if self.monitor:
             # self.SCHED = BackgroundScheduler()
             # logger.info('Setting directory scanner to monitor %s every 2 minutes for new files to harpoon' % config.GENERAL['torrentfile_dir'])
@@ -217,14 +232,7 @@ class QueueR(object):
             logger.info('Not enough information given - specify hash / filename')
             return
 
-        #for threading
-        self.SNPOOL = threading.Thread(target=self.worker_main, args=(self.HQUEUE,))
-        self.SNPOOL.setdaemon = True
-        self.SNPOOL.start()
-        harpoon.MAINTHREAD = threading.current_thread()
-        logger.debug("Threads: %s" % threading.enumerate())
 
-        logger.info('TV-Client set to : %s' % config.GENERAL['tv_choice'])
 
         if options.add:
             logger.info('Adding file to queue %s' % options.add)
@@ -232,10 +240,6 @@ class QueueR(object):
             return
 
 
-        logger.info('Web: %s' % config.WEB)
-        if config.WEB['http_enable']:
-            logger.debug("Starting web server")
-            webStart.initialize(options=config.WEB, basepath=harpoon.DATADIR, parent=self)
 
         while True:
             if self.restart:

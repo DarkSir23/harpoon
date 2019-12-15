@@ -114,6 +114,24 @@ except IndexError:
             else:
                 logger.info('Failing, unknown type')
                 os._exit(1)
+        elif 'radarr_release_title' in os.environ:
+            mode = 'radarr'
+            inputfile = os.environ.get('radarr_release_title')
+            if '//' in inputfile:
+                inputfile = re.sub('-', '//', inputfile).strip()
+            if '/' in inputfile:
+                inputfile = inputfile.replace('/', '-')
+            label = radarr_label
+            filetype = '.file'
+        elif 'radarr_eventtype' in os.environ:
+            eventtype = os.environ.get('radarr_eventtype')
+            logger.info('Called from Radarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'Test':
+                logger.info('Exiting successfully (Radarr Test)')
+                os._exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                os._exit(1)
 
         else:
             logger.info('Unable to detect what client called harpoonshot...')

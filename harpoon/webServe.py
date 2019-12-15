@@ -129,7 +129,8 @@ class WebInterface(object):
                 msg = '1 item removed.'
             else:
                 msg = '%s items removed.' % removeditems
-        return self.home(msg=msg)
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return bytes(json.dumps({'msg': msg}).encode('utf-8'))
 
     @cherrypy.expose
     def restart(self):
@@ -207,6 +208,10 @@ class WebInterface(object):
     def force_rescan(self):
         cherrypy.session.load()
         scanner = Scanner(HQUEUE, None)
-        scanner.scan()
-        msg = "Force Rescan Triggered"
-        return self.home(msg=msg)
+        try:
+            scanner.scan()
+            msg = "Force Rescan Triggered"
+        except Exception as e:
+            msg = "ERROR: %s" % e
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        return bytes(json.dumps({'msg': msg}).encode('utf-8'))

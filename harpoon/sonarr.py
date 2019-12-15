@@ -124,6 +124,7 @@ class Sonarr(object):
         for x in results:
             try:
                 if x['downloadId']:
+                    logger.debug('[SONARR] Found item in queue.')
                     if self.snstat['hash'] == x['downloadId']:
                         if x['status'] == 'Completed':
                             logger.info('[SONARR] file has been marked as completed within Sonarr. It\'s a Go!')
