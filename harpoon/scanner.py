@@ -2,6 +2,7 @@ from harpoon import config, logger, rtorrent, sabnzbd
 from harpoon import HQUEUE
 from harpoon import hashfile as hf
 import json, requests, re, bencode, hashlib
+from pathlib import Path
 
 import os
 
@@ -31,6 +32,11 @@ class Scanner:
                         logger.info('Client: %s' % client)
                         logger.info('hash:' + str(hash))
                         logger.info('working_hash:' + str(self.current_hash))
+                        if not hash:
+                            logger.debug('[SCANNER] Hash not found, triggering rescan')
+                            fpath = os.path.join(dirpath, f)
+                            Path(fpath).touch()
+                            return
                         # dupchk = [x for x in self.queue.ckqueue() if x['hash'] == hash]
                         dupchk = hash in list(HQUEUE.ckqueue().keys())
                         if all([hash is not None, not dupchk]):
@@ -149,6 +155,7 @@ class Scanner:
                                 label = dirp
                             mode = f[-4:]
                             actualfile = os.path.join(dirpath, f)
+                            self.hashfilename = os.path.join(config.GENERAL['torrentfile_dir'], label, hashfile + '.hash')
                             try:
                                 filecontent = json.load(open(actualfile))
                                 if filecontent:
@@ -192,8 +199,9 @@ class Scanner:
                         if dupchk:
                             if dupchk['stage'] == 'completed':
                                 try:
-                                    logger.info('Status is now completed - forcing removal of HASH from queue.')
-                                    # self.queue.pop(xc['hash']) -- This needs fixed.   Queue has no pop method
+                                    logger.info('Status is now completed - forcing removal of HASH file.')
+                                    if os.path.exists(self.hashfilename):
+                                        os.remove(self.hashfilename)
                                 except Exception as e:
                                     logger.warn(
                                         'Unable to locate hash in queue. Was already removed most likely. This was the error returned: %s' % e)
@@ -202,30 +210,38 @@ class Scanner:
                                 pass
                                 # logger.info('HASH already exists in queue in a status of ' + xc['stage'] + ' - avoiding duplication: ' + hashfile)
                         else:
-                            newhashfile = str(hashfile) + '.hash'
-                            if label is not None:
-                                fpath = os.path.join(dirpath, f)
-                                # fpath = os.path.join(config.GENERAL['torrentfile_dir'], label, f)
-                                npath = os.path.join(config.GENERAL['torrentfile_dir'], label, newhashfile)
-                            else:
-                                fpath = os.path.join(dirpath, f)
-                                # fpath = os.path.join(config.GENERAL['torrentfile_dir'], f)
-                                npath = os.path.join(config.GENERAL['torrentfile_dir'], newhashfile)
-                            if mode != 'hash':
-                                try:
-                                    os.rename(fpath, npath)
-                                    logger.info('Succesfully renamed file to ' + npath)
-                                    self.hashfilename = npath
-                                except Exception as e:
-                                    logger.warn('[%s] Unable to rename file %s to %s' % (e, fpath, npath))
-                                    self.hashfilename = fpath
-                                    continue
-                            else:
-                                self.hashfilename = fpath
-                            logger.info('HASH not in queue - adding : ' + hashfile)
-                            logger.info('Client: %s' % client)
-                            logger.info('Queuefile: %s' % queuefile)
-                            logger.info('LL_Type: %s' % ll_type)
+                            # newhashfile = str(hashfile) + '.hash'
+                            # if label is not None:
+                            #     fpath = os.path.join(dirpath, f)
+                            #     # fpath = os.path.join(config.GENERAL['torrentfile_dir'], label, f)
+                            #     npath = os.path.join(config.GENERAL['torrentfile_dir'], label, newhashfile)
+                            # else:
+                            #     fpath = os.path.join(dirpath, f)
+                            #     # fpath = os.path.join(config.GENERAL['torrentfile_dir'], f)
+                            #     npath = os.path.join(config.GENERAL['torrentfile_dir'], newhashfile)
+                            # if mode != 'hash':
+                            #     try:
+                            #         os.rename(fpath, npath)
+                            #         logger.info('[SCANNER] Succesfully renamed file to ' + npath)
+                            #         self.hashfilename = npath
+                            #     except Exception as e:
+                            #         logger.warn('[SCANNER] [%s] Unable to rename file %s to %s' % (e, fpath, npath))
+                            #         self.hashfilename = fpath
+                            #         continue
+                            # else:
+                            #     self.hashfilename = fpath
+                            fpath = os.path.join(dirpath, f)
+                            if os.path.exists(self.hashfilename) and self.hashfilename != fpath:
+                                if os.path.exists(fpath):
+                                    os.remove(fpath)
+                            elif os.path.exists(fpath) and self.hashfilename != fpath:
+                                os.rename(fpath, self.hashfilename)
+                                logger.debug('[SCANNER] Renamed %s to %s' % (fpath, self.hashfilename))
+                            logger.info('[SCANNER] HASH not in queue - adding : ' + hashfile)
+                            logger.info('[SCANNER] Client: %s' % client)
+                            logger.info('[SCANNER] Queuefile: %s' % queuefile)
+                            logger.info('[SCANNER] LL_Type: %s' % ll_type)
+                            logger.info('[SCANNER] HashFile: %s' % self.hashfilename)
                             hashinfo = hf.info(queuefile, label=label, mode=mode)
                             self.queue.ckupdate(hashfile, {'hash': hashfile,
                                                            'stage': 'to-do',
@@ -273,13 +289,15 @@ class Scanner:
                    'sortKey': 'date',
                    'sortDir': 'desc'}
 
-        logger.info('Quering against history now: %s' % payload)
+        logger.info('[SCANNER] Quering against history now: %s' % payload)
         r = requests.get(url, params=payload, headers=headers)
         logger.info(r.status_code)
         result = r.json()
         hash = None
         client = None
-        logger.info(torrentname)
+        hashfilename = None
+        logger.info('[SCANNER] Name: %s' % torrentname)
+        logger.info('[SCANNER] Records: %s' % len(result['records']))
         for x in result['records']:
             # logger.info(x)
             if self.filesafe(torrentname.lower()) == self.filesafe(x['sourceTitle'].lower()):
@@ -297,14 +315,14 @@ class Scanner:
             with open(filepath, 'w') as outfile:
                 json.dump(info, outfile)
 
-            logger.info("wrote to snatch queue-directory %s" % filepath)
+            logger.info("[SCANNER] Wrote to snatch queue-directory %s" % filepath)
         #            try:
         #                os.remove(os.path.join(path, torrentname + '.' + mode + '.file'))
         #            except:
         #                logger.warn('file doesnt exist...ignoring deletion of .file remnant')
 
         else:
-            logger.info('No hash discovered - this requires the torrent name, NOT the filename')
+            logger.info('[SCANNER] No hash discovered - this requires the torrent name, NOT the filename.')
 
         return hash, client
 
