@@ -60,10 +60,12 @@ from watchdog.utils import UnsupportedLibc
 from harpoon import logger
 
 if platform.is_linux():
-    try:
-        from .inotify import InotifyObserver as Observer
-        logger.debug('[WATCHDOG] Using Inotify')
-    except UnsupportedLibc:
+    # Skipping iNotify for Harpoon (iNotify sometimes doesn't work with shared folders on virtual servers)
+    # try:
+    #     from .inotify import InotifyObserver as Observer
+    #     logger.debug('[WATCHDOG] Using Inotify')
+    # except UnsupportedLibc:
+
         logger.debug('[WATCHDOG] Using Polling')
         from .polling import PollingObserver as Observer
 
