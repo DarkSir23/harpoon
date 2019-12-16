@@ -120,7 +120,10 @@ class TorrentClient(object):
         logger.debug('filepath to torrent file set to : ' + filepath)
         if not self.conn:
             return False
-        torrent = self.conn.load_torrent(filepath, verify_load=True)
+        try:
+            torrent = self.conn.load_torrent(filepath, verify_load=True)
+        except:
+            torrent = None
         if not torrent:
             return False
 

@@ -22,7 +22,7 @@ except ImportError:
 
 # Try import requests transport (optional)
 try:
-    from .lib.xmlrpc.transports.requests_ import RequestsTransport
+    from rtorrent.lib.xmlrpc.transports.requests_ import RequestsTransport
 except ImportError:
     RequestsTransport = None
 
