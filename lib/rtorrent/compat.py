@@ -25,6 +25,6 @@ def is_py3():
     return sys.version_info[0] == 3
 
 if is_py3():
-    import xmlrpc.client as xmlrpclib
+    import py3.xmlrpc.client as xmlrpclib
 else:
     import xmlrpclib

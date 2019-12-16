@@ -122,7 +122,9 @@ class TorrentClient(object):
             return False
         try:
             torrent = self.conn.load_torrent(filepath, verify_load=True)
-        except:
+        except Exception as e:
+            logger.debug('[RTORRENT] Load torrent error: %s' % e)
+            logger.debug(traceback.format_exc())
             torrent = None
         if not torrent:
             return False
