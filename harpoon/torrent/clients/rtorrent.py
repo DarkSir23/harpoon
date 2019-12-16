@@ -62,7 +62,7 @@ class TorrentClient(object):
                     newurl = url.replace('http://', 'http://%s:%s@' % (username, password))
                 else:
                     newurl = url
-                logger.debug('NEWURL: %s' % newurl)
+                logger.debug('NEWURL: %s' % newurl.replace(password, '[REDACTED]'))
                 self.conn = RTorrent(newurl)
             except Exception as e:
                 logger.debug("Connection Exception: %s. Failing" % e)

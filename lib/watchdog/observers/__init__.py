@@ -57,11 +57,14 @@ Class          Platforms                        Note
 import warnings
 from watchdog.utils import platform
 from watchdog.utils import UnsupportedLibc
+from harpoon import logger
 
 if platform.is_linux():
     try:
         from .inotify import InotifyObserver as Observer
+        logger.debug('[WATCHDOG] Using Inotify')
     except UnsupportedLibc:
+        logger.debug('[WATCHDOG] Using Polling')
         from .polling import PollingObserver as Observer
 
 elif platform.is_darwin():
