@@ -66,7 +66,6 @@ class SABnzbd(object):
     def query(self):
         sendresponse = self.params['nzo_id']
         queue = {'mode': 'queue',
-                 'search': self.params['nzo_id'],
                  'output': 'json',
                  'apikey': self.sab_apikey}
         try:
@@ -91,62 +90,71 @@ class SABnzbd(object):
                 logger.error('error: %s' % e)
                 return {'completed': False}
 
-            logger.info('[SABNZBD] Download completed.  Querying history.')
             hist_params = {'mode':      'history',
                            'failed':    0,
                            'output':    'json',
                            'limit':     500,
                            'apikey':    self.sab_apikey}
-            hist = requests.get(self.sab_url, params=hist_params, verify=False)
-            historyresponse = hist.json()
-            histqueue = historyresponse['history']
-            found = {'completed': True, 'failed': True}
-            try:
-                for hq in histqueue['slots']:
-                    # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
-                    if hq['nzo_id'] == sendresponse and hq['status'] == 'Completed':
-                        logger.info('[SABNZBD] Found matching completed item in history. Job has a status of %s' % hq['status'])
-                        logger.info('[SABNZBD] Location found @ %s' % hq['storage'])
-                        path_folder = hq['storage']
-                        nzbname = os.path.basename(hq['storage'])
-                        found = {'completed': True,
-                                 'name': re.sub('.nzb', '', hq['nzb_name']).strip(),
-                                 'extendedname': nzbname,
-                                 'folder': path_folder,
-                                 'mirror': True,  # Change this
-                                 'multiple': None,
-                                 'label': hq['category'],
-                                 'hash': hq['nzo_id'],
-                                 'failed': False,
-                                 'files': [],
-                                 'total_filesize': hq['bytes']}
-                        logger.debug('Found: %s' % found)
-                        break
-                    elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':
-                        # get the stage / error message and see what we can do
-                        stage = hq['stage_log']
-                        for x in stage:
-                            if 'Failed' in x['actions'] and any([x['name'] == 'Unpack', x['name'] == 'Repair']):
-                                if 'moving' in x['actions']:
-                                    logger.warn(
-                                        '[SABNZBD] There was a failure in SABnzbd during the unpack/repair phase that caused a failure: %s' %
-                                        x['actions'])
-                                else:
-                                    logger.warn(
-                                        '[SABNZBD] Failure occured during the Unpack/Repair phase of SABnzbd. This is probably a bad file: %s' %
-                                        x['actions'])
+            found = {'completed': False, 'failed': True, 'reason': 'Unknown'}
+            count = 1
+            while found['completed'] is False and count < 6:
+                if count > 1:
+                    time.sleep(5)
+                logger.info('[SABNZBD] Download completed.  Querying history. (Attempt %s)' % count)
+                hist = requests.get(self.sab_url, params=hist_params, verify=False)
+                historyresponse = hist.json()
+                histqueue = historyresponse['history']
+                try:
+                    for hq in histqueue['slots']:
+                        # logger.info('nzo_id: %s --- %s [%s]' % (hq['nzo_id'], sendresponse, hq['status']))
+                        if hq['nzo_id'] == sendresponse and hq['status'] == 'Completed':
+                            logger.info('[SABNZBD] Found matching completed item in history. Job has a status of %s' % hq['status'])
+                            logger.info('[SABNZBD] Location found @ %s' % hq['storage'])
+                            path_folder = hq['storage']
+                            nzbname = os.path.basename(hq['storage'])
+                            found = {'completed': True,
+                                     'name': re.sub('.nzb', '', hq['nzb_name']).strip(),
+                                     'extendedname': nzbname,
+                                     'folder': path_folder,
+                                     'mirror': True,  # Change this
+                                     'multiple': None,
+                                     'label': hq['category'],
+                                     'hash': hq['nzo_id'],
+                                     'failed': False,
+                                     'files': [],
+                                     'total_filesize': hq['bytes'],
+                                     'reason': 'Success'}
+                            logger.debug('Found: %s' % found)
+                            break
+                        elif hq['nzo_id'] == sendresponse and hq['status'] == 'Failed':
+                            # get the stage / error message and see what we can do
+                            stage = hq['stage_log']
+                            for x in stage:
+                                if 'Failed' in x['actions'] and any([x['name'] == 'Unpack', x['name'] == 'Repair']):
+                                    if 'moving' in x['actions']:
+                                        logger.warn(
+                                            '[SABNZBD] There was a failure in SABnzbd during the unpack/repair phase that caused a failure: %s' %
+                                            x['actions'])
+                                    else:
+                                        logger.warn(
+                                            '[SABNZBD] Failure occured during the Unpack/Repair phase of SABnzbd. This is probably a bad file: %s' %
+                                            x['actions'])
+                                        found = {'completed': True,
+                                                 'failed': True}
+                                if any([x['name'] == 'Download', x['name'] == 'Fail']):
+                                    logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
                                     found = {'completed': True,
-                                             'failed': True}
-                            if any([x['name'] == 'Download', x['name'] == 'Fail']):
-                                logger.warn('[SABNZBD] SABnzbd failed to to download.  Articles were probably missing.')
-                                found = {'completed': True,
-                                         'failed': True}
-                    elif hq['nzo_id'] == sendresponse:
-                        logger.warn('[SABNZBD] Unexpected response: %s' % hq)
-                        found = {'completed': False}
-            except Exception as e:
-                logger.warn('error %s' % e)
-
+                                             'failed': True,
+                                             'reason': 'SABnzbd failed to download.'}
+                        elif hq['nzo_id'] == sendresponse:
+                            logger.warn('[SABNZBD] Unexpected response: %s' % hq)
+                            found = {'completed': False}
+                    count += 1
+                    if found['completed'] is False:
+                        found['reason'] = 'NZB not found in SAB History'
+                except Exception as e:
+                    logger.warn('error %s' % e)
+            found['completed'] = True
             return found
 
     def cleanup(self):

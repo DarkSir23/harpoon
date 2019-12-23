@@ -313,6 +313,7 @@ class QueueR(object):
                 sa_params = {}
                 sa_params['nzo_id'] = item['item']
                 sa_params['apikey'] = config.SAB['sab_apikey']
+
                 try:
                     sab = sabnzbd.SABnzbd(params=sa_params, saburl=config.SAB['sab_url'])
                     snstat = sab.query()
@@ -407,7 +408,10 @@ class QueueR(object):
                 #     logger.warn(
                 #         '[HARPOON] Unable to remove file from snatch queue directory [' + item['item'] + '.' + item[
                 #             'mode'] + ']. You should delete it manually to avoid re-downloading')
-                queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (%s returned a failure)' % item['client']})
+                if 'reason' in snstat.keys():
+                    queue.ckupdate(item['item'], {'stage': 'failed', 'status': snstat['reason']})
+                else:
+                    queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (%s returned a failure)' % item['client']})
             else:
                 if self.exists is False:
                     import shlex, subprocess
@@ -543,7 +547,11 @@ class QueueR(object):
                         if harpoon.CURRENT_DOWNLOAD.exitlevel == 1:
                             queue.ckupdate(item['item'], {'stage': 'failed', 'status': 'Failed (Could not fetch from host)'})
                         logger.warn('Exception occured: %s' % e)
-                        continue
+                        if os.path.exists(self.CURRENT_DOWNFOLDER) and self.get_size(self.CURRENT_DOWNFOLDER) > (snstat['total_filesize'] * .8):
+                            logger.info('[HARPOON] PP Path already exists.  Trying to process.')
+                            snatch_status = 'COMPLETED'
+                        else:
+                            continue
                     else:
                         snatch_status = 'COMPLETED'
 
@@ -890,6 +898,16 @@ class QueueR(object):
 
         os._exit(0)
 
+    def get_size(self, start_path = '.'):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(start_path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                # skip if it is symbolic link
+                if not os.path.islink(fp):
+                    total_size += os.path.getsize(fp)
+
+    return total_size
 
 if __name__ == '__main__':
     gf = QueueR()
