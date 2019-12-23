@@ -907,7 +907,7 @@ class QueueR(object):
                 if not os.path.islink(fp):
                     total_size += os.path.getsize(fp)
 
-    return total_size
+        return total_size
 
 if __name__ == '__main__':
     gf = QueueR()
