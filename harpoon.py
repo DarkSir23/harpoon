@@ -583,8 +583,12 @@ class QueueR(object):
                     ll_file = os.path.join(config.GENERAL['torrentfile_dir'], config.LAZYLIBRARIAN['lazylibrarian_label'], item['item'] + '.' + item['mode'])
                     ll_type = queue.ckqueue()[snstat['hash']]['ll_type']
                     if os.path.isfile(ll_file):
-                        ll_filedata = json.load(open(ll_file))
-                        logger.info('[LAZYLIBRARIAN] File data loaded.')
+                        try:
+                            ll_filedata = json.load(open(ll_file))
+                            logger.info('[LAZYLIBRARIAN] File data loaded.')
+                        except:
+                            ll_filedata = None
+                            logger.info('[LAZYLIBRARIAN] File data NOT loaded.')
                     else:
                         ll_filedata = None
                         logger.info('[LAZYLIBRARIAN] File data NOT loaded.')

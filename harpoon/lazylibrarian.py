@@ -17,6 +17,7 @@ import os
 import time
 import shutil
 import requests
+import json
 from harpoon import logger, config, common
 
 class LazyLibrarian(object):
@@ -53,6 +54,9 @@ class LazyLibrarian(object):
         midpath = os.path.abspath(os.path.join(filepath, os.pardir))
         midbase = os.path.basename(midpath)
         defaultbase = os.path.basename(self.defaultdir)
+        downloadid = ''
+        if 'DownloadID' in self.lazylibrarian_filedata.keys():
+            downloadid = self.lazylibrarian_filedata['DownloadID']
         movefile = False
         if self.lazylibrarian_filedata and 'BookID' in list(self.lazylibrarian_filedata.keys()):
             process_suffix = ' LL.(%s)' % self.lazylibrarian_filedata['BookID']
@@ -146,6 +150,8 @@ class LazyLibrarian(object):
                        'dir': process_path,
                        'apikey': self.lazylibrarian_apikey,
                        'ignoreclient': 'True',
+                       'wait': 'True',
+                       'downloadid': downloadid,
                        }
         else:
             payload = {'cmd':  'importAlternate',
@@ -157,9 +163,37 @@ class LazyLibrarian(object):
 
         logger.info('[LAZYLIBRARIAN] Posting url: %s' % url)
         logger.info('[LAZYLIBRARIAN] Posting to completed download handling now: %s' % payload)
+        processing = True
+        while processing:
+            r = requests.post(url, data=payload, headers=self.lazylibrarian_headers)
+            try:
+                data = json.loads(r.text)
+            except:
+                data = None
+            logger.debug('Response: %s - type: %s' % (data, type(data)))
+            if self.ll_type == 'Magazine' and 'status' in data.keys():
+                if data['status'] =='success':
+                    processing = False
+                    logger.info('[LAZYLIBRARIAN] Successfully post-processed : ' + self.snstat['name'])
+                    return True
+                elif data['status'] == 'failed':
+                    processing = False
+                    logger.info('[LAZYLIBRARIAN] Failed post-processing : ' + self.snstat['name'])
+                    return False
+                else:
+                    logger.debug('[LAZYLIBRARIAN] Processing is already running.  Trying again in 10 seconds.')
+                    time.sleep(10)
+            elif data == True:
+                logger.info('[LAZYLIBRARIAN] Successfully post=processed : ' + self.snstat['name'])
+                return True
+            elif data == False:
+                logger.info('[LAZYLIBRARIAN[ Failed post-processing : ' + self.snstat['name'])
+                return False
+            else:
+                processing = False
+                logger.info('[LAZYLIBRARIAN] No status returned.  Assuming failure.')
+                logger.info('content: %s' % data)
+                return False
 
-        r = requests.post(url, data=payload, headers=self.lazylibrarian_headers)
-        data = r.text
-        logger.info('content: %s' % data)
         logger.info('[LAZYLIBRARIAN] Successfully post-processed : ' + self.snstat['name'])
         return True

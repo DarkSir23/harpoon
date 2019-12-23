@@ -124,6 +124,7 @@ class CustomConnection(pysftp.Connection):
         self.walktree(remotedir, wtcb.file_cb, wtcb.dir_cb, wtcb.unk_cb)
         # handle directories we recursed through
         for dname in wtcb.dlist:
+            logger.debug("SFTP: directory: %s" % dname)
             for subdir in path_advance(dname):
                 try:
                     os.mkdir(reparent(localdir, subdir))
@@ -135,6 +136,8 @@ class CustomConnection(pysftp.Connection):
         for fname in wtcb.flist:
             # they may have told us to start down farther, so we may not have
             # recursed through some, ensure local dir structure matches
+            logger.debug('SFTP: file: %s' % fname)
+
             head, _ = os.path.split(fname)
             if head not in wtcb.dlist:
                 for subdir in path_advance(head):
