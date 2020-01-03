@@ -5,6 +5,7 @@ import json, requests, re, bencode, hashlib
 from pathlib import Path
 
 import os
+import time
 
 class Scanner:
 
@@ -15,10 +16,12 @@ class Scanner:
         self.queue = queue
         self.current_hash = working_hash
         self.hashfilename = ''
+        self.firstrun = False
 
     def scan(self):
         logger.info('SCANNER: Running New File Scan')
         extensions = ['.file', '.hash', '.torrent', '.nzb']
+        self.firstrun = True
         for (dirpath, dirnames, filenames) in os.walk(config.GENERAL['torrentfile_dir'], followlinks=True):
             for f in filenames:
                 self.hashfilename = ''
@@ -242,7 +245,7 @@ class Scanner:
                             logger.info('[SCANNER] Queuefile: %s' % queuefile)
                             logger.info('[SCANNER] LL_Type: %s' % ll_type)
                             logger.info('[SCANNER] HashFile: %s' % self.hashfilename)
-                            hashinfo = hf.info(queuefile, label=label, mode=mode)
+                            hashinfo = hf.info(filepath=self.hashfilename)
                             self.queue.ckupdate(hashfile, {'hash': hashfile,
                                                            'stage': 'to-do',
                                                            'name': hashinfo['name'],
@@ -288,7 +291,9 @@ class Scanner:
                    'filterValue': 1,
                    'sortKey': 'date',
                    'sortDir': 'desc'}
-
+        if self.firstrun:
+            time.sleep(3)
+            self.firstrun = False
         logger.info('[SCANNER] Quering against history now: %s' % payload)
         r = requests.get(url, params=payload, headers=headers)
         logger.info(r.status_code)
@@ -296,7 +301,10 @@ class Scanner:
         hash = None
         client = None
         hashfilename = None
-        logger.info('[SCANNER] Name: %s' % torrentname)
+        try:
+            logger.info('[SCANNER] Name: %s' % self.filesafe(torrentname))
+        except:
+            pass
         logger.info('[SCANNER] Records: %s' % len(result['records']))
         for x in result['records']:
             # logger.info(x)
@@ -361,16 +369,21 @@ class Scanner:
         import unicodedata
 
         try:
-            name = name.decode('utf-8')
+            name = name.decode('utf-8', 'surrogatepass')
         except:
             pass
 
+        if '\udcc5\udc8d' in name:
+            name = re.sub('\udcc5\udc8d', 'o', name)
+
         if '\u2014' in name:
             name = re.sub('\u2014', ' - ', name)
+
         try:
             u_name = str(unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').strip())
         except TypeError:
             u_name = str(name.encode('ASCII', 'ignore').strip())
+
 
         name_filesafe = re.sub('[\:\'\"\,\?\!\\\]', '', u_name)
         name_filesafe = re.sub('[\/\*]', '-', name_filesafe)

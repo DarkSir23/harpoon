@@ -6,8 +6,10 @@ import fnmatch
 
 
 
-def info(hash=None, label=None, mode=None, filename=None):
-    if all([filename, label]):
+def info(hash=None, label=None, mode=None, filename=None, filepath=None):
+    if filepath:
+        hashfile = filepath
+    elif all([filename, label]):
         hashfile = os.path.join(config.GENERAL['torrentfile_dir'], label, filename)
     elif all([hash, label, mode]):
         hashfile = os.path.join(config.GENERAL['torrentfile_dir'], label, hash + '.' + mode)
