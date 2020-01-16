@@ -26,6 +26,7 @@
         <div><b>Hashfile</b>: <a href="hashfile?hash=${activeItem['hash']}">${activeItem['hash']}</a></div>
         % if activeItem['status'] == 'Fetching':
         <div><b>Current File</b>: ${stats['currentfile']} (${int(stats['percent'])}%)</div>
+        <div><b>Speed</b>: ${size(stats['speed'])}B/s</div>
             <div class="progress">
                 <div
                         class="progress-bar progress-bar-striped progress-bar-animated"

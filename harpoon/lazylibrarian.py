@@ -171,7 +171,7 @@ class LazyLibrarian(object):
             except:
                 data = None
             logger.debug('Response: %s - type: %s' % (data, type(data)))
-            if self.ll_type == 'Magazine' and 'status' in data.keys():
+            if self.ll_type == 'Magazine' and data and 'status' in data.keys():
                 if data['status'] =='success':
                     processing = False
                     logger.info('[LAZYLIBRARIAN] Successfully post-processed : ' + self.snstat['name'])

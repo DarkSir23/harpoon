@@ -5,6 +5,7 @@ from logging import WARNING
 from harpoon import logger
 from paramiko import SFTPClient
 logger.getLogger("paramiko").setLevel(WARNING)
+from datetime import datetime
 
 class SFTP():
     def __init__(self, env, mirror=False):
@@ -22,6 +23,8 @@ class SFTP():
             'filefinishedpct': 0,
             'fileremainderpct': 0,
             'totalpct': 0,
+            'speed': 0,
+            'lasttime': datetime.now()
 
         }
         self.isopen = False
@@ -78,12 +81,22 @@ class SFTP():
         self.isopen = False
 
     def receivestatus(self, btrans, btotal):
+        thistime = datetime.now()
+        timediff = thistime - self.stats['lasttime']
+        # print(timediff)
+        if timediff.seconds:
+            speed = ((float(btrans) - self.stats['trans']) / timediff.seconds)
+        else:
+            speed = (((float(btrans) - self.stats['trans']) / timediff.microseconds) * 1000000)
 
         if self.stats['currentfile'] != self.stats['prevfile']:
             self.stats['finished'] += self.stats['total']
             self.stats['prevfile'] = self.stats['currentfile']
+            self.stats['speed'] = 0
         self.stats['trans'] = float(btrans)
         self.stats['total'] = float(btotal)
+        self.stats['speed'] = speed
+        self.stats['lasttime'] = thistime
         # logger.debug('%s/%s - %s' % (self.stats['trans'], self.stats['total'], self.stats['download_total']))
         if self.stats['trans'] and self.stats['total'] and self.stats['download_total']:
             self.stats['finishedpct'] = (self.stats['finished'] / self.stats['download_total']) * 100
