@@ -45,7 +45,8 @@ class SFTP():
 
     def get(self, remoteloc, localloc):
         self.isopen = True
-        self.speedlist = collections.deque(maxlen=30)
+        self.speedlist = collections.deque(maxlen=100)
+        self.lasttrans = 0
         try:
             if not self.mirror:
                 if self.connection.isdir(remoteloc):
@@ -87,22 +88,23 @@ class SFTP():
         thistime = datetime.now()
         timediff = thistime - self.lasttime
         # print(timediff)
-        if timediff.seconds:
-            self.speedlist.append((float(btrans) - self.stats['trans']) / timediff.seconds)
-        else:
-            self.speedlist.append(((float(btrans) - self.stats['trans']) / timediff.microseconds) * 1000000)
-        speed = sum(self.speedlist) / len(self.speedlist)
+        if timediff.seconds or timediff.microseconds:
+            ms = (timediff.seconds * 1000000) + timediff.microseconds
+            self.speedlist.append(((float(btrans) - self.lasttrans) / ms) * 1000000)
+            speed = sum(self.speedlist) / len(self.speedlist)
+            if speed > self.stats['maxspeed']:
+                self.stats['maxspeed'] = speed
+            self.stats['speed'] = speed
+            self.lasttime = thistime
+            self.lasttrans = float(btrans)
         # print(speed)
-        if speed > self.stats['maxspeed']:
-            self.stats['maxspeed'] = speed
         if self.stats['currentfile'] != self.stats['prevfile']:
             self.stats['finished'] += self.stats['total']
             self.stats['prevfile'] = self.stats['currentfile']
+            self.lasttrans = 0
             # self.stats['speed'] = 0
         self.stats['trans'] = float(btrans)
         self.stats['total'] = float(btotal)
-        self.stats['speed'] = speed
-        self.lasttime = thistime
         # logger.debug('%s/%s - %s' % (self.stats['trans'], self.stats['total'], self.stats['download_total']))
         if self.stats['trans'] and self.stats['total'] and self.stats['download_total']:
             self.stats['finishedpct'] = (self.stats['finished'] / self.stats['download_total']) * 100
