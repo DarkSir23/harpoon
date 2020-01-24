@@ -15,8 +15,10 @@ import harpoon
 from harpoon import logger, HQUEUE
 from cherrypy.lib.static import serve_file
 from mako import exceptions
+import json
 from mako.lookup import TemplateLookup
 from harpoon.scanner import Scanner
+from collections import OrderedDict
 from . import hashfile
 
 
@@ -64,6 +66,22 @@ class WebInterface(object):
     def active_content(self):
         cherrypy.session.load()
         return serve_template(templatename='active-content.html', title="Active Status")
+
+    @cherrypy.expose
+    def active_json(self):
+        cherrypy.session.load()
+        items = OrderedDict(sorted(harpoon.HQUEUE.ckqueue().items(), key=lambda x: x[1]['timestamp'], reverse=True))
+        activeItem = None
+        for key in items.keys():
+            if items[key]['stage'] == 'current':
+                activeItem = items[key]
+        if harpoon.CURRENT_DOWNLOAD:
+            stats = dict(harpoon.CURRENT_DOWNLOAD.get_stats())
+            stats['lasttime']=''
+        else:
+            stats = {}
+        return_info = {'activeItem': activeItem, 'stats': stats}
+        return json.dumps(return_info)
 
     @cherrypy.expose
     def hashfile(self, hash=None):

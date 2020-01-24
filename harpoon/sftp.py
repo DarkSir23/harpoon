@@ -1,6 +1,7 @@
 import pysftp
 from pysftp.helpers import reparent, WTCallbacks, path_advance
 import os
+import collections
 from logging import WARNING
 from harpoon import logger
 from paramiko import SFTPClient
@@ -24,9 +25,10 @@ class SFTP():
             'fileremainderpct': 0,
             'totalpct': 0,
             'speed': 0,
-            'lasttime': datetime.now()
+            'maxspeed': 0,
 
         }
+        self.lasttime = datetime.now()
         self.isopen = False
         self.exitlevel = 0
         opts = pysftp.CnOpts()
@@ -43,6 +45,7 @@ class SFTP():
 
     def get(self, remoteloc, localloc):
         self.isopen = True
+        self.speedlist = collections.deque(maxlen=30)
         try:
             if not self.mirror:
                 if self.connection.isdir(remoteloc):
@@ -82,21 +85,24 @@ class SFTP():
 
     def receivestatus(self, btrans, btotal):
         thistime = datetime.now()
-        timediff = thistime - self.stats['lasttime']
+        timediff = thistime - self.lasttime
         # print(timediff)
         if timediff.seconds:
-            speed = ((float(btrans) - self.stats['trans']) / timediff.seconds)
+            self.speedlist.append((float(btrans) - self.stats['trans']) / timediff.seconds)
         else:
-            speed = (((float(btrans) - self.stats['trans']) / timediff.microseconds) * 1000000)
-
+            self.speedlist.append(((float(btrans) - self.stats['trans']) / timediff.microseconds) * 1000000)
+        speed = sum(self.speedlist) / len(self.speedlist)
+        # print(speed)
+        if speed > self.stats['maxspeed']:
+            self.stats['maxspeed'] = speed
         if self.stats['currentfile'] != self.stats['prevfile']:
             self.stats['finished'] += self.stats['total']
             self.stats['prevfile'] = self.stats['currentfile']
-            self.stats['speed'] = 0
+            # self.stats['speed'] = 0
         self.stats['trans'] = float(btrans)
         self.stats['total'] = float(btotal)
         self.stats['speed'] = speed
-        self.stats['lasttime'] = thistime
+        self.lasttime = thistime
         # logger.debug('%s/%s - %s' % (self.stats['trans'], self.stats['total'], self.stats['download_total']))
         if self.stats['trans'] and self.stats['total'] and self.stats['download_total']:
             self.stats['finishedpct'] = (self.stats['finished'] / self.stats['download_total']) * 100

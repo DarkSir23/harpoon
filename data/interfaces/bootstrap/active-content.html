@@ -12,55 +12,68 @@
         if items[key]['stage'] == 'current':
             activeItem = items[key]
 %>
-<%
-    if harpoon.CURRENT_DOWNLOAD:
-        stats = harpoon.CURRENT_DOWNLOAD.get_stats()
-    else:
-        stats = {'total': 0, 'trans': 0, 'currentfile': 'Error', 'percent': 0}
-%>
-
-% if activeItem:
-<div class="card bg-secondary text-white">
-    <div class="card-header"><h6 class="card-title">Active Item: ${activeItem['name'].replace('.',' ')}</h6></div>
+<div id="active" class="card bg-secondary text-white">
+    <div class="card-header"><h6 id="item_name" class="card-title">Active Item: <span></span></h6></div>
     <div class="card-body">
-        <div><b>Hashfile</b>: <a href="hashfile?hash=${activeItem['hash']}">${activeItem['hash']}</a></div>
-        % if activeItem['status'] == 'Fetching':
-        <div><b>Current File</b>: ${stats['currentfile']} (${int(stats['percent'])}%)</div>
-        <div><b>Speed</b>: ${size(stats['speed'])}B/s</div>
-            <div class="progress">
-                <div
-                        class="progress-bar progress-bar-striped progress-bar-animated"
-                        role="progressbar"
-                        style="width: ${int(stats['finishedpct'])}%;"
-                        aria-valuenow="${stats['finishedpct']}"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                >
-                </div>
-                <div
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                        role="progressbar"
-                        style="width: ${int(stats['filefinishedpct'])}%;"
-                        aria-valuenow="${stats['filefinishedpct']}"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                >
-                    ${size(stats['trans'])}/${size(stats['total'])}
-                </div>
-                <div
-                        class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                        role="progressbar"
-                        style="width: ${int(stats['fileremainderpct'])}%;"
-                        aria-valuenow="${stats['fileremainderpct']}"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                >
+        <div id="fetch_row" class="row">
+            <div class="col-sm-8 col-xs-12">
+                <div id="hash_file"></div>
+                <div id="current_file"></div>
+                <div id="speedline"></div>
+            </div>
+            <div id="activegauge" class="col-sm-4 col-xs-12 js-gauge speed gauge my-auto"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="activebar" class="progress">
+                    <div
+                            id="finishedbar"
+                            class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style="width: 0%;"
+                            aria-valuenow="0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                    >
+                    </div>
+                    <div
+                            id="currentbar"
+                            class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                            role="progressbar"
+                            style="width: 0%;"
+                            aria-valuenow="0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                    >
+                        <span>0/0</span>
+                    </div>
+                    <div
+                            id="remainingbar"
+                            class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                            role="progressbar"
+                            style="width: 100%;"
+                            aria-valuenow="0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                    >
+                    </div>
                 </div>
             </div>
-        % else:
-        <b>Status</b>: ${activeItem['status']}
-        % endif
+        </div>
+        <div id="other_row" class="row">
+        </div>
 
     </div>
 </div>
-% endif
+<script>
+    $('.speed').kumaGauge({
+        value : 0,
+        max: 50000000,
+        showNeedle: true,
+        gaugeBackground: '#ffffff',
+
+        // valueLabel: { display: true},
+        // label: { display: false},
+        // title: { display: false}
+    });
+</script>

@@ -41,6 +41,17 @@ if (window.addEventListener) { // Mozilla, Netscape, Firefox
 } else if (window.attachEvent) { // IE
     window.attachEvent('onload', loadlink);
 }
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 function loadlink(){
     $('#table-content').load('table_content',function () {
     });
@@ -55,7 +66,43 @@ setInterval(function(){
     loadlink() // this will run after every 2 seconds
 }, 2000);
 setInterval(function(){
-    loadactive()
+    // loadactive()
+    statusbar = $("#activebar");
+    statusmeter = $("#gauge-0");
+    $.getJSON('active_json', function(data, status){
+        if (data.activeItem) {
+            $('#active_content').show();
+            $("#hash_file").html('<b>Hasfile: </b> <a href="hashfile?hash=' + data.activeItem.hash + '">' + data.activeItem.hash + '</a>');
+            $('#item_name span').text(data.activeItem.name)
+            if (data.activeItem.status == 'Fetching') {
+                $('#fetch_row').show();
+                $('#other_row').hide();
+            }
+            else {
+                $('#fetch_row').hide();
+                $('#other_row').show();
+                $('#other_row').html('<b>Status: </b>' + data.activeItem.status)
+            }
+        }
+        else {
+            $('#active_content').hide();
+        }
+        if (data.stats) {
+            $("#current_file").html('<b>Current File:</b>: ' + data.stats.currentfile)
+            statusmeter.kumaGauge('update', {
+                value: Math.round(data.stats.speed),
+                max: Math.round(data.stats.maxspeed),
+            })
+            $('#finishedbar').attr('aria-valuenow', data.stats.finishedpct).css('width', Math.round(data.stats.finishedpct) + '%');
+            $('#currentbar').attr('aria-valuenow', data.stats.filefinishedpct).css('width', Math.round(data.stats.filefinishedpct) + '%');
+            $('#currentbar span').text(formatBytes(data.stats.trans)+'/'+formatBytes(data.stats.total));
+            $('#remainingbar').attr('aria-valuenow', data.stats.fileremainderpct).css('width', Math.round(data.stats.fileremainderpct) + '%');
+            $('#speedline').html('<b>Speed: </b>' + formatBytes(data.stats.speed)+'/s');
+
+        }
+    });
+
+
 }, 500);
 </script>
 </%def>
