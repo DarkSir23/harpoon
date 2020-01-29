@@ -60,7 +60,7 @@ class UnRAR(object):
             filename = fname['filename']
 
             rar_ex = r'\.(?:rar|r\d\d|\d\d\d)$'
-            rar_chk = re.findall(rar_ex, filename, flags=re.IGNORECASE)
+            rar_chk = re.findall(rar_ex, str(filename), flags=re.IGNORECASE)
             if rar_chk:
                 #append the rars found to the rar_found tuple
                 rar_found.append({"directory": self.path,

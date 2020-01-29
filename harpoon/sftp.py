@@ -148,7 +148,7 @@ class CustomConnection(pysftp.Connection):
             logger.debug("SFTP: directory: %s" % dname)
             for subdir in path_advance(dname):
                 try:
-                    os.mkdir(reparent(localdir, subdir))
+                    os.mkdir(reparent(localdir, subdir).encode('utf-8'))
                     # force result to a list for setter,
                     wtcb.dlist = wtcb.dlist + [subdir, ]
                 except OSError:     # dir exists
@@ -164,7 +164,7 @@ class CustomConnection(pysftp.Connection):
                 for subdir in path_advance(head):
                     if subdir not in wtcb.dlist and subdir != '.':
                         try:
-                            os.mkdir(reparent(localdir, subdir))
+                            os.mkdir(reparent(localdir, subdir).encode('utf-8'))
                             wtcb.dlist = wtcb.dlist + [subdir, ]
                         except OSError:
                             pass

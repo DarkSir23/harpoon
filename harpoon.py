@@ -642,7 +642,7 @@ class QueueR(object):
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], label ,snstat['name']))
                     queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
-                    if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], label, snstat['name']))]):
+                    if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], label, snstat['name']).encode('utf-8'))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
                         logger.warn('[%s] Problem with snatched files - nothing seems to have downloaded. Retrying the snatch again in case the file was moved from a download location to a completed location on the client.' % log_label)
                         time.sleep(5)
