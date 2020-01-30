@@ -11,6 +11,7 @@ from shutil import copyfile, rmtree
 import json
 
 import cherrypy
+
 import harpoon
 from harpoon import logger, HQUEUE
 from cherrypy.lib.static import serve_file

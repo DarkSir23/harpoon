@@ -2,7 +2,7 @@ import os
 import sys
 
 import cherrypy
-from cherrypy.lib.sessions import FileSession
+from cherrypy.lib.sessions import FileSession, RamSession
 import harpoon
 from harpoon import logger
 from harpoon.webServe import WebInterface
@@ -30,7 +30,7 @@ def initialize(options=None, basepath=None, parent=None):
         'tools.encode.encoding': 'utf-8',
         'tools.decode.on': True,
         'tools.sessions.on': True,
-        'tools.sessions.storage_class': FileSession,
+        'tools.sessions.storage_class': RamSession,
         'tools.sessions.storage_path': os.path.join(basepath, "sessions"),
         'tools.sessions.timeout': 120,
         'tools.sessions.clean_freq': 240,
