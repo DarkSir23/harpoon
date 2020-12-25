@@ -62,7 +62,6 @@ class hQueue:
             return msg
 
 
-
     ### CKQUEUE ###
 
     def ckupdate(self, key, item):

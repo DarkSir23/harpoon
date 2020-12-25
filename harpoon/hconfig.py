@@ -28,6 +28,7 @@ class config:
         self.WEB = {}
         self.RADARR = {}
         self.LIDARR = {}
+        self.READARR = {}
         self.MYLAR = {}
         self.LAZYLIBRARIAN = {}
         self.PLEX = {}
@@ -90,6 +91,11 @@ class config:
             self.GENERAL['tv_choice'] = 'sickrage'
         else:
             self.GENERAL['tv_choice'] = None
+
+        self.READARR['readarr_headers'] = {'X-Api-Key': self.get('readarr', 'apikey', str),
+                               'Accept': 'application/json'}
+        self.READARR['readarr_url'] = self.get('readarr', 'url', str)
+        self.READARR['readarr_label'] = self.get('readarr', 'readarr_label', str)
 
         #webserver
         self.WEB = {

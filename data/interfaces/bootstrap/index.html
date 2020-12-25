@@ -72,7 +72,7 @@ setInterval(function(){
     $.getJSON('active_json', function(data, status){
         if (data.activeItem) {
             $('#active_content').show();
-            $("#hash_file").html('<b>Hasfile: </b> <a href="hashfile?hash=' + data.activeItem.hash + '">' + data.activeItem.hash + '</a>');
+            $("#hash_file").html('<b>Hashfile: </b> <a href="hashfile?hash=' + data.activeItem.hash + '">' + data.activeItem.hash + '</a>');
             $('#item_name span').text(data.activeItem.name)
             if (data.activeItem.status == 'Fetching') {
                 $('#fetch_row').show();
@@ -88,7 +88,7 @@ setInterval(function(){
             $('#active_content').hide();
         }
         if (data.stats) {
-            $("#current_file").html('<b>Current File:</b>: ' + data.stats.currentfile)
+            $("#current_file").html('<b>Current File:</b> ' + data.stats.currentfile)
             statusmeter.kumaGauge('update', {
                 value: Math.round(data.stats.speed),
                 max: Math.round(data.stats.maxspeed),

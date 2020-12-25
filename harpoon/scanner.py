@@ -55,6 +55,8 @@ class Scanner:
                                 label = config.SICKRAGE['sickrage_label']
                             elif 'lidarr' in f[-11:]:
                                 label = config.LIDARR['lidarr_label']
+                            elif 'readarr' in f[-12:]:
+                                label = config.READARR['readarr_label']
                             else:
                                 # label = os.path.basename(dirpath)
                                 label = None
@@ -272,19 +274,26 @@ class Scanner:
             label = config.SONARR['sonarr_label']
             url = historyurl + '/api/history'
             mode = 'sonarr'
+            torrentname = torrentname[:-7]
         elif 'radarr' in torrentname[-6:]:
             historyurl = config.RADARR['radarr_url']
             headers = config.RADARR['radarr_headers']
             label = config.RADARR['radarr_label']
             url = historyurl + '/api/history'
             mode = 'radarr'
+            torrentname = torrentname[:-7]
         elif 'lidarr' in torrentname[-6:]:
             historyurl = config.LIDARR['lidarr_url']
             headers = config.LIDARR['lidarr_headers']
             label = config.LIDARR['lidarr_label']
             url = historyurl + '/api/v1/history'
-
-        torrentname = torrentname[:-7]
+            torrentname = torrentname[:-7]
+        elif 'readarr' in torrentname[-7:]:
+            historyurl = config.READARR['readarr_url']
+            headers = config.READARR['readarr_headers']
+            label = config.READARR['readarr_label']
+            url = historyurl + '/api/v1/history'
+            torrentname = torrentname[:-8]
         payload = {'pageSize': 1000,
                    'page': 1,
                    'filterKey': 'eventType',
@@ -308,7 +317,10 @@ class Scanner:
         logger.info('[SCANNER] Records: %s' % len(result['records']))
         for x in result['records']:
             # logger.info(x)
+            logger.info(f'[SCANNER] {self.filesafe(torrentname.lower())} - {self.filesafe(x["sourceTitle"].lower())}')
+            logger.info('A')
             if self.filesafe(torrentname.lower()) == self.filesafe(x['sourceTitle'].lower()):
+                logger.info('B')
                 hash = x['downloadId']
                 client = x['data']['downloadClient'].lower()
                 info = x

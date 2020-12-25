@@ -34,6 +34,7 @@ config.read(os.path.join(datadir, 'conf', 'harpoon.conf'))
 log_path = config.get('general', 'logpath')
 sonarr_label = config.get('sonarr', 'sonarr_label')
 radarr_label = config.get('radarr', 'radarr_label')
+readarr_label = config.get('readarr', 'readarr_label')
 mylar_label = config.get('mylar', 'mylar_label')
 lidarr_label = config.get('lidarr', 'lidarr_label')
 lazylibrarian_label = config.get('lazylibrarian', 'lazylibrarian_label')
@@ -44,7 +45,9 @@ except ValueError:
 torrentfile_dir = config.get('general', 'torrentfile_dir')
 
 # Setup file logger
-logging.basicConfig(level=logging.DEBUG)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.WARNING)
+logging.basicConfig(level=logging.DEBUG, handlers=[stream_handler])
 logger = logging.getLogger()
 
 filename = os.path.join(log_path, 'harpoonshot.log')
@@ -132,6 +135,24 @@ except IndexError:
             else:
                 logger.info('Failing, unknown type')
                 os._exit(1)
+        elif 'readarr_release_title' in os.environ:
+            mode = 'readarr'
+            inputfile = os.environ.get('readarr_release_title')
+            if '//' in inputfile:
+                inputfile = re.sub('-', '//', inputfile).strip()
+            if '/' in inputfile:
+                inputfile = inputfile.replace('/', '-')
+            label = readarr_label
+            filetype = '.file'
+        elif 'readarr_eventtype' in os.environ:
+            eventtype = os.environ.get('readarr_eventtype')
+            logger.info('Called from Readarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'Test':
+                logger.info('Exiting successfully (Readarr Test)')
+                os._exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                os._exit(1)
 
         else:
             logger.info('Unable to detect what client called harpoonshot...')
@@ -161,6 +182,14 @@ else:
         if '/' in inputfile:
             inputfile =inputfile.replace('/', '-')
         label = lidarr_label
+        filetype = '.file'
+    elif mode == 'lidarr':
+        inputfile = os.environ.get('readarr_release_title')
+        if '//' in inputfile:
+            inputfile = re.sub('-', '//', inputfile).strip()
+        if '/' in inputfile:
+            inputfile = inputfile.replace('/', '-')
+        label = readarr_label
         filetype = '.file'
     elif len(args) > 2:
         mydict = {}
@@ -200,7 +229,7 @@ if os.path.exists(path):
     try:
         with open(filepath, 'w') as outfile:
             os.utime(filepath, None)
-            if any([mode == 'sonarr', mode == 'radarr', mode == 'mylar', mode == 'lidarr']):
+            if any([mode == 'sonarr', mode == 'radarr', mode == 'mylar', mode == 'lidarr', mode == 'readarr']):
                 outfile.write(json.dumps(dict(os.environ), indent=4))
             elif filecontent:
                 outfile.write(json.dumps(filecontent))

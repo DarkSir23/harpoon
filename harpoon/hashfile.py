@@ -56,6 +56,8 @@ def info(hash=None, label=None, mode=None, filename=None, filepath=None):
                 hashinfo['name'] = hashinfo['radarr_release_title']
             elif 'sonarr_release_title' in list(hashinfo.keys()):
                 hashinfo['name'] = hashinfo['sonarr_release_title']
+            elif 'readarr_release_title' in list(hashinfo.keys()):
+                hashinfo['name'] = hashinfo['readarr_release_title']
             else:
                 hashinfo['name'] = 'Unknown'
         logger.debug("HashInfo: %s" % hashinfo)

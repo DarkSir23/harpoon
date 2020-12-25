@@ -30,7 +30,7 @@ import threading
 import traceback
 
 import harpoon
-from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp
+from harpoon import rtorrent, sabnzbd, unrar, logger, sonarr, radarr, plex, sickrage, mylar, lazylibrarian, lidarr, webStart, sftp, readarr
 from harpoon import HQUEUE as HQUEUE
 from harpoon import config, watcher
 from harpoon.scanner import Scanner
@@ -58,7 +58,7 @@ class QueueR(object):
                        "Unrar, cleanup and client-side post-processing as required. "
                        "Also supports direct dropping of .torrent files into a watch directory. "
                        "Supported client-side applications: "
-                       "Sonarr, Radarr, Lidarr, Mylar, LazyLibrarian, SickRage")
+                       "Sonarr, Radarr, Lidarr, Readarr, Mylar, LazyLibrarian, SickRage")
         self.server = None
         self.server_thread = None
         self.ARGS = sys.argv[:]
@@ -583,6 +583,13 @@ class QueueR(object):
                     pp_obj = lidarr.Lidarr
                     info = {'snstat': snstat}
                     plex_pp = True
+                elif snstat['label'] == config.READARR['readarr_label']:
+                    check_unrar = True
+                    label_name = 'Readarr'
+                    label = config.READARR['readarr_label']
+                    pp_obj = readarr.Readarr
+                    info = {'snstat': snstat}
+                    plex_pp = False
                 elif snstat['label'] == config.LAZYLIBRARIAN['lazylibrarian_label']:
                     check_unrar = True
                     label_name = 'LazyLibrarian'
@@ -640,8 +647,8 @@ class QueueR(object):
                     # unrar it, delete the .rar's and post-process against the items remaining in the given directory.
                     queue.ckupdate(item['item'], {'status': 'Unpacking'})
                     cr = unrar.UnRAR(os.path.join(config.GENERAL['defaultdir'], label ,snstat['name']))
-                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     chkrelease = cr.main()
+                    queue.ckupdate(item['item'], {'status': 'Processing'})
                     if all([len(chkrelease) == 0, len(snstat['files']) > 1, not os.path.isdir(os.path.join(config.GENERAL['defaultdir'], label, snstat['name']).encode('utf-8'))]):
                         #if this hits, then the retrieval from the seedbox failed probably due to another script moving into a finished/completed directory (ie. race-condition)
                         logger.warn('[%s] Problem with snatched files - nothing seems to have downloaded. Retrying the snatch again in case the file was moved from a download location to a completed location on the client.' % log_label)

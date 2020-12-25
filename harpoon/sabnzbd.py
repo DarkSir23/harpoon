@@ -152,6 +152,7 @@ class SABnzbd(object):
                     count += 1
                     if found['completed'] is False:
                         found['reason'] = 'NZB not found in SAB History'
+                        return found
                 except Exception as e:
                     logger.warn('error %s' % e)
             found['completed'] = True

@@ -132,6 +132,24 @@ except IndexError:
             else:
                 logger.info('Failing, unknown type')
                 os._exit(1)
+        elif 'readarr_release_title' in os.environ:
+            mode = 'readarr'
+            inputfile = os.environ.get('readarr_release_title')
+            if '//' in inputfile:
+                inputfile = re.sub('-', '//', inputfile).strip()
+            if '/' in inputfile:
+                inputfile = inputfile.replace('/', '-')
+            label = readarr_label
+            filetype = '.file'
+        elif 'readarr_eventtype' in os.environ:
+            eventtype = os.environ.get('readarr_eventtype')
+            logger.info('Called from Readarr, but as eventtype "%s".' % eventtype)
+            if eventtype == 'Test':
+                logger.info('Exiting successfully (Readarr Test)')
+                os._exit(0)
+            else:
+                logger.info('Failing, unknown type')
+                os._exit(1)
 
         else:
             logger.info('Unable to detect what client called harpoonshot...')

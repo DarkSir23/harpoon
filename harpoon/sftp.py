@@ -36,7 +36,7 @@ class SFTP():
         opts.compression = True
         keyfile = self.env['harpoon_pp_keyfile'] if self.env['harpoon_pp_keyfile'] else None
         password = self.env['harpoon_pp_passwd'] if self.env['harpoon_pp_passwd'] else None
-        logger.debug('SFTP: Opening connection.')
+        logger.debug(f'SFTP: Opening connection.')
         if keyfile:
             self.connection = CustomConnection(self.env['harpoon_pp_host'], port=int(self.env['harpoon_pp_sshport']), username=self.env['harpoon_pp_user'], private_key=keyfile, cnopts=opts)
         else:
