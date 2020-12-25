@@ -36,7 +36,6 @@ def serve_template(templatename, **kwargs):
         return exceptions.html_error_template().render()
 
 
-
 class WebInterface(object):
 
     def __init__(self, parent):
